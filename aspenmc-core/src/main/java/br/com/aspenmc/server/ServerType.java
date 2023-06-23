@@ -1,5 +1,6 @@
 package br.com.aspenmc.server;
 
+import br.com.aspenmc.utils.string.StringFormat;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,60 +11,28 @@ import java.util.Map;
 
 @Getter
 @AllArgsConstructor
-@NoArgsConstructor
-public class ServerType {
+public enum ServerType {
 
-    /*
-     * DEFAULT
-     */
+    UNKNOWN,
 
-    public static final ServerType BUNGEECORD = new ServerType("bungeecord");
+    BUNGEECORD,
+    DISCORD,
 
-    public static final ServerType DISCORD = new ServerType("discord");
+    HG,
 
-    /*
-     * SERVER
-     */
+    LOBBY(true),
+    HG_LOBBY(true, "lobby"),
+    LOGIN(true);
 
-    public static final ServerType LOBBY = new ServerType("lobby", true);
+    private final boolean lobby;
+    private final String parent;
 
-    public static final ServerType LOGIN = new ServerType("login", true);
-
-    /*
-     * SKYWARS
-     */
-
-    public static final ServerType SKYWARS_LOBBY = new ServerType("sw_lobby", "lobby", true);
-
-    public static final ServerType SKYWARS_SOLO = new ServerType("sw_solo", "sw_lobby", true);
-
-
-    /*
-     * UNKNOWN
-     */
-
-    public static final ServerType UNKNOWN = new ServerType("unknown", true);
-    private String name;
-    private boolean lobby;
-
-    private String parent;
-
-
-    public ServerType(String name) {
-        this(name, false, "");
+    ServerType() {
+        this(false, "");
     }
 
-
-    public ServerType(String name, boolean lobby) {
-        this(name, lobby, "");
-    }
-
-    public ServerType(String name, String parent, boolean lobby) {
-        this(name, lobby, parent);
-    }
-
-    public String name() {
-        return getName();
+    ServerType(boolean lobby) {
+        this(lobby, "");
     }
 
     public boolean hasParent() {
@@ -74,9 +43,8 @@ public class ServerType {
         return getByName(parent);
     }
 
-    @Override
-    public String toString() {
-        return name();
+    public String getName() {
+        return StringFormat.formatString(name());
     }
 
     public static final Map<String, ServerType> SERVER_MAP;
@@ -84,27 +52,14 @@ public class ServerType {
     static {
         SERVER_MAP = new HashMap<>();
 
-        for (Field field : ServerType.class.getDeclaredFields()) {
-            if (field.getType() == ServerType.class) {
-                try {
-                    ServerType serverType = (ServerType) field.get(null);
+        for (ServerType serverType : ServerType.values()) {
+            if (serverType == UNKNOWN) continue;
 
-                    if (serverType == UNKNOWN) continue;
-
-                    SERVER_MAP.put(field.getName().toLowerCase(), serverType);
-                    SERVER_MAP.put(serverType.getName().toLowerCase(), serverType);
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                }
-            }
+            SERVER_MAP.put(serverType.name().toLowerCase(), serverType);
         }
     }
 
-    public static ServerType[] values() {
-        return SERVER_MAP.values().toArray(new ServerType[0]);
-    }
-
     public static ServerType getByName(String name) {
-        return SERVER_MAP.get(name.toLowerCase());
+        return SERVER_MAP.getOrDefault(name.toLowerCase(), UNKNOWN);
     }
 }
