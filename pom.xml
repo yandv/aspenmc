@@ -7,11 +7,120 @@
     <groupId>br.com.aspenmc</groupId>
     <artifactId>aspenmc</artifactId>
     <version>1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <modules>
+        <module>aspenmc-core</module>
+    </modules>
 
     <properties>
-        <maven.compiler.source>8</maven.compiler.source>
-        <maven.compiler.target>8</maven.compiler.target>
+        <build.number>unknown</build.number>
+        <maven.deploy.skip>true</maven.deploy.skip>
+        <maven.javadoc.skip>true</maven.javadoc.skip>
+        <netty.version>4.1.49.Final</netty.version>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.build.timestamp.format>ddMMyyyy</maven.build.timestamp.format>
     </properties>
-    
+
+    <build>
+        <sourceDirectory>src</sourceDirectory>
+        <defaultGoal>clean install</defaultGoal>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.1.0</version>
+                <configuration>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.2.1</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <filters>
+                        <filter>
+                            <artifact>bungeecord-api</artifact>
+                            <excludes>
+                                <exclude>**</exclude>
+                            </excludes>
+                        </filter>
+                    </filters>
+                    <artifactSet>
+                        <excludes>
+                            <exclude>net.md-5:bungeecord-api</exclude>
+                        </excludes>
+                    </artifactSet>
+                    <transformers>
+                        <transformer implementation="com.github.edwgiz.mavenShadePlugin.log4j2CacheTransformer.PluginsCacheFileTransformer" />
+                    </transformers>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.github.edwgiz</groupId>
+                        <artifactId>maven-shade-plugin.log4j2-cachefile-transformer</artifactId>
+                        <version>2.8.1</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+        </plugins>
+
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <excludes>
+                    <exclude>dependencies/**</exclude>
+                </excludes>
+            </resource>
+        </resources>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.24</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.mariaum</groupId>
+            <artifactId>zartema-api</artifactId>
+            <version>1.17-R0.1-SNAPSHOT</version>
+            <scope>system</scope>
+            <systemPath>C:/Zartema.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.9.1</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mongodb</groupId>
+            <artifactId>mongo-java-driver</artifactId>
+            <version>3.8.0</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>redis.clients</groupId>
+            <artifactId>jedis</artifactId>
+            <version>2.9.0</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
 </project>
