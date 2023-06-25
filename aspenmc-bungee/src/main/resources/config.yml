@@ -1,0 +1,16 @@
+serverId: a1.bungeecord.minehurt.com
+
+motds:
+  server_not_found:
+    header: '&6&lMineHurt &8&l» &7&lServer not found'
+    footer: '&7The server you are trying to connect to does not exist.'
+  maintenance:
+    header: '&6&lMineHurt &8&l» &7&lMaintenance'
+    footer: '&7The server is currently in maintenance mode.'
+  random:
+    principal:
+      header: '&6&lMineHurt &8&l» &7&lTest'
+      footer: '&7This is a test motd.'
+    second:
+      header: '&6&lMineHurt &8&l» &7&lTest 2'
+      footer: '&7This is a test motd. 2'
