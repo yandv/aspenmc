@@ -49,7 +49,7 @@ public class ServerListener implements Listener {
         if (server == null || server.getServerInfo() == null) {
             event.setCancelled(true);
             event.setCancelMessage(
-                    "§c§lMINEHURT\n§c\n§cNenhum servidor disponível no momento.\n§cTente novamente em alguns instantes.");
+                    "§c§lASPENMC\n§c\n§cNenhum servidor disponível no momento.\n§cTente novamente em alguns instantes.");
             return;
         }
 

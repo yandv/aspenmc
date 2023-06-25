@@ -54,7 +54,7 @@ public class BungeeMain extends Plugin {
 
         loadConfiguration();
 
-        plugin.setServerId(getConfig().getString("serverId", "bungeecord.minehurt.com"));
+        plugin.setServerId(getConfig().getString("serverId", "proxy.aspenmc.com.br"));
         plugin.setServerType(ServerType.BUNGEECORD);
         plugin.setServerManager(new BungeeServerManager());
 

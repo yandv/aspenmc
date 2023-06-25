@@ -49,10 +49,10 @@ public class CommonConst {
 
     public static final String SKIN_FETCHER = "https://sessionserver.mojang.com/session/minecraft/profile/%s?unsigned=false";
 
-    public static final String WEBSITE = "www.minehurt.com";
-    public static final String DISCORD = "discord.gg/minehurt";
+    public static final String WEBSITE = "www.aspenmc.com.br";
+    public static final String DISCORD = "discord.gg/aspenmc";
 
-    public static final String PRINCIPAL_DIRECTORY = "C:/Users/ALLAN/Desktop/allan/Servidores/MineHurt/";
+    public static final String PRINCIPAL_DIRECTORY = "C:/Users/ALLAN/Desktop/allan/Servidores/AspenMC/";
 
     public static Double getCpuUse() {
         try {

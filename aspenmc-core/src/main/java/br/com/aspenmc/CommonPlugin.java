@@ -103,7 +103,7 @@ public class CommonPlugin {
     }
 
     public void startConnection() {
-        mongoConnection = new MongoConnection(new Credentials("127.0.0.1", "", "", "minehurt", 27017));
+        mongoConnection = new MongoConnection(new Credentials("127.0.0.1", "", "", "aspenmc", 27017));
         redisConnection = new RedisConnection(new Credentials("localhost", "", "", "", 6379));
 
         mongoConnection.createConnection();
