@@ -58,4 +58,8 @@ public class Punish {
     public boolean isPermanent() {
         return this.expiresAt == -1;
     }
+
+    public String getPunishMessage() {
+        return "";
+    }
 }
