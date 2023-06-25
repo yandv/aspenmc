@@ -55,6 +55,22 @@ public interface Sender {
      * @param messages the messages to send
      */
 
+    default void sendMessageFormatted(String... messages) {
+        String formatted = messages[0];
+
+        for (int i = 1; i < messages.length; i += 2) {
+            formatted = formatted.replace(messages[i], messages[i + 1]);
+        }
+
+        sendMessage(formatted);
+    }
+
+    /**
+     * Sends a message to the sender
+     *
+     * @param messages the messages to send
+     */
+
     void sendMessage(TextComponent... messages);
 
     /**
