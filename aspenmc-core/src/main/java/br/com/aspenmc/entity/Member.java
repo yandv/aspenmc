@@ -1,11 +1,11 @@
 package br.com.aspenmc.entity;
 
 import br.com.aspenmc.CommonPlugin;
+import br.com.aspenmc.entity.member.Skin;
 import br.com.aspenmc.entity.member.configuration.LoginConfiguration;
 import br.com.aspenmc.entity.member.configuration.PreferencesConfiguration;
 import br.com.aspenmc.entity.member.configuration.PunishConfiguration;
 import br.com.aspenmc.entity.member.gamer.Gamer;
-import javafx.scene.control.Skin;
 import lombok.Getter;
 import lombok.Setter;
 import br.com.aspenmc.permission.Group;
