@@ -1,0 +1,70 @@
+package br.com.aspenmc.bukkit.permission;
+
+/**
+ * Este codigo nao pertence ao autor do plugin.
+ * Este codigo pertence ao criador do PermissionEX
+ */
+
+import br.com.aspenmc.bukkit.permission.loader.LoaderNormal;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.regex.Pattern;
+
+public class RegExpMatcher implements PermissionMatcher {
+
+    public static final String RAW_REGEX_CHAR = "$";
+    protected static Pattern rangeExpression = Pattern.compile("(\\d+)-(\\d+)");
+    private Object patternCache;
+
+    public RegExpMatcher() {
+        Class<?> cacheBuilder = getClassGuava("com.google.common.cache.CacheBuilder");
+        Class<?> cacheLoader = getClassGuava("com.google.common.cache.CacheLoader");
+        try {
+            Object obj = cacheBuilder.getMethod("newBuilder").invoke(null);
+            Method maximumSize = obj.getClass().getMethod("maximumSize", long.class);
+            Object obj2 = maximumSize.invoke(obj, 500);
+            Object loader = new LoaderNormal();
+            Method build = obj2.getClass().getMethod("build", cacheLoader);
+            patternCache = build.invoke(obj2, loader);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public boolean isMatches(String expression, String permission) {
+        try {
+            Method get = patternCache.getClass().getMethod("get", Object.class);
+            get.setAccessible(true);
+            Object obj = get.invoke(patternCache, expression);
+            return ((Pattern) obj).matcher(permission).matches();
+        } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException | NoSuchMethodException |
+                 SecurityException ex) {
+            ex.printStackTrace();
+        }
+        return false;
+    }
+
+    private Class<?> getClassGuava(String str) {
+        Class<?> clasee = null;
+        try {
+            if (hasNetUtil()) {
+                str = "net.minecraft.util." + str;
+            }
+            clasee = Class.forName(str);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return clasee;
+    }
+
+    private boolean hasNetUtil() {
+        try {
+            Class.forName("net.minecraft.util.com.google.common.cache.LoadingCache");
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+    }
+}
