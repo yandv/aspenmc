@@ -43,7 +43,6 @@ public class ServerListener implements Listener {
             break;
         }
 
-        System.out.println("SEARCH SERVER EVENT - PLAYER " + member.getName() + " ServerType: " + serverType);
         ProxiedServer server = CommonPlugin.getInstance().getServerManager().getBalancer(serverType).next();
 
         if (server == null || server.getServerInfo() == null) {
@@ -53,6 +52,9 @@ public class ServerListener implements Listener {
             return;
         }
 
+        CommonPlugin.getInstance()
+                    .debug("Sending the player " + player.getName() + " to the server " + server.getServerId() + " (" +
+                           server.getServerInfo().getName() + ".");
         event.setServer(server.getServerInfo());
     }
 

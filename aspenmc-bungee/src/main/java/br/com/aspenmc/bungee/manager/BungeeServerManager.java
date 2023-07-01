@@ -1,8 +1,8 @@
 package br.com.aspenmc.bungee.manager;
 
 import br.com.aspenmc.manager.ServerManager;
+import br.com.aspenmc.server.ProxiedServer;
 import br.com.aspenmc.server.ServerType;
-import br.com.aspenmc.server.loadbalancer.server.ProxiedServer;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.config.ServerInfo;
 
