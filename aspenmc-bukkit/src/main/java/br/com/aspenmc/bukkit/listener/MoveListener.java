@@ -22,7 +22,7 @@ public class MoveListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
-    public void onUpdate(ServerTickEvent event) {
+    public void onServerTick(ServerTickEvent event) {
         if (event.getCurrentTick() % 5 == 0) {
             for (Player player : Bukkit.getOnlinePlayers()) {
                 if (locationMap.containsKey(player.getUniqueId())) {
