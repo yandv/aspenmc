@@ -49,7 +49,7 @@ public class PermissionListener implements Listener {
         }
 
         PermissionAttachment attach = attachments.get(player.getUniqueId());
-        Permission playerPerm = getCreateWrapper(player, player.getUniqueId().toString());
+        Permission playerPerm = getCreateWrapper(player.getUniqueId().toString());
 
         if (attach == null) {
             attach = player.addAttachment(BukkitCommon.getInstance());
@@ -68,10 +68,10 @@ public class PermissionListener implements Listener {
                     playerPerm.getChildren().put(perm, true);
                 }
 
-        /*for (String perm : member.getPermissions().keySet())
+        for (String perm : member.getPermissions().keySet())
             if (!playerPerm.getChildren().containsKey(perm)) {
                 playerPerm.getChildren().put(perm, true);
-            }*/
+            }
 
         player.recalculatePermissions();
     }
@@ -96,11 +96,11 @@ public class PermissionListener implements Listener {
         Bukkit.getPluginManager().removePermission(player.getUniqueId().toString());
     }
 
-    private Permission getCreateWrapper(Player player, String name) {
+    private Permission getCreateWrapper(String name) {
         Permission perm = Bukkit.getPluginManager().getPermission(name);
 
         if (perm == null) {
-            perm = new Permission(name, "Hurt Internal Permission", PermissionDefault.FALSE);
+            perm = new Permission(name, "Server Internal Permission", PermissionDefault.FALSE);
             Bukkit.getPluginManager().addPermission(perm);
         }
 
