@@ -10,30 +10,13 @@ import org.bukkit.Bukkit;
 
 import java.util.*;
 
+@Getter
 public class CharacterManager {
 
-    private Set<Character> characterSet;
-    @Getter
-    private Map<String, CharacterModel> characterModelMap;
+    private final Set<Character> characterSet;
 
     public CharacterManager() {
         this.characterSet = new HashSet<>();
-        this.characterModelMap = new HashMap<>();
-        loadModel(
-                new CharacterModel("default", Location.fromLocation(Bukkit.getWorld("world").getSpawnLocation()), true,
-                                   CommonPlugin.getInstance().getDefaultSkin()));
-    }
-
-    public void loadModel(CharacterModel model) {
-        this.characterModelMap.put(model.getCharacterName().toLowerCase(), model);
-    }
-
-    public Optional<CharacterModel> getModel(String characterName) {
-        return Optional.ofNullable(this.characterModelMap.get(characterName.toLowerCase()));
-    }
-
-    public void unloadModel(CharacterModel model) {
-        this.characterModelMap.remove(model.getCharacterName().toLowerCase());
     }
 
     public void registerCharacter(Character character) {
@@ -47,24 +30,5 @@ public class CharacterManager {
 
     public Collection<Character> getCharacters() {
         return this.characterSet;
-    }
-
-    public void setLocation(CharacterModel characterModel, Location location) {
-        characterModel.setLocation(location);
-        getCharacters().stream().filter(character -> characterModel.getCharacterName().equals(character.getModelName()))
-                       .forEach(character -> character.teleport(location.toLocation()));
-    }
-
-    public void setSkin(CharacterModel characterModel, Skin skin) {
-        characterModel.setSkin(skin);
-        getCharacters().stream().filter(character -> characterModel.getCharacterName().equals(character.getModelName()))
-                       .filter(character -> character instanceof DefaultCharacter)
-                       .map(character -> (DefaultCharacter) character).forEach(character -> character.setSkin(skin));
-    }
-
-    public void setCollision(CharacterModel characterModel, boolean collision) {
-        characterModel.setCollision(collision);
-        getCharacters().stream().filter(character -> characterModel.getCharacterName().equals(character.getModelName()))
-                       .forEach(character -> character.setCollision(collision));
     }
 }
