@@ -320,7 +320,7 @@ public class BukkitCommandFramework implements CommandFramework {
 
                 Method method = timingsClass.getDeclaredMethod("ofSafe", String.class);
                 method.setAccessible(true);
-                Field field = Command.class.getDeclaredField("timings");
+                Field field = org.bukkit.command.Command.class.getDeclaredField("timings");
                 field.setAccessible(true);
                 field.set(this, method.invoke(null, "** Command: " + getName()));
             } catch (ClassNotFoundException | NoSuchMethodException | NoSuchFieldException | InvocationTargetException |

@@ -11,25 +11,6 @@ import java.net.InetSocketAddress;
 public class BungeeServerManager extends ServerManager {
 
     @Override
-    public ProxiedServer addActiveServer(String serverAddress, int serverPort, String serverIp, ServerType type, int maxPlayers, boolean joinEnabled, ProxiedServer.GameState gameState, int time, String mapName, long startTime) {
-        ProxiedServer server = super.addActiveServer(serverAddress, serverPort, serverIp, type, maxPlayers, joinEnabled,
-                                                     gameState, time, mapName, startTime);
-
-        if (server.getServerType() != ServerType.BUNGEECORD &&
-            !ProxyServer.getInstance().getServers().containsKey(serverIp.toLowerCase())) {
-            ServerInfo localServerInfo = ProxyServer.getInstance().constructServerInfo(serverIp.toLowerCase(),
-                                                                                       new InetSocketAddress(
-                                                                                               serverAddress,
-                                                                                               serverPort),
-                                                                                       "Restarting", false);
-
-            ProxyServer.getInstance().getServers().put(serverIp.toLowerCase(), localServerInfo);
-        }
-
-        return server;
-    }
-
-    @Override
     public void addActiveServer(ProxiedServer server) {
         super.addActiveServer(server);
 
@@ -49,7 +30,6 @@ public class BungeeServerManager extends ServerManager {
     @Override
     public void removeActiveServer(String str) {
         super.removeActiveServer(str);
-
         ProxyServer.getInstance().getServers().remove(str.toLowerCase());
     }
 }

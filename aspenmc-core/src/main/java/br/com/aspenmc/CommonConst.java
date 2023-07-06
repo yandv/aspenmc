@@ -26,7 +26,7 @@ public class CommonConst {
             new ThreadFactoryBuilder().setNameFormat("HighMC - Executor").build());
 
     public static final Gson GSON = new GsonBuilder()
-            .excludeFieldsWithModifiers(Modifier.TRANSIENT, Modifier.STATIC, Modifier.PROTECTED).create();
+            .excludeFieldsWithModifiers(Modifier.TRANSIENT, Modifier.STATIC).create();
 
     public static final Gson GSON_PRETTY = new GsonBuilder().setPrettyPrinting().create();
 

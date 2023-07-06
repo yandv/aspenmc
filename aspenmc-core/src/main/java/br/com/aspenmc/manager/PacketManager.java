@@ -41,7 +41,7 @@ public class PacketManager {
     }
 
     public void registerPackets() {
-        for (Class<?> commandClass : ClassGetter.getClassesForPackage(getClass(), "br.com.aspenmc.packet.types"))
+        for (Class<?> commandClass : ClassGetter.getClassesForPackage(getClass(), "br.com.aspenmc.packet.type"))
             if (Packet.class != commandClass && !Modifier.isAbstract(commandClass.getModifiers())) {
                 if (Packet.class.isAssignableFrom(commandClass)) {
                     try {

@@ -83,7 +83,7 @@ public class ServerListener implements Listener {
         String serverIp = getServerIp(event.getConnection());
         ProxiedServer server = CommonPlugin.getInstance().getServerManager().getServer(serverIp);
 
-        serverPing.getPlayers().setOnline(CommonPlugin.getInstance().getServerManager().getCurrentPlayersCount());
+        serverPing.getPlayers().setOnline(CommonPlugin.getInstance().getServerManager().getTotalCount());
         serverPing.getPlayers().setMax(1500);
 
         if (server == null || server.getServerType() == ServerType.BUNGEECORD) {

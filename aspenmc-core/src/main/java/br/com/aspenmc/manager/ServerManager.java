@@ -19,8 +19,8 @@ import java.util.*;
 @Getter
 public class ServerManager {
 
-    private Map<String, ProxiedServer> activeServers;
-    private Map<ServerType, BaseBalancer<ProxiedServer>> balancers;
+    private final Map<String, ProxiedServer> activeServers;
+    private final Map<ServerType, BaseBalancer<ProxiedServer>> balancers;
 
     public ServerManager() {
         balancers = new HashMap<>();
@@ -28,24 +28,8 @@ public class ServerManager {
 
         for (ServerType serverType : ServerType.values())
             if (serverType != ServerType.DISCORD) {
-                balancers.put(serverType,
-                              serverType.name().contains("LOBBY") ? new LeastConnection<>() : new MostConnection<>());
+                balancers.put(serverType, serverType.isLobby() ? new LeastConnection<>() : new MostConnection<>());
             }
-    }
-
-    public BaseBalancer<ProxiedServer> getBalancer(ServerType type) {
-        if (type == null) return null;
-
-        return balancers.get(type);
-    }
-
-    public void putBalancer(ServerType type, BaseBalancer<ProxiedServer> balancer) {
-        balancers.put(type, balancer);
-    }
-
-    public ProxiedServer addActiveServer(String serverAddress, int serverPort, String serverIp, ServerType type, int maxPlayers, boolean joinEnabled, ProxiedServer.GameState gameState, int time, String mapName, long startTime) {
-        return updateActiveServer(serverAddress, serverPort, serverIp, type, new HashSet<>(), maxPlayers, joinEnabled,
-                                  gameState, time, mapName, startTime);
     }
 
     public void addActiveServer(ProxiedServer server) {
@@ -53,25 +37,27 @@ public class ServerManager {
         addToBalancers(server.getServerId(), server);
     }
 
-    public ProxiedServer updateActiveServer(String serverAddress, int serverPort, String serverId, ServerType type, Set<UUID> onlinePlayers, int maxPlayers, boolean joinEnabled, ProxiedServer.GameState gameState, int time, String mapName, long startTime) {
-        ProxiedServer server = activeServers.get(serverId);
+    public void addToBalancers(String serverId, ProxiedServer server) {
+        BaseBalancer<ProxiedServer> balancer = getBalancer(server.getServerType());
 
-        if (server == null) {
-            server = createInstance(serverAddress, serverPort, serverId, type, onlinePlayers, maxPlayers, joinEnabled,
-                                    gameState, time, mapName);
-            server.setStartTime(startTime);
-            activeServers.put(serverId.toLowerCase(), server);
-        }
+        if (balancer == null) return;
 
-        server.setOnlinePlayers(onlinePlayers);
-        server.setJoinEnabled(joinEnabled);
-
-        addToBalancers(serverId, server);
-        return server;
+        balancer.add(serverId.toLowerCase(), server);
     }
 
-    private ProxiedServer createInstance(String serverAddress, int serverPort, String serverId, ServerType type, Set<UUID> onlinePlayers, int maxPlayers, boolean joinEnabled, ProxiedServer.GameState gameState, int time, String mapName) {
-        return new ProxiedServer(serverAddress, serverPort, serverId, type, onlinePlayers, maxPlayers, joinEnabled);
+    public void removeActiveServer(String str) {
+        if (getServer(str) != null) {
+            removeFromBalancers(getServer(str));
+        }
+
+        activeServers.remove(str.toLowerCase());
+    }
+
+    public void removeFromBalancers(ProxiedServer serverId) {
+        BaseBalancer<ProxiedServer> balancer = getBalancer(serverId.getServerType());
+        if (balancer != null) {
+            balancer.remove(serverId.getServerId().toLowerCase());
+        }
     }
 
     public ProxiedServer getServer(String serverName) {
@@ -91,48 +77,10 @@ public class ServerManager {
         return activeServers.values();
     }
 
-    public void removeActiveServer(String str) {
-        if (getServer(str) != null) {
-            removeFromBalancers(getServer(str));
-        }
+    public BaseBalancer<ProxiedServer> getBalancer(ServerType type) {
+        if (type == null) return null;
 
-        activeServers.remove(str.toLowerCase());
-    }
-
-    public void addToBalancers(String serverId, ProxiedServer server) {
-        BaseBalancer<ProxiedServer> balancer = getBalancer(server.getServerType());
-
-        if (balancer == null) {
-            return;
-        }
-
-        balancer.add(serverId.toLowerCase(), server);
-    }
-
-    public void removeFromBalancers(ProxiedServer serverId) {
-        BaseBalancer<ProxiedServer> balancer = getBalancer(serverId.getServerType());
-        if (balancer != null) {
-            balancer.remove(serverId.getServerId().toLowerCase());
-        }
-    }
-
-    public int getTotalNumber(ServerType... serverTypes) {
-        int number = 0;
-
-        for (ServerType serverType : serverTypes)
-            number += getBalancer(serverType).getTotalNumber();
-
-        return number;
-    }
-
-    public int getTotalNumber(List<ServerType> types) {
-        int players = 0;
-
-        for (ServerType type : types) {
-            players += getBalancer(type).getTotalNumber();
-        }
-
-        return players;
+        return balancers.get(type);
     }
 
     public Set<UUID> getOnlinePlayers() {
@@ -145,19 +93,12 @@ public class ServerManager {
         return players;
     }
 
-    public Set<UUID> getProxyPlayers() {
-        return activeServers.values().stream().filter(server -> server.getServerType() == ServerType.BUNGEECORD)
-                            .map(ProxiedServer::getPlayers).reduce(new HashSet<>(), (acc, id) -> {
-                    acc.addAll(id);
-                    return acc;
-                });
-    }
-
     public int getTotalCount() {
         return activeServers.values().stream().mapToInt(ProxiedServer::getOnlinePlayers).sum();
     }
 
-    public int getCurrentPlayersCount() {
-        return getTotalCount();
+    public int getTotalNumber(ServerType... serverTypes) {
+        return Arrays.stream(serverTypes).mapToInt(serverType -> getBalancer(serverType).getTotalNumber())
+                     .sum();
     }
 }
