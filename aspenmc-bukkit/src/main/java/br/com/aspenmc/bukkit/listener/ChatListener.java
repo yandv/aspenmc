@@ -44,7 +44,7 @@ public class ChatListener implements Listener {
         if (member == null) return;
 
         MessageBuilder messageBuilder = new MessageBuilder(
-                member.getTag().map(Tag::getRealPrefix).orElse("§7") + player.getName() + " §7" + event.getMessage());
+                member.getTag().map(Tag::getRealPrefix).orElse("§f") + player.getName() + " §8» §f" + event.getMessage());
 
         event.getRecipients().forEach(recipient -> recipient.spigot().sendMessage(messageBuilder.create()));
     }
