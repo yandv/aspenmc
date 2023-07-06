@@ -4,7 +4,6 @@ import br.com.aspenmc.CommonPlugin;
 import br.com.aspenmc.bukkit.BukkitCommon;
 import br.com.aspenmc.bukkit.utils.TouchHandler;
 import br.com.aspenmc.bukkit.utils.character.Character;
-import br.com.aspenmc.bukkit.utils.character.CharacterModel;
 import br.com.aspenmc.bukkit.utils.hologram.Hologram;
 import br.com.aspenmc.entity.member.Skin;
 import com.mojang.authlib.GameProfile;
@@ -62,12 +61,6 @@ public class DefaultCharacter implements Character {
 
     public DefaultCharacter(Location location, TouchHandler<Character> touchHandler, Skin skin) {
         this(location, false, null, touchHandler, skin);
-    }
-
-    public DefaultCharacter(CharacterModel characterModel, TouchHandler<Character> touchHandler) {
-        this(characterModel.getLocation().toLocation(), characterModel.isCollision(), characterModel.getCharacterName(),
-             touchHandler,
-             characterModel.getSkin() == null ? CommonPlugin.getInstance().getDefaultSkin() : characterModel.getSkin());
     }
 
     public DefaultCharacter(Location location, TouchHandler<Character> touchHandler) {
@@ -155,11 +148,6 @@ public class DefaultCharacter implements Character {
     @Override
     public boolean hasCollision() {
         return collision;
-    }
-
-    @Override
-    public String getModelName() {
-        return model;
     }
 
     @Override

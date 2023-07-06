@@ -3,7 +3,6 @@ package br.com.aspenmc.bukkit.manager;
 import br.com.aspenmc.CommonPlugin;
 import br.com.aspenmc.bukkit.utils.Location;
 import br.com.aspenmc.bukkit.utils.character.Character;
-import br.com.aspenmc.bukkit.utils.character.CharacterModel;
 import br.com.aspenmc.bukkit.utils.character.impl.DefaultCharacter;
 import br.com.aspenmc.entity.member.Skin;
 import lombok.Getter;

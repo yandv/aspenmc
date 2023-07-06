@@ -1,6 +1,6 @@
 package br.com.aspenmc.bukkit.utils.character;
 
-import me.minehurt.bukkit.utils.character.impl.DefaultCharacter;
+import br.com.aspenmc.bukkit.utils.character.impl.DefaultCharacter;
 import org.bukkit.Location;
 
 import java.util.ArrayList;
