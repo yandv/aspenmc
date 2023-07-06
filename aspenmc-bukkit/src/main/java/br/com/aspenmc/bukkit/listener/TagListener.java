@@ -69,23 +69,17 @@ public class TagListener implements Listener {
         String id = getTagId(tag);
 
         for (Player o : Bukkit.getOnlinePlayers()) {
-            ScoreboardAPI.joinTeam(ScoreboardAPI.createTeamIfNotExistsToPlayer(o, id, prefix, ""), p);
-        }
-
-        for (Player o : Bukkit.getOnlinePlayers()) {
             if (!o.getUniqueId().equals(p.getUniqueId())) {
-                BukkitMember bp = CommonPlugin.getInstance().getMemberManager()
-                                              .getMemberById(o.getUniqueId(), BukkitMember.class).orElse(null);
+                CommonPlugin.getInstance().getMemberManager()
+                            .getMemberById(o.getUniqueId(), BukkitMember.class)
+                            .ifPresent(bp -> {
+                                Tag t = bp.getTag().orElse(null);
+                                String pfx = t == null ? "§7" : t.getRealPrefix();
 
-                if (bp == null) {
-                    o.kickPlayer("§cSua conta não foi carregada.");
-                    continue;
-                }
+                                ScoreboardAPI.joinTeam(ScoreboardAPI.createTeamIfNotExistsToPlayer(p, getTagId(t), pfx, ""), o);
+                            });
 
-                tag = bp.getTag().orElse(null);
-                prefix = tag == null ? "§7" : tag.getRealPrefix();
-
-                ScoreboardAPI.joinTeam(ScoreboardAPI.createTeamIfNotExistsToPlayer(p, getTagId(tag), prefix, ""), o);
+                ScoreboardAPI.joinTeam(ScoreboardAPI.createTeamIfNotExistsToPlayer(o, id, prefix, ""), p);
             }
         }
     }
