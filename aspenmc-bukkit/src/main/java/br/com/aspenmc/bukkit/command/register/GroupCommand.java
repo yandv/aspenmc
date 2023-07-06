@@ -384,7 +384,9 @@ public class GroupCommand implements CommandHandler {
         if (args.length == 0) {
             if (sender instanceof Member) {
                 Member member = (Member) sender;
-                List<Tag> tagList = ImmutableList.copyOf(CommonPlugin.getInstance().getPermissionManager().getTags());
+                List<Tag> tagList = CommonPlugin.getInstance().getPermissionManager().getTags()
+                                                .stream()
+                                                .filter(member::hasTag).collect(Collectors.toList());
 
                 if (tagList.isEmpty()) {
                     sender.sendMessage("§cNão há nenhuma tag criada.");

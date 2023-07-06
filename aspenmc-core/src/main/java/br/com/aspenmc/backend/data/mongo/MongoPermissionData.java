@@ -22,6 +22,7 @@ import br.com.aspenmc.utils.JsonUtils;
 import org.bson.Document;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -35,14 +36,14 @@ public class MongoPermissionData implements PermissionData {
         this.groupCollection = mongoConnection.createCollection("groups", collection -> {
             collection.createIndex(new Document("id", 1), new IndexOptions().unique(true));
             collection.createIndex(new Document("groupName", 1), new IndexOptions().unique(true));
-            collection.insertOne(
-                    Document.parse(CommonConst.GSON.toJson(new Group(0, "Membro", new ArrayList<>(), null, true))));
+            collection.insertOne(Document.parse(
+                    CommonConst.GSON.toJson(new Group(0, "Membro", Arrays.asList("tag.membro"), "membro", true))));
         });
 
         this.tagCollection = mongoConnection.createCollection("tags", collection -> {
             collection.createIndex(new Document("id", 1), new IndexOptions().unique(true));
             collection.createIndex(new Document("tagName", 1), new IndexOptions().unique(true));
-            collection.insertOne(Document.parse(CommonConst.GSON.toJson(new Tag(0, "Membro", "§7"))));
+            collection.insertOne(Document.parse(CommonConst.GSON.toJson(new Tag(0, "Membro", "§f"))));
         });
     }
 

@@ -234,7 +234,14 @@ public abstract class BukkitCommon extends JavaPlugin {
     public void registerCommands() {
         BukkitCommandFramework.INSTANCE.unregisterCommands("me", "tellraw", "?", "whitelist", "gamemode", "clear",
                                                            "tps", "ban", "ban-ip", "banlist", "pardon", "pardon-ip",
-                                                           "stop", "restart");
+                                                           "stop", "restart", "pl", "testfor", "testforblocks",
+                                                           "setidletimeout", "replaceitem", "entitydata", "clone",
+                                                           "debug", "defaultgamemode", "deop", "op", "filter",
+                                                           "icanhasbukkit", "list", "protocol", "reload", "restart",
+                                                           "rl", "scoreboard", "seed", "spawnpoint", "spreadplayers",
+                                                           "stats", "trigger", "ver", "about", "achievement",
+                                                           "blockdata", "title", "help", "plugins");
         BukkitCommandFramework.INSTANCE.loadCommands("br.com.aspenmc.bukkit.command.register");
+        BukkitCommandFramework.INSTANCE.registerHelp();
     }
 }

@@ -194,6 +194,10 @@ public abstract class Member implements Sender {
         setTag(getDefaultTag());
     }
 
+    public boolean hasTag(Tag tag) {
+        return getDefaultTag().equals(tag) || hasPermission("tag." + tag.getTagName().toLowerCase());
+    }
+
     public Collection<Group> getGroups() {
         return getGroupMap().keySet().stream().map(CommonPlugin.getInstance().getPermissionManager()::getGroupByName)
                             .filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
@@ -322,4 +326,5 @@ public abstract class Member implements Sender {
     public boolean isPlayer() {
         return true;
     }
+
 }

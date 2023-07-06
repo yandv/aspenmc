@@ -88,10 +88,8 @@ public class ServerCommand implements CommandHandler {
             CommonPlugin.getInstance().setServerId(serverId);
             BukkitCommon.getInstance().getConfig().set("serverId", serverId);
             BukkitCommon.getInstance().saveConfig();
-            sender.sendMessage(" §a» §fId do servidor alterado para §a" + serverId + "§f.");
-            CommonPlugin.getInstance().getServerData().startServer(Bukkit.getMaxPlayers());
-            Bukkit.getOnlinePlayers()
-                  .forEach(player -> CommonPlugin.getInstance().getServerData().joinPlayer(player.getUniqueId()));
+            sender.sendMessage("§aVocê alterou o id do servidor para §a" + serverId + "§f.");
+            startServer();
             break;
         }
         case "setservertype": {
@@ -117,14 +115,12 @@ public class ServerCommand implements CommandHandler {
             CommonPlugin.getInstance().setServerType(serverType);
             BukkitCommon.getInstance().getConfig().set("serverType", serverType.name());
             BukkitCommon.getInstance().saveConfig();
-            sender.sendMessage(" §a» §fTipo do servidor alterado para §a" + serverType + "§f.");
-            CommonPlugin.getInstance().getServerData().startServer(Bukkit.getMaxPlayers());
+            sender.sendMessage("§aVocê alterou o tipo do servidor para §a" + serverType + "§f.");
+            startServer();
             break;
         }
         case "start": {
-            CommonPlugin.getInstance().getServerData().startServer(Bukkit.getMaxPlayers());
-            Bukkit.getOnlinePlayers()
-                  .forEach(player -> CommonPlugin.getInstance().getServerData().joinPlayer(player.getUniqueId()));
+            startServer();
             sender.sendMessage("§aO servidor foi iniciado com sucesso.");
             break;
         }
@@ -134,6 +130,12 @@ public class ServerCommand implements CommandHandler {
             break;
         }
         }
+    }
+
+    private void startServer() {
+        CommonPlugin.getInstance().getServerData().startServer(Bukkit.getMaxPlayers());
+        Bukkit.getOnlinePlayers()
+              .forEach(player -> CommonPlugin.getInstance().getServerData().joinPlayer(player.getUniqueId()));
     }
 
     @CommandFramework.Command(name = "tps", aliases = {"ticks"}, permission = "command.tps")
@@ -219,10 +221,12 @@ public class ServerCommand implements CommandHandler {
         List<String> args = new ArrayList<>();
 
         if (cmdArgs.getArgs().length == 1) {
-            args.addAll(Arrays.asList("setserverid", "setservertype"));
+            args.addAll(Arrays.asList("setserverid", "setservertype", "start", "stop"));
         } else if (cmdArgs.getArgs().length == 2) {
             if (cmdArgs.getArgs()[0].equalsIgnoreCase("setservertype")) {
-                args.addAll(Arrays.stream(ServerType.values()).map(ServerType::name).collect(Collectors.toList()));
+                args.addAll(Arrays.stream(ServerType.values())
+                                  .filter(st -> st != ServerType.BUNGEECORD && st != ServerType.DISCORD)
+                                  .map(ServerType::name).collect(Collectors.toList()));
             }
         }
 
