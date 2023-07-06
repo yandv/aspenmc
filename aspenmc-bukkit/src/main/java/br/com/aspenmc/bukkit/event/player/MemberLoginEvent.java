@@ -1,9 +1,8 @@
 package br.com.aspenmc.bukkit.event.player;
 
+import br.com.aspenmc.bukkit.entity.BukkitMember;
+import br.com.aspenmc.bukkit.event.PlayerEvent;
 import lombok.Getter;
-import me.minehurt.bukkit.event.PlayerEvent;
-import me.minehurt.bukkit.member.BukkitMember;
-import org.bukkit.entity.Player;
 
 public class MemberLoginEvent extends PlayerEvent {
 

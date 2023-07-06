@@ -1,14 +1,15 @@
 package br.com.aspenmc.bukkit.manager;
 
+import br.com.aspenmc.CommonPlugin;
+import br.com.aspenmc.bukkit.event.player.vanish.PlayerAdminEvent;
+import br.com.aspenmc.bukkit.event.player.vanish.PlayerHideToPlayerEvent;
+import br.com.aspenmc.bukkit.event.player.vanish.PlayerShowToPlayerEvent;
+import br.com.aspenmc.entity.Member;
+import br.com.aspenmc.permission.Group;
+import br.com.aspenmc.permission.Tag;
 import com.google.common.collect.ImmutableSet;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import me.minehurt.CommonPlugin;
-import me.minehurt.bukkit.event.player.vanish.PlayerAdminEvent;
-import me.minehurt.bukkit.event.player.vanish.PlayerHideToPlayerEvent;
-import me.minehurt.bukkit.event.player.vanish.PlayerShowToPlayerEvent;
-import me.minehurt.entity.Member;
-import me.minehurt.permission.Group;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
@@ -96,8 +97,7 @@ public class VanishManager {
         adminSet.add(player.getUniqueId());
 
         Group group = hidePlayer(player);
-        player.sendMessage(member.getLanguage().translateOrDefault("command.admin.vanished",
-                                                                   "§dVocê entrou no modo admin.\n§dVocê está invísivel para todos os jogadores."));
+        player.sendMessage("§dVocê entrou no modo admin.\n§dVocê está invísivel para " + group.getGroupName() + " e abaixo.");
         player.setGameMode(playerAdminEvent.getGameMode());
 
         if (playerAdminEvent.getGameMode() == GameMode.CREATIVE) {
@@ -131,8 +131,7 @@ public class VanishManager {
             adminSet.remove(player.getUniqueId());
 
             showPlayer(player);
-            player.sendMessage(member.getLanguage().translateOrDefault("command.admin.unvanished",
-                                                                       "§dVocê entrou no modo jogador.\n§dVocê está visível para todos os jogadores."));
+            player.sendMessage("§dVocê entrou no modo jogador.\n§dVocê está visível para todos os jogadores.");
             player.setGameMode(playerAdminEvent.getGameMode());
 
             if (playerStateMap.containsKey(player.getUniqueId())) {

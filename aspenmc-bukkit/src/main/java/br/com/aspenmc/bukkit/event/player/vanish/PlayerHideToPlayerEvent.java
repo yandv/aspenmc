@@ -1,7 +1,7 @@
 package br.com.aspenmc.bukkit.event.player.vanish;
 
+import br.com.aspenmc.bukkit.event.PlayerCancellableEvent;
 import lombok.Getter;
-import me.minehurt.bukkit.event.PlayerCancellableEvent;
 import org.bukkit.entity.Player;
 
 @Getter

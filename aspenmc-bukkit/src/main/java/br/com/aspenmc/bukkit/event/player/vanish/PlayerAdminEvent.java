@@ -1,6 +1,6 @@
 package br.com.aspenmc.bukkit.event.player.vanish;
 
-import me.minehurt.bukkit.event.PlayerCancellableEvent;
+import br.com.aspenmc.bukkit.event.PlayerCancellableEvent;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 

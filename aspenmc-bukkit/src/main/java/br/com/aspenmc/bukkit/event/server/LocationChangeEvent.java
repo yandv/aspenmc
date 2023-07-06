@@ -1,9 +1,9 @@
 package br.com.aspenmc.bukkit.event.server;
 
+import br.com.aspenmc.bukkit.event.NormalEvent;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import me.minehurt.bukkit.event.NormalEvent;
-import me.minehurt.bukkit.utils.Location;
+import org.bukkit.Location;
 
 @AllArgsConstructor
 @Getter

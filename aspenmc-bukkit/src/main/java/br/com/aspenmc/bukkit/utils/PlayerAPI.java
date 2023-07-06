@@ -9,13 +9,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import br.com.aspenmc.CommonPlugin;
+import br.com.aspenmc.bukkit.BukkitCommon;
+import br.com.aspenmc.entity.member.Skin;
 import com.comphenix.protocol.wrappers.*;
 import com.google.common.cache.CacheLoader;
-import me.minehurt.CommonConst;
-import me.minehurt.CommonPlugin;
-import me.minehurt.bukkit.BukkitCommon;
-import me.minehurt.bukkit.BukkitMain;
-import me.minehurt.entity.member.Skin;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -204,7 +202,7 @@ public class PlayerAPI {
                     e.printStackTrace();
                 }
             }
-        }.runTask(BukkitMain.getInstance());
+        }.runTask(BukkitCommon.getInstance());
     }
 
     public static WrappedSignedProperty changePlayerSkin(Player player, String value, String signature, boolean respawn) {

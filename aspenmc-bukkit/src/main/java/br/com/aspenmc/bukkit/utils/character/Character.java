@@ -67,13 +67,6 @@ public interface Character {
 
     boolean hasCollision();
 
-    String getModelName();
-
-    default Optional<CharacterModel> getModel() {
-        if (getModelName() == null) return Optional.empty();
-        return BukkitCommon.getInstance().getCharacterManager().getModel(getModelName());
-    }
-
     /**
      * Get the Character's location
      *
