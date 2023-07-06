@@ -1,10 +1,10 @@
 package br.com.aspenmc.bukkit.networking;
 
+import br.com.aspenmc.CommonConst;
+import br.com.aspenmc.CommonPlugin;
+import br.com.aspenmc.bukkit.event.server.packet.PacketReceiveEvent;
+import br.com.aspenmc.bukkit.event.server.packet.PacketReceivedEvent;
 import com.google.gson.JsonParser;
-import me.minehurt.CommonConst;
-import me.minehurt.CommonPlugin;
-import me.minehurt.bukkit.event.server.packet.PacketReceiveEvent;
-import me.minehurt.bukkit.event.server.packet.PacketReceivedEvent;
 import org.bukkit.Bukkit;
 import redis.clients.jedis.JedisPubSub;
 

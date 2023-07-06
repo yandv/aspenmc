@@ -1,4 +1,4 @@
-package br.com.aspenmc.bukkit;
+package br.com.aspenmc.bukkit.entity;
 
 import br.com.aspenmc.CommonPlatform;
 import br.com.aspenmc.bukkit.BukkitCommon;
