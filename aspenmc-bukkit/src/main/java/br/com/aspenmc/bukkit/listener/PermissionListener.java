@@ -2,6 +2,7 @@ package br.com.aspenmc.bukkit.listener;
 
 import br.com.aspenmc.CommonPlugin;
 import br.com.aspenmc.bukkit.BukkitCommon;
+import br.com.aspenmc.bukkit.event.player.group.PlayerChangedGroupEvent;
 import br.com.aspenmc.entity.Member;
 import br.com.aspenmc.permission.Group;
 import org.bukkit.Bukkit;
@@ -39,6 +40,12 @@ public class PermissionListener implements Listener {
         if (event.getResult() != Result.ALLOWED) {
             removeAttachment(event.getPlayer());
         }
+    }
+
+    @EventHandler
+    public void onPlayerChangedGroup(PlayerChangedGroupEvent event) {
+        removeAttachment(event.getPlayer());
+        updateAttachment(event.getPlayer());
     }
 
     public void updateAttachment(Player player) {
