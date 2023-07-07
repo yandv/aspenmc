@@ -79,8 +79,8 @@ public class TagListener implements Listener {
                                 ScoreboardAPI.joinTeam(ScoreboardAPI.createTeamIfNotExistsToPlayer(p, getTagId(t), pfx, ""), o);
                             });
 
-                ScoreboardAPI.joinTeam(ScoreboardAPI.createTeamIfNotExistsToPlayer(o, id, prefix, ""), p);
             }
+            ScoreboardAPI.joinTeam(ScoreboardAPI.createTeamIfNotExistsToPlayer(o, id, prefix, ""), p);
         }
     }
 

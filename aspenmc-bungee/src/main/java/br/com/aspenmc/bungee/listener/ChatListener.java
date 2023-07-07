@@ -13,7 +13,7 @@ import java.util.List;
 
 public class ChatListener implements Listener {
 
-    private static final List<String> ALLOWED_COMMANDS = Arrays.asList("login", "register", "logar", "registrar");
+    private static final List<String> ALLOWED_COMMANDS = Arrays.asList("login", "logar", "register", "registrar");
 
     @EventHandler
     public void onChat(ChatEvent event) {
@@ -34,14 +34,14 @@ public class ChatListener implements Listener {
                 return;
             }
 
-            if (member.getPreferencesConfiguration().isStaffChatEnabled())
+            if (member.getPreferencesConfiguration().isStaffChatEnabled()) {
                 member.getPreferencesConfiguration().setStaffChatEnabled(false);
+            }
         }
 
-        if (member.getPreferencesConfiguration().isStaffChatEnabled()) {
+        if (member.getPreferencesConfiguration().isStaffChatEnabled() && !event.isCommand()) {
             BungeeMain.getInstance().sendStaffChatMessage(member, event.getMessage().replace('&', '§'));
             return;
         }
     }
-
 }
