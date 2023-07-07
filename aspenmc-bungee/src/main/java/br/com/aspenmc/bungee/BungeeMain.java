@@ -1,5 +1,6 @@
 package br.com.aspenmc.bungee;
 
+import br.com.aspenmc.CommonPlatform;
 import br.com.aspenmc.backend.type.RedisConnection;
 import br.com.aspenmc.bungee.entity.BungeeConsoleSender;
 import br.com.aspenmc.bungee.listener.MemberListener;
@@ -21,6 +22,7 @@ import br.com.aspenmc.command.CommandFramework;
 import br.com.aspenmc.entity.Member;
 import br.com.aspenmc.server.ServerType;
 import net.md_5.bungee.api.ProxyServer;
+import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.config.Configuration;
@@ -32,9 +34,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @Getter
-public class BungeeMain extends Plugin {
+public class BungeeMain extends Plugin implements CommonPlatform {
 
     @Getter
     private static BungeeMain instance;
@@ -49,7 +53,7 @@ public class BungeeMain extends Plugin {
     public void onLoad() {
         instance = this;
 
-        plugin = new CommonPlugin(new BungeePlatform(), getLogger());
+        plugin = new CommonPlugin(this, getLogger());
         plugin.setConsoleSender(new BungeeConsoleSender());
 
         loadConfiguration();
@@ -159,6 +163,61 @@ public class BungeeMain extends Plugin {
 
     public void registerCommands() {
         BungeeCommandFramework.INSTANCE.loadCommands("br.com.aspenmc.bungee.command.register");
+    }
+
+    @Override
+    public void broadcast(String... messages) {
+        for (String message : messages) {
+            ProxyServer.getInstance().broadcast(message);
+        }
+    }
+
+    @Override
+    public void broadcast(TextComponent... components) {
+        ProxyServer.getInstance().broadcast(components);
+    }
+
+    @Override
+    public String getNameById(UUID playerId) {
+        ProxiedPlayer player = ProxyServer.getInstance().getPlayer(playerId);
+        return player == null ? null : player.getName();
+    }
+
+    @Override
+    public UUID getUniqueId(String playerName) {
+        ProxiedPlayer player = ProxyServer.getInstance().getPlayer(playerName);
+        return player == null ? null : player.getUniqueId();
+    }
+
+    @Override
+    public void runAsync(Runnable runnable) {
+        ProxyServer.getInstance().getScheduler().runAsync(BungeeMain.getInstance(), runnable);
+    }
+
+    @Override
+    public void runAsyncTimer(Runnable runnable, long delay, long period) {
+        ProxyServer.getInstance().getScheduler()
+                   .schedule(BungeeMain.getInstance(), runnable, (long) ((delay / 20.0D) * 1000),
+                             (long) ((period / 20.0D) * 1000), TimeUnit.MILLISECONDS);
+    }
+
+    @Override
+    public void runSync(Runnable runnable) {
+        runnable.run();
+    }
+
+    @Override
+    public void runLater(Runnable runnable, long delay) {
+        ProxyServer.getInstance().getScheduler()
+                   .schedule(BungeeMain.getInstance(), runnable, (long) ((delay / 20.0D) * 1000),
+                             TimeUnit.MILLISECONDS);
+    }
+
+    @Override
+    public void runTimer(Runnable runnable, long delay, long period) {
+        ProxyServer.getInstance().getScheduler()
+                   .schedule(BungeeMain.getInstance(), runnable, (long) ((delay / 20.0D) * 1000),
+                             (long) ((period / 20.0D) * 1000), TimeUnit.MILLISECONDS);
     }
 
     public void sendStaffChatMessage(Member sender, String message) {

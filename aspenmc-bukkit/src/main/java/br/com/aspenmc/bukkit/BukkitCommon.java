@@ -1,11 +1,11 @@
 package br.com.aspenmc.bukkit;
 
 import br.com.aspenmc.CommonConst;
+import br.com.aspenmc.CommonPlatform;
 import br.com.aspenmc.CommonPlugin;
 import br.com.aspenmc.backend.type.RedisConnection;
 import br.com.aspenmc.bukkit.command.BukkitCommandFramework;
 import br.com.aspenmc.bukkit.entity.BukkitMember;
-import br.com.aspenmc.bukkit.entity.BukkitPlatform;
 import br.com.aspenmc.bukkit.event.player.group.PlayerChangedGroupEvent;
 import br.com.aspenmc.bukkit.event.server.ServerUpdateEvent;
 import br.com.aspenmc.bukkit.listener.*;
@@ -26,6 +26,7 @@ import br.com.aspenmc.server.ProxiedServer;
 import br.com.aspenmc.server.ServerType;
 import lombok.Getter;
 import lombok.Setter;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -33,12 +34,12 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.util.*;
 
 @Getter
-public abstract class BukkitCommon extends JavaPlugin {
+public abstract class BukkitCommon extends JavaPlugin implements CommonPlatform {
 
     @Getter
     private static BukkitCommon instance;
 
-    protected CommonPlugin plugin = new CommonPlugin(new BukkitPlatform(), getLogger());
+    protected CommonPlugin plugin;
 
     protected RegexPermissions regexPerms;
 
@@ -67,6 +68,8 @@ public abstract class BukkitCommon extends JavaPlugin {
 
         saveDefaultConfig();
 
+        plugin = new CommonPlugin(this, getLogger());
+
         plugin.setConsoleSender(new BukkitConsoleSender());
 
         plugin.setServerAddress(Bukkit.getIp());
@@ -93,10 +96,8 @@ public abstract class BukkitCommon extends JavaPlugin {
     public void onEnable() {
         regexPerms = new RegexPermissions();
 
-        Bukkit.getScheduler().runTaskAsynchronously(this,
-                                                    new RedisConnection.PubSubListener(plugin.getRedisConnection(),
-                                                                                       new BukkitPubSub(),
-                                                                                       CommonConst.SERVER_PACKET_CHANNEL));
+        runAsync(new RedisConnection.PubSubListener(plugin.getRedisConnection(), new BukkitPubSub(),
+                                                    CommonConst.SERVER_PACKET_CHANNEL));
 
         characterManager = new CharacterManager();
         hologramManager = new HologramManager();
@@ -110,9 +111,9 @@ public abstract class BukkitCommon extends JavaPlugin {
 
         registerPacketHandlers();
         registerListeners();
-        plugin.getPluginPlatform().runLater(this::registerCommands, 7L);
 
-        getServer().getScheduler().runTaskTimer(this, new UpdateScheduler(), 1, 1);
+        runLater(this::registerCommands, 7L);
+        runTimer(new UpdateScheduler(), 1, 1);
 
         if (plugin.isServerLog()) {
             plugin.loadServers();
@@ -243,5 +244,56 @@ public abstract class BukkitCommon extends JavaPlugin {
                                                            "blockdata", "title", "help", "plugins");
         BukkitCommandFramework.INSTANCE.loadCommands("br.com.aspenmc.bukkit.command.register");
         BukkitCommandFramework.INSTANCE.registerHelp();
+    }
+
+    @Override
+    public void broadcast(String... messages) {
+        for (String message : messages) {
+            Bukkit.broadcastMessage(message);
+        }
+    }
+
+    @Override
+    public void broadcast(TextComponent... components) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            player.spigot().sendMessage(components);
+        }
+    }
+
+    @Override
+    public void runAsync(Runnable runnable) {
+        Bukkit.getScheduler().runTaskAsynchronously(BukkitCommon.getInstance(), runnable);
+    }
+
+    @Override
+    public void runAsyncTimer(Runnable runnable, long delay, long period) {
+        Bukkit.getScheduler().runTaskTimerAsynchronously(BukkitCommon.getInstance(), runnable, delay, period);
+    }
+
+    @Override
+    public void runSync(Runnable runnable) {
+        Bukkit.getScheduler().runTask(BukkitCommon.getInstance(), runnable);
+    }
+
+    @Override
+    public void runLater(Runnable runnable, long delay) {
+        Bukkit.getScheduler().runTaskLater(BukkitCommon.getInstance(), runnable, delay);
+    }
+
+    @Override
+    public void runTimer(Runnable runnable, long delay, long period) {
+        Bukkit.getScheduler().runTaskTimer(BukkitCommon.getInstance(), runnable, delay, period);
+    }
+
+    @Override
+    public String getNameById(UUID playerId) {
+        Player player = Bukkit.getPlayer(playerId);
+        return player == null ? null : player.getName();
+    }
+
+    @Override
+    public UUID getUniqueId(String playerName) {
+        Player player = Bukkit.getPlayer(playerName);
+        return player == null ? null : player.getUniqueId();
     }
 }
