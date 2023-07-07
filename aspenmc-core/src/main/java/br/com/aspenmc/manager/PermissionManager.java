@@ -10,6 +10,8 @@ import java.util.stream.Collectors;
 @Getter
 public class PermissionManager {
 
+    public static final Tag NULL_TAG = new Tag(0, "Membro", "§7");
+
     private final Map<String, Group> groupMap;
     private final Map<String, Tag> tagMap;
 

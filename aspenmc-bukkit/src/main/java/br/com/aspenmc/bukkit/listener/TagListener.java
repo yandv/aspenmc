@@ -6,6 +6,7 @@ import br.com.aspenmc.bukkit.entity.BukkitMember;
 import br.com.aspenmc.bukkit.event.player.tag.PlayerChangedTagEvent;
 import br.com.aspenmc.bukkit.utils.scoreboard.ScoreboardAPI;
 import br.com.aspenmc.entity.Member;
+import br.com.aspenmc.manager.PermissionManager;
 import br.com.aspenmc.permission.Tag;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -63,8 +64,7 @@ public class TagListener implements Listener {
 
         if (player == null) return;
 
-        Tag tag = player.getTag().orElse(null);
-        String prefix = tag == null ? "§7" : tag.getRealPrefix();
+        Tag tag = player.getTag().orElse(PermissionManager.NULL_TAG);
 
         String id = getTagId(tag);
 
@@ -73,14 +73,12 @@ public class TagListener implements Listener {
                 CommonPlugin.getInstance().getMemberManager()
                             .getMemberById(o.getUniqueId(), BukkitMember.class)
                             .ifPresent(bp -> {
-                                Tag t = bp.getTag().orElse(null);
-                                String pfx = t == null ? "§7" : t.getRealPrefix();
-
-                                ScoreboardAPI.joinTeam(ScoreboardAPI.createTeamIfNotExistsToPlayer(p, getTagId(t), pfx, ""), o);
+                                Tag t = bp.getTag().orElse(PermissionManager.NULL_TAG);
+                                ScoreboardAPI.joinTeam(ScoreboardAPI.createTeamIfNotExistsToPlayer(p, getTagId(t), t.getRealPrefix(), ""), o);
                             });
 
             }
-            ScoreboardAPI.joinTeam(ScoreboardAPI.createTeamIfNotExistsToPlayer(o, id, prefix, ""), p);
+            ScoreboardAPI.joinTeam(ScoreboardAPI.createTeamIfNotExistsToPlayer(o, id, tag.getRealPrefix(), ""), p);
         }
     }
 
