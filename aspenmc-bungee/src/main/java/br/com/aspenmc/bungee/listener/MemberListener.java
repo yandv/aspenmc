@@ -51,7 +51,7 @@ public class MemberListener implements Listener {
         member.setProxiedPlayer(player);
         member.getLoginConfiguration().reloadSession();
 
-        calculatePermissions(member);
+        calculatePermissions(player, member);
     }
 
     @EventHandler
@@ -75,32 +75,6 @@ public class MemberListener implements Listener {
             event.setHasPermission(member.hasSilentPermission(event.getPermission()));
         } else {
             event.setHasPermission(true);
-        }
-    }
-
-    private void calculatePermissions(BungeeMember member) {
-        ProxiedPlayer player = member.getProxiedPlayer();
-
-        if (player == null) {
-            CommonPlugin.getInstance()
-                        .debug("The player " + member.getName() + " is null when trying to handle permissions.");
-            return;
-        }
-
-        if (player.getPermissions() != null) {
-            for (String permission : ImmutableList.copyOf(player.getPermissions())) {
-                player.setPermission(permission, false);
-            }
-        }
-
-        for (String string : member.getPermissions().keySet()) {
-            player.setPermission(string.toLowerCase(), true);
-        }
-
-        for (Group group : member.getGroups()) {
-            for (String string : group.getPermissions()) {
-                player.setPermission(string.toLowerCase(), true);
-            }
         }
     }
 
@@ -156,12 +130,7 @@ public class MemberListener implements Listener {
             Punish currentPunish = member.getPunishConfiguration().getCurrentPunish(PunishType.BAN);
 
             if (currentPunish != null) {
-                if (currentPunish.isPermanent()) {
-                    loginEvent.setCancelReason(currentPunish.getPunishMessage());
-                } else {
-                    loginEvent.setCancelReason(currentPunish.getPunishMessage());
-                }
-
+                loginEvent.setCancelReason(currentPunish.getPunishMessage());
                 loginEvent.setCancelled(true);
                 return;
             }
@@ -193,5 +162,23 @@ public class MemberListener implements Listener {
         CommonPlugin.getInstance().getMemberManager().loadMember(member);
         CommonPlugin.getInstance().debug("The player " + member.getConstraintName() + " has been loaded (" +
                                          (System.currentTimeMillis() - start) + "ms).");
+    }
+
+    private void calculatePermissions(ProxiedPlayer player, BungeeMember member) {
+        if (player.getPermissions() != null) {
+            for (String permission : ImmutableList.copyOf(player.getPermissions())) {
+                player.setPermission(permission, false);
+            }
+        }
+
+        for (String string : member.getPermissions().keySet()) {
+            player.setPermission(string.toLowerCase(), true);
+        }
+
+        for (Group group : member.getGroups()) {
+            for (String string : group.getPermissions()) {
+                player.setPermission(string.toLowerCase(), true);
+            }
+        }
     }
 }

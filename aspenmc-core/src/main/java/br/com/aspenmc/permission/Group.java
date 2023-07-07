@@ -21,6 +21,8 @@ public class Group {
 
     private boolean defaultGroup;
 
+    private boolean paidGroup;
+
     public void setTag(Tag tag) {
         if (tag == null) {
             this.tag = null;
@@ -34,6 +36,11 @@ public class Group {
     public void setDefaultGroup(boolean defaultGroup) {
         this.defaultGroup = defaultGroup;
         CommonPlugin.getInstance().getPermissionData().updateGroup(this, "defaultGroup");
+    }
+
+    public void setPaidGroup(boolean paidGroup) {
+        this.paidGroup = paidGroup;
+        CommonPlugin.getInstance().getPermissionData().updateGroup(this, "paidGroup");
     }
 
     public boolean hasTag() {

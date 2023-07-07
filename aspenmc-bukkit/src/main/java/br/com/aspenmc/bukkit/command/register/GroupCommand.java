@@ -35,6 +35,8 @@ public class GroupCommand implements CommandHandler {
                                " settag <groupName> <tag> §fpara definir uma tag para um grupo.");
             sender.sendMessage(" §e» §fUse §a/" + cmdArgs.getLabel() +
                                " setdefault <groupName> <true:false> §fpara definir um grupo como padrão.");
+            sender.sendMessage(" §e» §fUse §a/" + cmdArgs.getLabel() +
+                               " setpaid <groupName> <true:false> §fpara definir um grupo como vip.");
 
             sender.sendMessage("");
             sender.sendMessage(" §e» §fUse §a/" + cmdArgs.getLabel() + " <player>§f para ver o grupo de um jogador.");
@@ -121,7 +123,7 @@ public class GroupCommand implements CommandHandler {
                 break;
             }
 
-            Group group = new Group(groupId, StringFormat.formatString(groupName), new ArrayList<>(), null, false);
+            Group group = new Group(groupId, StringFormat.formatString(groupName), new ArrayList<>(), null, false, false);
 
             sender.sendMessage("§aO grupo \"" + groupName + "\" foi criado com sucesso.");
             CommonPlugin.getInstance().getPermissionManager().loadGroup(group);
@@ -217,6 +219,35 @@ public class GroupCommand implements CommandHandler {
             group.setDefaultGroup(defaultGroup);
             sender.sendMessage("§aO grupo \"" + group.getGroupName() + "\" " + (defaultGroup ? "agora é" : "não é") +
                                " o grupo padrão.");
+            break;
+        }
+        case "setpaid": {
+            if (args.length == 1) {
+                sender.sendMessage(" §a» §fUse §a/" + cmdArgs.getLabel() +
+                                   " setpaid <nome> <true:false> §fpara definir se um grupo é vip ou não.");
+                break;
+            }
+
+            Optional<Group> optionalGroup = CommonPlugin.getInstance().getPermissionManager().getGroupByName(args[1]);
+
+            if (!optionalGroup.isPresent()) {
+                sender.sendMessage("§cO grupo \"" + args[1] + "\" não existe.");
+                return;
+            }
+
+            Group group = optionalGroup.get();
+
+            if (args.length == 2) {
+                sender.sendMessage(" §a» §fUse §a/" + cmdArgs.getLabel() + " setpaid " + group.getGroupName() +
+                                   " <true:false> §fpara definir se um grupo é vip ou não.");
+                return;
+            }
+
+            boolean paidGroup = StringFormat.parseBoolean(args[2]);
+
+            group.setPaidGroup(paidGroup);
+            sender.sendMessage("§aO grupo \"" + group.getGroupName() + "\" " + (paidGroup ? "agora é" : "agora não é") +
+                               " um grupo vip.");
             break;
         }
         default: {
@@ -553,6 +584,11 @@ public class GroupCommand implements CommandHandler {
             if (args.length == 1 || !sender.hasPermission("command.tag.forcetag")) {
                 if (!sender.isPlayer()) {
                     sender.sendMessage("§cUso correto: /tag <tag> <jogador>");
+                    return;
+                }
+
+                if (!((Member) sender).hasTag(tag)) {
+                    sender.sendMessage("§cVocê não possui a tag " + tag.getColoredName() + "§c.");
                     return;
                 }
 
