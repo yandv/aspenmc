@@ -90,7 +90,7 @@ public class ServerConnectRequest extends Packet {
     public ProxiedServer getServer(String server) {
         ServerType serverType = ServerType.getByName(server);
 
-        if (serverType == null) {
+        if (serverType == ServerType.UNKNOWN) {
             return CommonPlugin.getInstance().getServerManager().getServer(server);
         } else {
             return CommonPlugin.getInstance().getServerManager().getBalancer(serverType).next();

@@ -151,7 +151,7 @@ public class CommonPlugin {
 
     private void tryAddServer(ProxiedServer server, int attemp) {
         packetManager.waitPacket(KeepAliveResponse.class,
-                packetManager.sendPacket(new KeepAliveRequest(server.getServerId())), 500L, response -> {
+                packetManager.sendPacket(new KeepAliveRequest(server.getServerId())), 3000L, response -> {
                     if (response != null) {
                         serverManager.addActiveServer(server);
                         debug("The server " + server.getServerId() + " (" + server.getServerType() + " - " +

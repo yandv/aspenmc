@@ -65,7 +65,7 @@ public class ModeratorCommand implements CommandHandler {
         Location location;
 
         if (sender.isPlayer()) {
-            location = ((Player) sender).getLocation();
+            location = ((BukkitMember) sender).getPlayer().getLocation();
         } else {
             if (args.length < 4) {
                 sender.sendMessage(
@@ -113,11 +113,10 @@ public class ModeratorCommand implements CommandHandler {
         }
 
         Bukkit.getPluginManager().callEvent(new LocationChangeEvent(locationName,
-                BukkitCommon.getInstance().getLocationManager().getLocation(locationName),
-                location));
+                BukkitCommon.getInstance().getLocationManager().getLocation(locationName), location));
 
         BukkitCommon.getInstance().getLocationManager().setLocation(locationName, location);
-        sender.sendMessage("aLocalização " + locationName + " definida com sucesso em " + location.getX() + ", " +
+        sender.sendMessage("§aLocalização " + locationName + " definida com sucesso em " + location.getX() + ", " +
                 location.getY() + ", " + location.getZ() + " do mundo " + location.getWorld().getName() + ".");
     }
 
@@ -156,7 +155,6 @@ public class ModeratorCommand implements CommandHandler {
         player.sendMessage(
                 "§dVocê está invisível para " + StringFormat.formatString(hidePlayer.getGroupName()) + "s e abaixo.");
     }
-
 
 
     @CommandFramework.Command(name = "stop", aliases = { "fechar", "restart" }, permission = "command.stop")
@@ -564,5 +562,16 @@ public class ModeratorCommand implements CommandHandler {
         }
 
         return returnList;
+    }
+
+    @CommandFramework.Completer(name = "setlocation", aliases = { "setloc" })
+    public List<String> setlocationCompleter(CommandArgs cmdArgs) {
+        if (cmdArgs.getArgs().length == 1) {
+            return BukkitCommon.getInstance().getLocationManager().getKeys().stream()
+                               .filter(name -> name.toLowerCase().startsWith(cmdArgs.getArgs()[0].toLowerCase()))
+                               .collect(Collectors.toList());
+        }
+
+        return new ArrayList<>();
     }
 }

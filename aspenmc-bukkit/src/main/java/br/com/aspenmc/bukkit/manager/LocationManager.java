@@ -2,11 +2,13 @@ package br.com.aspenmc.bukkit.manager;
 
 import br.com.aspenmc.bukkit.BukkitCommon;
 import br.com.aspenmc.bukkit.serializer.LocationParser;
+import com.comphenix.net.bytebuddy.jar.asm.commons.Remapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -47,6 +49,10 @@ public class LocationManager {
 
     public Optional<Location> getLocationAsOptional() {
         return Optional.ofNullable(locationMap.get("spawn"));
+    }
+
+    public Collection<String> getKeys() {
+        return locationMap.keySet();
     }
 }
 

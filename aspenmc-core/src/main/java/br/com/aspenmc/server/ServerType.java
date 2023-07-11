@@ -19,7 +19,7 @@ public enum ServerType {
 
     LOBBY(true), HG_LOBBY(true, "lobby"), PVP_LOBBY(true, "lobby"),
 
-    HG,
+    HG("hg_lobby"),
 
     ARENA, FPS, LAVA,
 
@@ -31,6 +31,10 @@ public enum ServerType {
 
     ServerType() {
         this(false, "");
+    }
+
+    ServerType(String parent) {
+        this(false, parent);
     }
 
     ServerType(boolean lobby) {
