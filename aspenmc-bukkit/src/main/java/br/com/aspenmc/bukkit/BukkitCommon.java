@@ -11,6 +11,7 @@ import br.com.aspenmc.bukkit.event.server.ServerUpdateEvent;
 import br.com.aspenmc.bukkit.listener.*;
 import br.com.aspenmc.bukkit.manager.CharacterManager;
 import br.com.aspenmc.bukkit.manager.HologramManager;
+import br.com.aspenmc.bukkit.manager.LocationManager;
 import br.com.aspenmc.bukkit.manager.VanishManager;
 import br.com.aspenmc.bukkit.networking.BukkitPubSub;
 import br.com.aspenmc.bukkit.permission.regex.RegexPermissions;
@@ -19,6 +20,7 @@ import br.com.aspenmc.bukkit.scheduler.UpdateScheduler;
 import br.com.aspenmc.entity.member.gamer.Gamer;
 import br.com.aspenmc.packet.type.member.MemberGroupChange;
 import br.com.aspenmc.packet.type.member.server.ServerConnectRequest;
+import br.com.aspenmc.packet.type.member.server.ServerConnectResponse;
 import br.com.aspenmc.packet.type.server.ServerUpdate;
 import br.com.aspenmc.packet.type.server.command.BungeeCommandRequest;
 import br.com.aspenmc.packet.type.server.command.BungeeCommandResponse;
@@ -45,6 +47,7 @@ public abstract class BukkitCommon extends JavaPlugin implements CommonPlatform 
 
     protected CharacterManager characterManager;
     protected HologramManager hologramManager;
+    private LocationManager locationManager;
     protected VanishManager vanishManager;
 
     private ProxiedServer.GameState state;
@@ -97,10 +100,11 @@ public abstract class BukkitCommon extends JavaPlugin implements CommonPlatform 
         regexPerms = new RegexPermissions();
 
         runAsync(new RedisConnection.PubSubListener(plugin.getRedisConnection(), new BukkitPubSub(),
-                                                    CommonConst.SERVER_PACKET_CHANNEL));
+                CommonConst.SERVER_PACKET_CHANNEL));
 
         characterManager = new CharacterManager();
         hologramManager = new HologramManager();
+        locationManager = new LocationManager();
         vanishManager = new VanishManager();
 
         if (plugin.getPermissionManager().getTags().isEmpty()) {
@@ -176,11 +180,44 @@ public abstract class BukkitCommon extends JavaPlugin implements CommonPlatform 
     }
 
     public void sendPlayerToServer(Player player, String... serversIds) {
-        plugin.getServerData().sendPacket(new ServerConnectRequest(player.getUniqueId(), serversIds));
+        plugin.getPacketManager().waitPacket(ServerConnectResponse.class,
+                plugin.getServerData().sendPacket(new ServerConnectRequest(player.getUniqueId(), serversIds)),
+                packet -> handleServerConnectResponse(player, packet));
     }
 
     public void sendPlayerToServer(Player player, ServerType... types) {
-        plugin.getServerData().sendPacket(new ServerConnectRequest(player.getUniqueId(), types));
+        plugin.getPacketManager().waitPacket(ServerConnectResponse.class,
+                plugin.getServerData().sendPacket(new ServerConnectRequest(player.getUniqueId(), types)),
+                packet -> handleServerConnectResponse(player, packet));
+    }
+
+    private void handleServerConnectResponse(Player player, ServerConnectResponse packet) {
+        if (packet.getResponseType() == ServerConnectResponse.ResponseType.SUCCESS) return;
+
+        String message;
+
+        switch (packet.getResponseType()) {
+        case INSSUFICIENT_PERMISSIONS:
+            message = "§cSomente membros da equipe podem entrar no servidor no momento.";
+            break;
+        case SERVER_NOT_FOUND:
+            message = "§cO servidor não existe ou não está disponível.";
+            break;
+        case UNKNOWN_ERROR:
+        case SERVER_UNAVAILABLE:
+            message = "§cO servidor não está disponível no momento.";
+            break;
+        case SERVER_FULL:
+            message = "§cO servidor está cheio no momento.";
+            break;
+        case STATE_NOT_ALLOWS_TO_CONNECT:
+            message = "§cSomente jogadores pagantes podem entrar no momento.";
+            break;
+        default:
+            return;
+        }
+
+        player.sendMessage(message);
     }
 
     public void registerPacketHandlers() {
@@ -190,29 +227,26 @@ public abstract class BukkitCommon extends JavaPlugin implements CommonPlatform 
             plugin.getMemberManager().getMemberById(packet.getPlayerId(), BukkitMember.class).ifPresent(
                     member -> Bukkit.getPluginManager().callEvent(
                             new PlayerChangedGroupEvent(member, packet.getGroupName(), packet.getExpiresAt(),
-                                                        packet.getDuration(),
-                                                        PlayerChangedGroupEvent.GroupAction.valueOf(
-                                                                packet.getGroupAction().name()))));
+                                    packet.getDuration(),
+                                    PlayerChangedGroupEvent.GroupAction.valueOf(packet.getGroupAction().name()))));
         });
 
         plugin.getPacketManager().registerHandler(BungeeCommandResponse.class, packet -> {
             for (BungeeCommandResponse.NormalCommand command : packet.getCommands()) {
                 BukkitCommandFramework.INSTANCE.getKnownCommands().put(command.getName(),
-                                                                       BukkitCommandFramework.INSTANCE.createCommand(
-                                                                               command.getName(), command.getName(),
-                                                                               command.getPermission()));
+                        BukkitCommandFramework.INSTANCE.createCommand(command.getName(), command.getName(),
+                                command.getPermission()));
 
                 for (String alias : command.getAliases()) {
                     BukkitCommandFramework.INSTANCE.getKnownCommands().put(alias,
-                                                                           BukkitCommandFramework.INSTANCE.createCommand(
-                                                                                   alias, command.getName(),
-                                                                                   command.getPermission()));
+                            BukkitCommandFramework.INSTANCE.createCommand(alias, command.getName(),
+                                    command.getPermission()));
                 }
             }
         });
 
-        plugin.getPacketManager().registerHandler(ServerUpdate.class, packet -> Bukkit.getPluginManager().callEvent(
-                new ServerUpdateEvent(packet)));
+        plugin.getPacketManager().registerHandler(ServerUpdate.class,
+                packet -> Bukkit.getPluginManager().callEvent(new ServerUpdateEvent(packet)));
 
         plugin.getPluginPlatform()
               .runLater(() -> plugin.getPacketManager().sendPacket(new BungeeCommandRequest()), 12L);
@@ -234,14 +268,11 @@ public abstract class BukkitCommon extends JavaPlugin implements CommonPlatform 
 
     public void registerCommands() {
         BukkitCommandFramework.INSTANCE.unregisterCommands("me", "tellraw", "?", "whitelist", "gamemode", "clear",
-                                                           "tps", "ban", "ban-ip", "banlist", "pardon", "pardon-ip",
-                                                           "stop", "restart", "pl", "testfor", "testforblocks",
-                                                           "setidletimeout", "replaceitem", "entitydata", "clone",
-                                                           "debug", "defaultgamemode", "deop", "op", "filter",
-                                                           "icanhasbukkit", "list", "protocol", "reload", "restart",
-                                                           "rl", "scoreboard", "seed", "spawnpoint", "spreadplayers",
-                                                           "stats", "trigger", "ver", "about", "achievement",
-                                                           "blockdata", "title", "help", "plugins");
+                "tps", "ban", "ban-ip", "banlist", "pardon", "pardon-ip", "stop", "restart", "pl", "testfor",
+                "testforblocks", "setidletimeout", "replaceitem", "entitydata", "clone", "debug", "defaultgamemode",
+                "deop", "op", "filter", "icanhasbukkit", "list", "protocol", "reload", "restart", "rl", "scoreboard",
+                "seed", "spawnpoint", "spreadplayers", "stats", "trigger", "ver", "about", "achievement", "blockdata",
+                "title", "help", "plugins");
         BukkitCommandFramework.INSTANCE.loadCommands("br.com.aspenmc.bukkit.command.register");
         BukkitCommandFramework.INSTANCE.registerHelp();
     }

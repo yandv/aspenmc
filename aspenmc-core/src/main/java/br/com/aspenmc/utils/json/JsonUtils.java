@@ -1,4 +1,4 @@
-package br.com.aspenmc.utils;
+package br.com.aspenmc.utils.json;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;

@@ -4,7 +4,7 @@ import br.com.aspenmc.CommonConst;
 import br.com.aspenmc.CommonPlugin;
 import br.com.aspenmc.backend.data.SkinData;
 import br.com.aspenmc.entity.member.Skin;
-import br.com.aspenmc.utils.JsonUtils;
+import br.com.aspenmc.utils.json.JsonUtils;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;

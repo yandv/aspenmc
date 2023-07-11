@@ -70,13 +70,13 @@ public class TagListener implements Listener {
 
         for (Player o : Bukkit.getOnlinePlayers()) {
             if (!o.getUniqueId().equals(p.getUniqueId())) {
-                CommonPlugin.getInstance().getMemberManager()
-                            .getMemberById(o.getUniqueId(), BukkitMember.class)
+                CommonPlugin.getInstance().getMemberManager().getMemberById(o.getUniqueId(), BukkitMember.class)
                             .ifPresent(bp -> {
                                 Tag t = bp.getTag().orElse(PermissionManager.NULL_TAG);
-                                ScoreboardAPI.joinTeam(ScoreboardAPI.createTeamIfNotExistsToPlayer(p, getTagId(t), t.getRealPrefix(), ""), o);
+                                ScoreboardAPI.joinTeam(
+                                        ScoreboardAPI.createTeamIfNotExistsToPlayer(p, getTagId(t), t.getRealPrefix(),
+                                                ""), o);
                             });
-
             }
             ScoreboardAPI.joinTeam(ScoreboardAPI.createTeamIfNotExistsToPlayer(o, id, tag.getRealPrefix(), ""), p);
         }

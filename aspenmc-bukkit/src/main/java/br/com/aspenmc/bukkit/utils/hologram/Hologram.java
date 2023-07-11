@@ -12,6 +12,8 @@ public interface Hologram {
 
     };
 
+    public static final double DISTANCE = 0.25D;
+
     /**
      * Change the hologram displayName
      *
@@ -19,6 +21,8 @@ public interface Hologram {
      */
 
     Hologram setDisplayName(String displayName);
+
+    Hologram updateTitle(Player player);
 
     /**
      * Teleports the hologram to the specified location
@@ -70,6 +74,14 @@ public interface Hologram {
 
     TouchHandler<Hologram> getTouchHandler();
 
+    /**
+     * Set the touch handler of the hologram
+     *
+     * @param touchHandler The new touch handler
+     */
+
+    void setTouchHandler(TouchHandler<Hologram> touchHandler);
+
     boolean hasViewHandler();
 
     /**
@@ -79,6 +91,14 @@ public interface Hologram {
      */
 
     ViewHandler getViewHandler();
+
+    /**
+     * Set view handler of the hologram
+     *
+     * @param viewHandler The view handler of the hologram
+     */
+
+    void setViewHandler(ViewHandler viewHandler);
 
     /**
      * Hide the hologram for the specified player

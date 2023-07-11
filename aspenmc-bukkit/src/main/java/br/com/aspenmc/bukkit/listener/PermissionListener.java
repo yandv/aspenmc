@@ -48,6 +48,26 @@ public class PermissionListener implements Listener {
         updateAttachment(event.getPlayer());
     }
 
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onQuit(PlayerQuitEvent event) {
+        removeAttachment(event.getPlayer());
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onKick(PlayerKickEvent event) {
+        removeAttachment(event.getPlayer());
+    }
+
+    protected void removeAttachment(Player player) {
+        PermissionAttachment attach = (PermissionAttachment) this.attachments.remove(player.getUniqueId());
+
+        if (attach != null) {
+            attach.remove();
+        }
+
+        Bukkit.getPluginManager().removePermission(player.getUniqueId().toString());
+    }
+
     public void updateAttachment(Player player) {
         Member member = CommonPlugin.getInstance().getMemberManager().getMemberById(player.getUniqueId()).orElse(null);
 
@@ -81,26 +101,6 @@ public class PermissionListener implements Listener {
             }
 
         player.recalculatePermissions();
-    }
-
-    @EventHandler(priority = EventPriority.MONITOR)
-    public void onQuit(PlayerQuitEvent event) {
-        removeAttachment(event.getPlayer());
-    }
-
-    @EventHandler(priority = EventPriority.MONITOR)
-    public void onKick(PlayerKickEvent event) {
-        removeAttachment(event.getPlayer());
-    }
-
-    protected void removeAttachment(Player player) {
-        PermissionAttachment attach = (PermissionAttachment) this.attachments.remove(player.getUniqueId());
-
-        if (attach != null) {
-            attach.remove();
-        }
-
-        Bukkit.getPluginManager().removePermission(player.getUniqueId().toString());
     }
 
     private Permission getCreateWrapper(String name) {

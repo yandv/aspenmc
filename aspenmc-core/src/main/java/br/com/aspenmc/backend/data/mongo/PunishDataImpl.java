@@ -12,7 +12,7 @@ import br.com.aspenmc.CommonConst;
 import br.com.aspenmc.backend.data.PunishData;
 import br.com.aspenmc.entity.Member;
 import br.com.aspenmc.entity.Sender;
-import br.com.aspenmc.utils.JsonUtils;
+import br.com.aspenmc.utils.json.JsonUtils;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 

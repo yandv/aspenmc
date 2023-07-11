@@ -68,14 +68,7 @@ public class MemberListener implements Listener {
             return;
         }
 
-        String permission = sender.getPermissions().stream().filter(string -> string.equals("*")).findFirst()
-                                  .orElse(null);
-
-        if (permission == null) {
-            event.setHasPermission(member.hasSilentPermission(event.getPermission()));
-        } else {
-            event.setHasPermission(true);
-        }
+        event.setHasPermission(member.hasSilentPermission(event.getPermission()) || member.hasSilentPermission("*"));
     }
 
     @EventHandler

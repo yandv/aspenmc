@@ -22,7 +22,8 @@ public class PlayerListener implements Listener {
         if (player.getKiller() != null) {
             killer = player.getKiller();
         } else if (player.getLastDamageCause() instanceof EntityDamageByEntityEvent) {
-            EntityDamageByEntityEvent entityDamageByEntityEvent = (EntityDamageByEntityEvent) player.getLastDamageCause();
+            EntityDamageByEntityEvent entityDamageByEntityEvent =
+                    (EntityDamageByEntityEvent) player.getLastDamageCause();
             killer = entityDamageByEntityEvent.getDamager();
         }
 
@@ -38,7 +39,7 @@ public class PlayerListener implements Listener {
             if (playerRealRespawnEvent.isDropXp()) {
                 ExperienceOrb experienceOrb = playerRealRespawnEvent.getDropLocation().getWorld()
                                                                     .spawn(playerRealRespawnEvent.getDropLocation(),
-                                                                           ExperienceOrb.class);
+                                                                            ExperienceOrb.class);
                 experienceOrb.setExperience((int) (player.getTotalExperience() * BukkitConst.DROP_XP_PERCENTAGE));
             }
 
@@ -46,7 +47,7 @@ public class PlayerListener implements Listener {
                 playerRealRespawnEvent.getDrops().forEach(
                         itemStack -> playerRealRespawnEvent.getDropLocation().getWorld()
                                                            .dropItemNaturally(playerRealRespawnEvent.getDropLocation(),
-                                                                              itemStack));
+                                                                   itemStack));
             }
         }, 3L);
     }

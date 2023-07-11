@@ -15,13 +15,15 @@ public enum ServerType {
 
     UNKNOWN,
 
-    BUNGEECORD,
-    DISCORD,
+    BUNGEECORD, DISCORD,
+
+    LOBBY(true), HG_LOBBY(true, "lobby"), PVP_LOBBY(true, "lobby"),
 
     HG,
 
-    LOBBY(true),
-    HG_LOBBY(true, "lobby"),
+    ARENA, FPS, LAVA,
+
+
     LOGIN(true);
 
     private final boolean lobby;
@@ -61,5 +63,9 @@ public enum ServerType {
 
     public static ServerType getByName(String name) {
         return SERVER_MAP.getOrDefault(name.toLowerCase(), UNKNOWN);
+    }
+
+    public static ServerType getByName(String name, ServerType orElse) {
+        return SERVER_MAP.getOrDefault(name.toLowerCase(), orElse);
     }
 }

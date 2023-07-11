@@ -2,6 +2,7 @@ package br.com.aspenmc.packet.type.server.keepalive;
 
 import br.com.aspenmc.CommonPlugin;
 import br.com.aspenmc.packet.Packet;
+import br.com.aspenmc.server.ProxiedServer;
 
 public class KeepAliveRequest extends Packet {
 
@@ -9,6 +10,10 @@ public class KeepAliveRequest extends Packet {
 
     public KeepAliveRequest(String serverId) {
         server(serverId);
+    }
+
+    public KeepAliveRequest(ProxiedServer server) {
+        server(server.getServerId());
     }
 
     @Override

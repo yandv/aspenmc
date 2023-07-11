@@ -9,6 +9,8 @@ import br.com.aspenmc.packet.type.member.skin.SkinChangeRequest;
 import br.com.aspenmc.packet.type.member.skin.SkinChangeResponse;
 import br.com.aspenmc.packet.type.server.command.BungeeCommandRequest;
 import br.com.aspenmc.packet.type.server.command.BungeeCommandResponse;
+import br.com.aspenmc.packet.type.server.keepalive.KeepAliveRequest;
+import br.com.aspenmc.packet.type.server.keepalive.KeepAliveResponse;
 import com.google.common.io.ByteStreams;
 import lombok.Getter;
 import br.com.aspenmc.CommonConst;
@@ -69,9 +71,9 @@ public class BungeeMain extends Plugin implements CommonPlatform {
     @Override
     public void onEnable() {
         plugin.loadServers();
-        getProxy().getScheduler().runAsync(this, new RedisConnection.PubSubListener(plugin.getRedisConnection(),
-                                                                                    new BungeeCordPubSub(),
-                                                                                    CommonConst.SERVER_PACKET_CHANNEL));
+        getProxy().getScheduler().runAsync(this,
+                new RedisConnection.PubSubListener(plugin.getRedisConnection(), new BungeeCordPubSub(),
+                        CommonConst.SERVER_PACKET_CHANNEL));
         motdManager = new MotdManager();
 
         registerListeners();
@@ -85,7 +87,7 @@ public class BungeeMain extends Plugin implements CommonPlatform {
                     CommandFramework.Command command = entry.getKey().getAnnotation(CommandFramework.Command.class);
 
                     return new BungeeCommandResponse.NormalCommand(command.name(), command.aliases(),
-                                                                   command.permission());
+                            command.permission());
                 }).toArray(BungeeCommandResponse.NormalCommand[]::new)));
         super.onEnable();
     }
@@ -108,7 +110,7 @@ public class BungeeMain extends Plugin implements CommonPlatform {
                 try {
                     configFile.createNewFile();
                     try (InputStream is = getResourceAsStream("config.yml");
-                         OutputStream os = Files.newOutputStream(configFile.toPath())) {
+                            OutputStream os = Files.newOutputStream(configFile.toPath())) {
                         ByteStreams.copy(is, os);
                     }
                 } catch (IOException e) {
@@ -131,7 +133,7 @@ public class BungeeMain extends Plugin implements CommonPlatform {
                         CommandFramework.Command command = entry.getKey().getAnnotation(CommandFramework.Command.class);
 
                         return new BungeeCommandResponse.NormalCommand(command.name(), command.aliases(),
-                                                                       command.permission());
+                                command.permission());
                     }).toArray(BungeeCommandResponse.NormalCommand[]::new)).id(request.getId())
                                                                            .server(request.getSource()));
         });
@@ -198,7 +200,7 @@ public class BungeeMain extends Plugin implements CommonPlatform {
     public void runAsyncTimer(Runnable runnable, long delay, long period) {
         ProxyServer.getInstance().getScheduler()
                    .schedule(BungeeMain.getInstance(), runnable, (long) ((delay / 20.0D) * 1000),
-                             (long) ((period / 20.0D) * 1000), TimeUnit.MILLISECONDS);
+                           (long) ((period / 20.0D) * 1000), TimeUnit.MILLISECONDS);
     }
 
     @Override
@@ -210,14 +212,14 @@ public class BungeeMain extends Plugin implements CommonPlatform {
     public void runLater(Runnable runnable, long delay) {
         ProxyServer.getInstance().getScheduler()
                    .schedule(BungeeMain.getInstance(), runnable, (long) ((delay / 20.0D) * 1000),
-                             TimeUnit.MILLISECONDS);
+                           TimeUnit.MILLISECONDS);
     }
 
     @Override
     public void runTimer(Runnable runnable, long delay, long period) {
         ProxyServer.getInstance().getScheduler()
                    .schedule(BungeeMain.getInstance(), runnable, (long) ((delay / 20.0D) * 1000),
-                             (long) ((period / 20.0D) * 1000), TimeUnit.MILLISECONDS);
+                           (long) ((period / 20.0D) * 1000), TimeUnit.MILLISECONDS);
     }
 
     public void sendStaffChatMessage(Member sender, String message) {

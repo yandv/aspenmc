@@ -19,6 +19,7 @@ public class ServerConnectResponse extends Packet {
         SERVER_UNAVAILABLE,
         SERVER_NOT_FOUND,
         SERVER_FULL,
+        STATE_NOT_ALLOWS_TO_CONNECT,
         INSSUFICIENT_PERMISSIONS,
         UNKNOWN_ERROR
     }

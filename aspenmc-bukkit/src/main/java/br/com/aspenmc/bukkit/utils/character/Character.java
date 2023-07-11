@@ -57,8 +57,6 @@ public interface Character {
 
     Character setHologram(Hologram hologram);
 
-    void setModel(String model);
-
     /**
      * Check if the Character have collision
      *

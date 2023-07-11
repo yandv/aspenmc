@@ -8,7 +8,7 @@ import br.com.aspenmc.CommonPlugin;
 import br.com.aspenmc.backend.data.GamerData;
 import br.com.aspenmc.entity.Member;
 import br.com.aspenmc.entity.member.gamer.Gamer;
-import br.com.aspenmc.utils.JsonUtils;
+import br.com.aspenmc.utils.json.JsonUtils;
 import org.bson.Document;
 
 import java.lang.reflect.Constructor;

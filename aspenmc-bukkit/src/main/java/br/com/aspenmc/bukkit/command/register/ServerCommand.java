@@ -4,10 +4,7 @@ import br.com.aspenmc.BukkitConst;
 import br.com.aspenmc.CommonConst;
 import br.com.aspenmc.CommonPlugin;
 import br.com.aspenmc.bukkit.BukkitCommon;
-import br.com.aspenmc.bukkit.entity.BukkitMember;
-import br.com.aspenmc.bukkit.utils.Location;
 import br.com.aspenmc.bukkit.utils.ProtocolVersion;
-import br.com.aspenmc.bukkit.utils.character.impl.DefaultCharacter;
 import br.com.aspenmc.command.CommandArgs;
 import br.com.aspenmc.command.CommandFramework;
 import br.com.aspenmc.command.CommandHandler;
@@ -15,7 +12,6 @@ import br.com.aspenmc.entity.Sender;
 import br.com.aspenmc.entity.member.Skin;
 import br.com.aspenmc.server.ServerType;
 import br.com.aspenmc.utils.string.StringFormat;
-import com.google.common.base.Joiner;
 import net.md_5.bungee.api.ChatColor;
 import net.minecraft.server.v1_8_R3.MinecraftServer;
 import org.bukkit.Bukkit;
@@ -25,7 +21,6 @@ import org.bukkit.entity.Player;
 import java.lang.management.ManagementFactory;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class ServerCommand implements CommandHandler {
 

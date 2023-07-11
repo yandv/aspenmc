@@ -5,7 +5,6 @@ import br.com.aspenmc.CommonPlugin;
 import br.com.aspenmc.bukkit.BukkitCommon;
 import br.com.aspenmc.bukkit.entity.BukkitMember;
 import br.com.aspenmc.bukkit.event.server.LocationChangeEvent;
-import br.com.aspenmc.bukkit.utils.Location;
 import br.com.aspenmc.command.CommandArgs;
 import br.com.aspenmc.command.CommandFramework;
 import br.com.aspenmc.command.CommandHandler;
@@ -18,9 +17,7 @@ import br.com.aspenmc.utils.string.StringFormat;
 import com.google.common.base.Joiner;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.server.v1_8_R3.MinecraftServer;
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
-import org.bukkit.OfflinePlayer;
+import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -32,8 +29,8 @@ import java.util.stream.Collectors;
 
 public class ModeratorCommand implements CommandHandler {
 
-    @CommandFramework.Command(name = "admin", aliases = {"adm"}, console = false,
-                              permission = BukkitConst.PERMISION_ADMIN_MODE)
+    @CommandFramework.Command(name = "admin", aliases = { "adm" }, console = false,
+            permission = BukkitConst.PERMISION_ADMIN_MODE)
     public void adminCommand(CommandArgs cmdArgs) {
         Player player = ((BukkitMember) cmdArgs.getSenderAsMember(BukkitMember.class)).getPlayer();
 
@@ -51,10 +48,80 @@ public class ModeratorCommand implements CommandHandler {
         boolean buildEnabled = !member.isBuildEnabled();
         member.setBuildEnabled(buildEnabled);
         member.sendMessage(buildEnabled ? "§aVocê agora está no modo de construção." :
-                           "§cVocê agora não está mais no modo de construção.");
+                "§cVocê agora não está mais no modo de construção.");
     }
 
-    @CommandFramework.Command(name = "vanish", aliases = {"v"}, permission = "command.vanish", console = false)
+    @CommandFramework.Command(name = "setlocation", aliases = { "setloc" }, permission = "command.location")
+    public void setlocationCommand(CommandArgs cmdArgs) {
+        Sender sender = cmdArgs.getSender();
+        String[] args = cmdArgs.getArgs();
+
+        if (args.length == 0) {
+            sender.sendMessage(" §a» §fUse §a/" + cmdArgs.getLabel() + " <nome> para definir uma localização.");
+            return;
+        }
+
+        String locationName = args[0].toLowerCase();
+        Location location;
+
+        if (sender.isPlayer()) {
+            location = ((Player) sender).getLocation();
+        } else {
+            if (args.length < 4) {
+                sender.sendMessage(
+                        " §a» §fUse §a/" + cmdArgs.getLabel() + " <nome> <x> <y> <z> para definir uma localização.");
+                return;
+            }
+
+            OptionalDouble x = StringFormat.parseDouble(args[1]);
+            OptionalDouble y = StringFormat.parseDouble(args[2]);
+            OptionalDouble z = StringFormat.parseDouble(args[3]);
+
+            if (!x.isPresent()) {
+                sender.sendMessage("§cO valor de x não é um número.");
+                return;
+            }
+
+            if (!y.isPresent()) {
+                sender.sendMessage("§cO valor de y não é um número.");
+                return;
+            }
+
+            if (!z.isPresent()) {
+                sender.sendMessage("§cO valor de z não é um número.");
+                return;
+            }
+
+            World world = args.length >= 5 ? Bukkit.getWorld(args[4]) : Bukkit.getWorlds().get(0);
+
+            if (world == null) {
+                sender.sendMessage(
+                        " §c» §fUse §a/" + cmdArgs.getLabel() + " <nome> <x> <y> <z> para definir uma localização.");
+                return;
+            }
+
+            float yaw = 0;
+            float pitch = 0;
+
+            try {
+                if (args.length >= 6) yaw = Float.parseFloat(args[5]);
+                if (args.length >= 7) pitch = Float.parseFloat(args[6]);
+            } catch (Exception ignored) {
+            }
+
+            location = new Location(world, x.getAsDouble(), y.getAsDouble(), z.getAsDouble(), yaw, pitch);
+        }
+
+        Bukkit.getPluginManager().callEvent(new LocationChangeEvent(locationName,
+                BukkitCommon.getInstance().getLocationManager().getLocation(locationName),
+                location));
+
+        BukkitCommon.getInstance().getLocationManager().setLocation(locationName, location);
+        sender.sendMessage("aLocalização " + locationName + " definida com sucesso em " + location.getX() + ", " +
+                location.getY() + ", " + location.getZ() + " do mundo " + location.getWorld().getName() + ".");
+    }
+
+    @CommandFramework.Command(name = "vanish", aliases = { "v" }, permission = "command.vanish", console = false)
     public void vanishCommand(CommandArgs cmdArgs) {
         Player player = ((BukkitMember) cmdArgs.getSenderAsMember(BukkitMember.class)).getPlayer();
         String[] args = cmdArgs.getArgs();
@@ -90,29 +157,9 @@ public class ModeratorCommand implements CommandHandler {
                 "§dVocê está invisível para " + StringFormat.formatString(hidePlayer.getGroupName()) + "s e abaixo.");
     }
 
-    @CommandFramework.Command(name = "setlocation", console = false, permission = "command.location")
-    public void setlocationCommand(CommandArgs cmdArgs) {
-        BukkitMember member = cmdArgs.getSenderAsMember(BukkitMember.class);
-        String[] args = cmdArgs.getArgs();
 
-        if (args.length == 0) {
-            member.sendMessage(" §a» §fUse §a/" + cmdArgs.getLabel() + " <nome> para definir uma localização.");
-            return;
-        }
 
-        String locationName = args[0].toLowerCase();
-        Location location = Location.fromPlayer(member.getPlayer());
-
-//        Bukkit.getPluginManager().callEvent(new LocationChangeEvent(locationName,
-//                                                                    CommonPlugin.getInstance().getDefaultConfiguration()
-//                                                                                .get("location." + locationName,
-//                                                                                     Location.NULL, Location.class),
-//                                                                    location));
-//        CommonPlugin.getInstance().getDefaultConfiguration().set(locationName, location);
-        member.sendMessage("§aVocê definiu a localização " + StringFormat.formatString(locationName) + " com sucesso.");
-    }
-
-    @CommandFramework.Command(name = "stop", aliases = {"fechar", "restart"}, permission = "command.stop")
+    @CommandFramework.Command(name = "stop", aliases = { "fechar", "restart" }, permission = "command.stop")
     public void stopCommand(CommandArgs cmdArgs) {
         Sender sender = cmdArgs.getSender();
 
@@ -144,8 +191,8 @@ public class ModeratorCommand implements CommandHandler {
 
                         if (serverType == null) {
                             serverType = player.getCurrentServerType() == null ||
-                                         !player.getCurrentServerType().hasParent() ? ServerType.LOBBY :
-                                         player.getCurrentServerType().getParent();
+                                    !player.getCurrentServerType().hasParent() ? ServerType.LOBBY :
+                                    player.getCurrentServerType().getParent();
                         }
 
                         BukkitCommon.getInstance().sendPlayerToServer(bukkitMember.getPlayer(), serverType);
@@ -163,14 +210,15 @@ public class ModeratorCommand implements CommandHandler {
     }
 
     @SuppressWarnings("deprecation")
-    @CommandFramework.Command(name = "gamemode", aliases = {"gm"}, permission = "command.gamemode")
+    @CommandFramework.Command(name = "gamemode", aliases = { "gm" }, permission = "command.gamemode")
     public void gamemodeCommand(CommandArgs cmdArgs) {
         Sender sender = cmdArgs.getSender();
         String[] args = cmdArgs.getArgs();
 
         if (args.length == 0) {
             sender.sendMessage(" §a» §f/" + cmdArgs.getLabel() +
-                               " <creative:adventure:survival:spectator> @optional:<player> para alterar o modo de jogo de um jogador.");
+                    " <creative:adventure:survival:spectator> @optional:<player> para alterar o modo de jogo de um " +
+                    "jogador.");
             return;
         }
 
@@ -193,7 +241,7 @@ public class ModeratorCommand implements CommandHandler {
 
         Player target =
                 args.length == 1 && sender.isPlayer() ? cmdArgs.getSenderAsMember(BukkitMember.class).getPlayer() :
-                Bukkit.getPlayer(args[1]);
+                        Bukkit.getPlayer(args[1]);
 
         if (target == null) {
             sender.sendMessage("§cO jogador " + args[1] + " não foi encontrado.");
@@ -206,7 +254,7 @@ public class ModeratorCommand implements CommandHandler {
             sender.sendMessage("§aSeu gamemode foi alterado para " + StringFormat.formatString(gameMode.name()) + ".");
         } else {
             sender.sendMessage("§aO gamemode do jogador " + target.getName() + " foi alterado para " +
-                               StringFormat.formatString(gameMode.name()) + ".");
+                    StringFormat.formatString(gameMode.name()) + ".");
         }
     }
 
@@ -242,8 +290,8 @@ public class ModeratorCommand implements CommandHandler {
         }
     }
 
-    @CommandFramework.Command(name = "inventorysee", aliases = {"invsee", "inv"}, console = false,
-                              permission = "command.invsee")
+    @CommandFramework.Command(name = "inventorysee", aliases = { "invsee", "inv" }, console = false,
+            permission = "command.invsee")
     public void invseeCommand(CommandArgs cmdArgs) {
         Sender sender = cmdArgs.getSender();
         String[] args = cmdArgs.getArgs();
@@ -264,7 +312,7 @@ public class ModeratorCommand implements CommandHandler {
         cmdArgs.getSenderAsMember(BukkitMember.class).getPlayer().openInventory(player.getInventory());
     }
 
-    @CommandFramework.Command(name = "teleport", aliases = {"tp"}, permission = "command.teleport")
+    @CommandFramework.Command(name = "teleport", aliases = { "tp" }, permission = "command.teleport")
     public void teleportCommand(CommandArgs cmdArgs) {
         Sender sender = cmdArgs.getSender();
         String[] args = cmdArgs.getArgs();
@@ -276,19 +324,14 @@ public class ModeratorCommand implements CommandHandler {
             if (target == null) {
                 if (sender.isPlayer()) {
                     CommonPlugin.getInstance().getPacketManager().waitPacket(MemberTeleportResponse.class,
-                                                                             CommonPlugin.getInstance().getServerData()
-                                                                                         .sendPacket(
-                                                                                                 new MemberTeleportRequest(
-                                                                                                         sender.getUniqueId(),
-                                                                                                         args[0])), 200,
-                                                                             packet -> {
-                                                                                 if (packet == null) {
-                                                                                     sender.sendMessage(
-                                                                                             "§cO jogador " + args[0] +
-                                                                                             " não foi encontrado.");
-                                                                                     return;
-                                                                                 }
-                                                                             });
+                            CommonPlugin.getInstance().getServerData()
+                                        .sendPacket(new MemberTeleportRequest(sender.getUniqueId(), args[0])), 200,
+                            packet -> {
+                                if (packet == null) {
+                                    sender.sendMessage("§cO jogador " + args[0] + " não foi encontrado.");
+                                    return;
+                                }
+                            });
                 } else {
                     sender.sendMessage("§cO jogador " + args[0] + " não foi encontrado.");
                 }
@@ -316,7 +359,8 @@ public class ModeratorCommand implements CommandHandler {
 //
 //                        player.teleport(location);
 //                        sender.sendMessage("§aVocê foi teleportado para a localização " + locationName + ".");
-////                        staffLog("O jogador " + sender.getName() + " teleportou-se para a localização " + locationName +
+////                        staffLog("O jogador " + sender.getName() + " teleportou-se para a localização " +
+// locationName +
 ////                                 ".");
 //                    } else {
 //                        sender.sendMessage("§cA localização " + locationName + " não foi encontrada.");
@@ -345,7 +389,8 @@ public class ModeratorCommand implements CommandHandler {
             sender.sendMessage(
                     "§aVocê teleportou o jogador " + player.getName() + " para o jogador " + target.getName() + ".");
 //            staffLog(
-//                    "O jogador " + sender.getName() + " teleportou o jogador " + player.getName() + " para o jogador " +
+//                    "O jogador " + sender.getName() + " teleportou o jogador " + player.getName() + " para o
+//                    jogador " +
 //                    target.getName() + ".");
             break;
         }
@@ -402,29 +447,30 @@ public class ModeratorCommand implements CommandHandler {
 
                 player.setFallDistance(-1f);
                 player.teleport(location);
-                sender.sendMessage("§aVocê foi teleportado para a localização " +
-                                   numberFormat.format(x) + ", " + numberFormat.format(y) + ", " +
-                                   numberFormat.format(z) + ".");
+                sender.sendMessage("§aVocê foi teleportado para a localização " + numberFormat.format(x) + ", " +
+                        numberFormat.format(y) + ", " + numberFormat.format(z) + ".");
 
 //                staffLog("O jogador " + sender.getName() + " teleportou-se para a localização " +
-//                         numberFormat.format(x) + ", " + numberFormat.format(y) + ", " + numberFormat.format(z) + ".");
+//                         numberFormat.format(x) + ", " + numberFormat.format(y) + ", " + numberFormat.format(z) + "
+//                         .");
             } else {
                 sender.sendMessage("§cVocê precisa ser um jogador para executar este comando.");
             }
             break;
         }
         default: {
-            sender.sendMessage("§cUse /" +  cmdArgs.getLabel() + " <jogador> para teleportar-se para um jogador." +
-                                                                       "\n§cUse /" +  cmdArgs.getLabel() + " <jogador> <jogador> para teleportar um jogador para outro jogador." +
-                                                                       "\n§cUse /" +  cmdArgs.getLabel() + " <x> <y> <z> para teleportar-se para uma localização." +
-                                                                       "\n§cUse /" +  cmdArgs.getLabel() + " location <locationName> para teleportar-se para uma " +
-                                                                       "localização salva.");
+            sender.sendMessage(
+                    "§cUse /" + cmdArgs.getLabel() + " <jogador> para teleportar-se para um jogador." + "\n§cUse /" +
+                            cmdArgs.getLabel() + " <jogador> <jogador> para teleportar um jogador para outro jogador." +
+                            "\n§cUse /" + cmdArgs.getLabel() + " <x> <y> <z> para teleportar-se para uma localização." +
+                            "\n§cUse /" + cmdArgs.getLabel() + " location <locationName> para teleportar-se para uma " +
+                            "localização salva.");
             break;
         }
         }
     }
 
-    @CommandFramework.Command(name = "whitelist", aliases = {"wt"}, permission = "command.whitelist", runAsync = true)
+    @CommandFramework.Command(name = "whitelist", aliases = { "wt" }, permission = "command.whitelist", runAsync = true)
     public void whitelistCommand(CommandArgs cmdArgs) {
         Sender sender = cmdArgs.getSender();
         String[] args = cmdArgs.getArgs();
@@ -468,7 +514,7 @@ public class ModeratorCommand implements CommandHandler {
         case "add": {
             if (args.length == 1) {
                 sender.sendMessage(" §a» §fUse §a/" + cmdArgs.getLabel() + " " + args[0] +
-                                   " <player>§f para adicionar/remover um jogador da whitelist.");
+                        " <player>§f para adicionar/remover um jogador da whitelist.");
                 return;
             }
 
@@ -503,7 +549,7 @@ public class ModeratorCommand implements CommandHandler {
         }
     }
 
-    @CommandFramework.Completer(name = "gamemode", aliases = {"gm"})
+    @CommandFramework.Completer(name = "gamemode", aliases = { "gm" })
     public List<String> gamemodeCompleter(CommandArgs cmdArgs) {
         List<String> returnList = new ArrayList<>();
 

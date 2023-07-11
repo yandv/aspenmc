@@ -12,7 +12,7 @@ import br.com.aspenmc.CommonConst;
 import br.com.aspenmc.CommonPlugin;
 import br.com.aspenmc.backend.data.MemberData;
 import br.com.aspenmc.entity.Member;
-import br.com.aspenmc.utils.JsonUtils;
+import br.com.aspenmc.utils.json.JsonUtils;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import redis.clients.jedis.Jedis;

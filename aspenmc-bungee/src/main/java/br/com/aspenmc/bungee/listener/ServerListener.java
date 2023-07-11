@@ -24,11 +24,11 @@ public class ServerListener implements Listener {
     @EventHandler
     public void onSearchServer(SearchServerEvent event) {
         ProxiedPlayer player = event.getPlayer();
-        Member member = CommonPlugin.getInstance().getMemberManager().getMemberById(player.getUniqueId()).orElse(null);
-
-        if (member == null) return;
-
-        LoginConfiguration.LoginResult loginResult = member.getLoginConfiguration().reloadSession();
+        LoginConfiguration.LoginResult loginResult = CommonPlugin.getInstance().getMemberManager()
+                                                                 .getMemberById(player.getUniqueId())
+                                                                 .map(Member::getLoginConfiguration)
+                                                                 .map(LoginConfiguration::reloadSession)
+                                                                 .orElse(LoginConfiguration.LoginResult.NOT_LOGGED);
         ServerType serverType;
 
         switch (loginResult) {
@@ -48,13 +48,14 @@ public class ServerListener implements Listener {
         if (server == null || server.getServerInfo() == null) {
             event.setCancelled(true);
             event.setCancelMessage(
-                    "§c§lASPENMC\n§c\n§cNenhum servidor disponível no momento.\n§cTente novamente em alguns instantes.");
+                    "§c§lASPENMC\n§c\n§cNenhum servidor disponível no momento.\n§cTente novamente em alguns instantes" +
+                            ".");
             return;
         }
 
         CommonPlugin.getInstance()
                     .debug("Sending the player " + player.getName() + " to the server " + server.getServerId() + " (" +
-                           server.getServerInfo().getName() + ".");
+                            server.getServerInfo().getName() + ")");
         event.setServer(server.getServerInfo());
     }
 
@@ -87,28 +88,23 @@ public class ServerListener implements Listener {
         serverPing.getPlayers().setMax(1500);
 
         if (server == null || server.getServerType() == ServerType.BUNGEECORD) {
-            serverPing.getPlayers().setSample(new ServerPing.PlayerInfo[]{
-                    new ServerPing.PlayerInfo("§e" + CommonConst.WEBSITE, UUID.randomUUID())});
+            serverPing.getPlayers().setSample(new ServerPing.PlayerInfo[] {
+                    new ServerPing.PlayerInfo("§e" + CommonConst.WEBSITE, UUID.randomUUID()) });
             serverPing.setDescription(BungeeMain.getInstance().getMotdManager().getRandomMotd().getAsString());
         } else {
             event.registerIntent(BungeeMain.getInstance());
-            server.getServerInfo().ping(new Callback<ServerPing>() {
-
-                @Override
-                public void done(ServerPing realPing, Throwable throwable) {
-                    if (throwable == null) {
-                        serverPing.getPlayers().setMax(realPing.getPlayers().getMax());
-                        serverPing.getPlayers().setOnline(realPing.getPlayers().getOnline());
-                        serverPing.setDescription(realPing.getDescription());
-                    } else {
-                        serverPing.getPlayers().setSample(new ServerPing.PlayerInfo[]{
-                                new ServerPing.PlayerInfo("§e" + CommonConst.WEBSITE, UUID.randomUUID())});
-                        serverPing.setDescription(
-                                BungeeMain.getInstance().getMotdManager().getRandomMotd().getAsString());
-                    }
-
-                    event.completeIntent(BungeeMain.getInstance());
+            server.getServerInfo().ping((realPing, throwable) -> {
+                if (throwable == null) {
+                    serverPing.getPlayers().setMax(realPing.getPlayers().getMax());
+                    serverPing.getPlayers().setOnline(realPing.getPlayers().getOnline());
+                    serverPing.setDescription(realPing.getDescription());
+                } else {
+                    serverPing.getPlayers().setSample(new ServerPing.PlayerInfo[] {
+                            new ServerPing.PlayerInfo("§e" + CommonConst.WEBSITE, UUID.randomUUID()) });
+                    serverPing.setDescription(BungeeMain.getInstance().getMotdManager().getRandomMotd().getAsString());
                 }
+
+                event.completeIntent(BungeeMain.getInstance());
             });
         }
     }

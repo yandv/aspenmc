@@ -56,6 +56,11 @@ public class ServerConnectRequest extends Packet {
             }
 
             if (!server.canBeSelected() && !player.hasPermission(CommonConst.ADMIN_MODE_PERMISSION)) {
+                callback(null, ServerConnectResponse.ResponseType.STATE_NOT_ALLOWS_TO_CONNECT);
+                return;
+            }
+
+            if (!server.isJoinEnabled() && !player.hasPermission(CommonConst.ADMIN_MODE_PERMISSION)) {
                 callback(null, ServerConnectResponse.ResponseType.INSSUFICIENT_PERMISSIONS);
                 return;
             }
@@ -67,6 +72,7 @@ public class ServerConnectRequest extends Packet {
 
         for (String server : servers) {
             ProxiedServer pServer = getServer(server);
+
             if (connect(player, pServer)) {
                 callback(pServer.getServerId(), ServerConnectResponse.ResponseType.SUCCESS);
                 return;

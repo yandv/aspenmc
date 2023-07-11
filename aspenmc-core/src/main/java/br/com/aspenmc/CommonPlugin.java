@@ -13,6 +13,8 @@ import br.com.aspenmc.manager.MemberManager;
 import br.com.aspenmc.manager.PacketManager;
 import br.com.aspenmc.manager.PermissionManager;
 import br.com.aspenmc.manager.ServerManager;
+import br.com.aspenmc.packet.type.server.keepalive.KeepAliveRequest;
+import br.com.aspenmc.packet.type.server.keepalive.KeepAliveResponse;
 import br.com.aspenmc.server.ProxiedServer;
 import br.com.aspenmc.server.ServerType;
 import br.com.aspenmc.utils.mojang.UUIDFetcher;
@@ -20,8 +22,11 @@ import lombok.Getter;
 import lombok.Setter;
 import org.intellij.lang.annotations.Language;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @Getter
@@ -123,8 +128,13 @@ public class CommonPlugin {
 
         if (defaultSkin == null) {
             setDefaultSkin(new Skin("Sem pele", CommonConst.CONSOLE_ID,
-                                    "ewogICJ0aW1lc3RhbXAiIDogMTY3NzI0NTI0OTE5MCwKICAicHJvZmlsZUlkIiA6ICI4NzQ3ODgyNjc2NzI0OTk1ODU1ODMwN2FiMWI3ZDRjZCIsCiAgInByb2ZpbGVOYW1lIiA6ICJUZXN0ZSIsCiAgInNpZ25hdHVyZVJlcXVpcmVkIiA6IHRydWUsCiAgInRleHR1cmVzIiA6IHsKICAgICJTS0lOIiA6IHsKICAgICAgInVybCIgOiAiaHR0cDovL3RleHR1cmVzLm1pbmVjcmFmdC5uZXQvdGV4dHVyZS8yYzFjYzE5YzYzZDM4MmI3ZTI5MzhkZWE4NGZmZmYzODYxMmJkM2IwNjM3NzY4NzkwZTZkNTJkNzEwNDZhNGIyIgogICAgfQogIH0KfQ==",
-                                    "qBgm2nqCyotJW0obDPws0w0iFjlyAK1kEyc3bAPukNPEu6mhdXi2VtVhSeQoW80DlTCn8Svcxzu2/8PGxYbT5/DkvHfA/yqgrgN6r3rSktC/AQMw6QxX/+h0r76ySO5VbcwPyhqekBcyu+EnuvOJ8nwdUKdVdZaHN4BYiHBtaKCwkG6GuhfrsDnxC5sjHa1GxkY9w9Wb83Zwn1lW+qFI8leeobYhPcmO9Y6a2B0u76yc55UoeHdxuuehtweeAKI3pKaCO0ckMBRMV4qhPbvWIFNJhNDTfjrR4JWwK4+tmq//3C470Cz4NQg0rNpe5yCBhxctn3yBJrs5M0fQKH559UdQ5wmdYufMtHy8HIa16jqn58UhJxN4P0A8KNwrL8qIOe67nCny+aATOWBo/IAywA4rITFsTAVCP5ViJyNOszEi4oj+/xbdUoDpqeLHJGJmef+PoP5oSvNfha/ZfTYXD+b4odN5SDema7xS/JLl774zDJCBPH47Y8fkY5tYdM/gk7lODMZHCRDCVErhXQqI4Bu9fY5z4Hnl8nUqQjKAn6UNjRA0xkxtL9SUPqD2l+OaUay9rJhcoyLNPr55v8P9qbHi1bg7zlcaXFMBcPiUdG8karSl8fhyfQ27AF94lF5L3kSH5yxa+ksOYYrXImRvDIsiFs45sqvFF0TnI8NQRYU="));
+                    "ewogICJ0aW1lc3RhbXAiIDogMTY3NzI0NTI0OTE5MCwKICAicHJvZmlsZUlkIiA6ICI4NzQ3ODgyNjc2NzI0OTk1ODU1ODMwN2FiMWI3ZDRjZCIsCiAgInByb2ZpbGVOYW1lIiA6ICJUZXN0ZSIsCiAgInNpZ25hdHVyZVJlcXVpcmVkIiA6IHRydWUsCiAgInRleHR1cmVzIiA6IHsKICAgICJTS0lOIiA6IHsKICAgICAgInVybCIgOiAiaHR0cDovL3RleHR1cmVzLm1pbmVjcmFmdC5uZXQvdGV4dHVyZS8yYzFjYzE5YzYzZDM4MmI3ZTI5MzhkZWE4NGZmZmYzODYxMmJkM2IwNjM3NzY4NzkwZTZkNTJkNzEwNDZhNGIyIgogICAgfQogIH0KfQ==",
+                    "qBgm2nqCyotJW0obDPws0w0iFjlyAK1kEyc3bAPukNPEu6mhdXi2VtVhSeQoW80DlTCn8Svcxzu2/8PGxYbT5/DkvHfA" +
+                            "/yqgrgN6r3rSktC/AQMw6QxX/+h0r76ySO5VbcwPyhqekBcyu" +
+                            "+EnuvOJ8nwdUKdVdZaHN4BYiHBtaKCwkG6GuhfrsDnxC5sjHa1GxkY9w9Wb83Zwn1lW" +
+                            "+qFI8leeobYhPcmO9Y6a2B0u76yc55UoeHdxuuehtweeAKI3pKaCO0ckMBRMV4qhPbvWIFNJhNDTfjrR4JWwK4" +
+                            "+tmq" +
+                            "//3C470Cz4NQg0rNpe5yCBhxctn3yBJrs5M0fQKH559UdQ5wmdYufMtHy8HIa16jqn58UhJxN4P0A8KNwrL8qIOe67nCny+aATOWBo/IAywA4rITFsTAVCP5ViJyNOszEi4oj+/xbdUoDpqeLHJGJmef+PoP5oSvNfha/ZfTYXD+b4odN5SDema7xS/JLl774zDJCBPH47Y8fkY5tYdM/gk7lODMZHCRDCVErhXQqI4Bu9fY5z4Hnl8nUqQjKAn6UNjRA0xkxtL9SUPqD2l+OaUay9rJhcoyLNPr55v8P9qbHi1bg7zlcaXFMBcPiUdG8karSl8fhyfQ27AF94lF5L3kSH5yxa+ksOYYrXImRvDIsiFs45sqvFF0TnI8NQRYU="));
         }
     }
 
@@ -135,10 +145,29 @@ public class CommonPlugin {
     public void loadServers() {
         for (Map.Entry<String, ProxiedServer> entry : getServerData().retrieveServerByType(ServerType.values())
                                                                      .entrySet()) {
-            serverManager.addActiveServer(entry.getValue());
-            debug("The server " + entry.getKey() + " (" + entry.getValue().getServerType() + " - " +
-                  entry.getValue().getOnlinePlayers() + "/" + entry.getValue().getMaxPlayers() + ") has been loaded!");
+            tryAddServer(entry.getValue(), 1);
         }
+    }
+
+    private void tryAddServer(ProxiedServer server, int attemp) {
+        packetManager.waitPacket(KeepAliveResponse.class,
+                packetManager.sendPacket(new KeepAliveRequest(server.getServerId())), 500L, response -> {
+                    if (response != null) {
+                        serverManager.addActiveServer(server);
+                        debug("The server " + server.getServerId() + " (" + server.getServerType() + " - " +
+                                server.getOnlinePlayers() + "/" + server.getMaxPlayers() + ") has been loaded!");
+                        return;
+                    }
+
+                    if (attemp + 1 > 3) {
+                        logger.log(Level.WARNING, "The server " + server.getServerId() +
+                                " didn't respond to the keep alive request, stopping the connection...");
+                        serverData.stopServer(server.getServerId(), server.getServerType());
+                        return;
+                    }
+
+                    tryAddServer(server, attemp + 1);
+                });
     }
 
     public void stopConnection() {

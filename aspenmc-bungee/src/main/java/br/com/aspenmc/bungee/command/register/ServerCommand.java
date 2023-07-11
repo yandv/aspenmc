@@ -1,4 +1,4 @@
-package br.com.aspenmc.bungee.command.player;
+package br.com.aspenmc.bungee.command.register;
 
 import br.com.aspenmc.bungee.entity.BungeeMember;
 import br.com.aspenmc.server.ProxiedServer;
@@ -118,11 +118,8 @@ public class ServerCommand implements CommandHandler {
         if (serverType == null) {
             serverType = ServerType.LOBBY;
         } else {
-            while (serverType.getParent() != null) {
-                if (!serverType.isLobby()) {
-                    serverType = serverType.getParent();
-                }
-            }
+            if (serverType != ServerType.LOBBY && serverType.hasParent())
+                serverType = serverType.getParent();
         }
 
         ProxiedServer server = CommonPlugin.getInstance().getServerManager().getBalancer(serverType).next();

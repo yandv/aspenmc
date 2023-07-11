@@ -18,7 +18,7 @@ import br.com.aspenmc.CommonPlugin;
 import br.com.aspenmc.backend.data.PermissionData;
 import br.com.aspenmc.permission.Group;
 import br.com.aspenmc.permission.Tag;
-import br.com.aspenmc.utils.JsonUtils;
+import br.com.aspenmc.utils.json.JsonUtils;
 import org.bson.Document;
 
 import java.util.ArrayList;

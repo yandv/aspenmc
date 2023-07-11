@@ -28,9 +28,7 @@ import java.util.UUID;
 public class DefaultCharacter implements Character {
 
     private Location location;
-    @Setter
-    @Getter(AccessLevel.NONE)
-    private String model;
+
     private TouchHandler<Character> touchHandler;
 
     private boolean collision;
@@ -43,11 +41,16 @@ public class DefaultCharacter implements Character {
 
     private final Set<UUID> showing;
 
-    public DefaultCharacter(Location location, boolean collision, String model, TouchHandler<Character> touchHandler, Skin skin) {
+    public DefaultCharacter(Location location, boolean collision, TouchHandler<Character> touchHandler, Skin skin,
+            Hologram hologram) {
         this.location = location;
-        this.model = model;
         this.touchHandler = touchHandler;
         this.skin = skin;
+        this.hologram = hologram;
+
+        if (this.hologram != null) {
+            this.hologram.teleport(location.clone().add(0, 0.1, 0));
+        }
 
         this.showing = new HashSet<>();
 
@@ -55,16 +58,17 @@ public class DefaultCharacter implements Character {
         Bukkit.getOnlinePlayers().forEach(this::show);
     }
 
-    public DefaultCharacter(Location location, String model, TouchHandler<Character> touchHandler, Skin skin) {
-        this(location, false, model, touchHandler, skin);
+    public DefaultCharacter(Location location, TouchHandler<Character> touchHandler, Skin skin, Hologram hologram) {
+        this(location, false, touchHandler, skin, hologram);
     }
 
-    public DefaultCharacter(Location location, TouchHandler<Character> touchHandler, Skin skin) {
-        this(location, false, null, touchHandler, skin);
+    public DefaultCharacter(Location location, TouchHandler<Character> touchHandler, String name, Hologram hologram) {
+        this(location, false, touchHandler, CommonPlugin.getInstance().getSkinData().loadData(name)
+                                                        .orElse(CommonPlugin.getInstance().getDefaultSkin()), hologram);
     }
 
     public DefaultCharacter(Location location, TouchHandler<Character> touchHandler) {
-        this(location, touchHandler, CommonPlugin.getInstance().getDefaultSkin());
+        this(location, touchHandler, CommonPlugin.getInstance().getDefaultSkin(), null);
     }
 
     @Override
@@ -96,8 +100,9 @@ public class DefaultCharacter implements Character {
         connection.sendPacket(new PacketPlayOutEntityMetadata(entityPlayer.getId(), watcher, true));
 
         Bukkit.getScheduler().scheduleSyncDelayedTask(BukkitCommon.getInstance(), () -> connection.sendPacket(
-                                                              new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, entityPlayer)),
-                                                      40L);
+                        new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER,
+                                entityPlayer)),
+                40L);
     }
 
     @Override
@@ -125,7 +130,7 @@ public class DefaultCharacter implements Character {
     public void teleport(Location location) {
         this.location = location;
         entityPlayer.setLocation(location.getX(), location.getY(), location.getZ(), location.getYaw(),
-                                 location.getPitch());
+                location.getPitch());
         entityBat.setLocation(location.getX() * 32.0, location.getY() * 32.0, location.getZ() * 32.0, 0.0f, 0.0f);
 
         for (Player player : Bukkit.getOnlinePlayers()) {
@@ -172,7 +177,7 @@ public class DefaultCharacter implements Character {
 
         entityPlayer.getBukkitEntity().setRemoveWhenFarAway(false);
         entityPlayer.setLocation(location.getX(), location.getY(), location.getZ(), location.getYaw(),
-                                 location.getPitch());
+                location.getPitch());
         entityPlayer.setInvisible(false);
 
         entityBat = new EntityBat(world);

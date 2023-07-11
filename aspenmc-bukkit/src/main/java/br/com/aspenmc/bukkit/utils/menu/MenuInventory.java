@@ -163,21 +163,22 @@ public class MenuInventory {
 
             this.inventory = Bukkit.createInventory(new MenuHolder(this), rows * 9, "");
             slotItem.clear();
+
             for (Entry<Integer, MenuItem> item : copyOf)
                 setItem(item.getKey(), item.getValue());
         }
     }
 
     public int firstEmpty() {
-        if (!onePerPlayer) {
-            return inventory.firstEmpty();
-        } else {
+        if (onePerPlayer) {
             for (int i = 0; i < rows * 9; i++) {
                 if (!slotItem.containsKey(i)) {
                     return i;
                 }
             }
             return -1;
+        } else {
+            return inventory.firstEmpty();
         }
     }
 
@@ -191,6 +192,7 @@ public class MenuInventory {
 
     public void clear() {
         slotItem.clear();
+
         if (!onePerPlayer) {
             inventory.clear();
         }

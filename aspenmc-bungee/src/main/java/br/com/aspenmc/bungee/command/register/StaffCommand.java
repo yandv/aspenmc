@@ -1,4 +1,4 @@
-package br.com.aspenmc.bungee.command.player;
+package br.com.aspenmc.bungee.command.register;
 
 import com.google.common.base.Joiner;
 import br.com.aspenmc.bungee.BungeeMain;

@@ -106,8 +106,6 @@ public interface ServerData {
 
     Map<String, ProxiedServer> retrieveServerByType(ServerType... serversType);
 
-
-
     /**
      * Send a packet
      *

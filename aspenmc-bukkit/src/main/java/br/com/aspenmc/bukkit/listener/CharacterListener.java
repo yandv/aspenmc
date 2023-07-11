@@ -21,37 +21,40 @@ public class CharacterListener implements Listener {
     private static final int MAX_DISTANCE = 128;
 
     public CharacterListener() {
-        ProtocolLibrary.getProtocolManager()
-                       .addPacketListener(new PacketAdapter(BukkitMain.getInstance(), PacketType.Play.Client.USE_ENTITY) {
+        ProtocolLibrary.getProtocolManager().addPacketListener(
+                new PacketAdapter(BukkitMain.getInstance(), PacketType.Play.Client.USE_ENTITY) {
 
-                           @Override
-                           public void onPacketReceiving(PacketEvent event) {
-                               if (event.isCancelled())
-                                   return;
+                    @Override
+                    public void onPacketReceiving(PacketEvent event) {
+                        if (event.isCancelled()) {
+                            return;
+                        }
 
-                               Player player = event.getPlayer();
+                        Player player = event.getPlayer();
 
-                               if (event.getPacket().getEntityUseActions().read(0) == EntityUseAction.INTERACT
-                                   || event.getPacket().getEntityUseActions().read(0) == EntityUseAction.ATTACK) {
-                                   int entityId = event.getPacket().getIntegers().read(0);
+                        if (event.getPacket().getEntityUseActions().read(0) == EntityUseAction.INTERACT ||
+                                event.getPacket().getEntityUseActions().read(0) == EntityUseAction.ATTACK) {
+                            int entityId = event.getPacket().getIntegers().read(0);
 
-                                   Character character = BukkitCommon.getInstance().getCharacterManager().getCharacterById(entityId);
+                            Character character = BukkitCommon.getInstance().getCharacterManager()
+                                                              .getCharacterById(entityId);
 
-                                   if (character != null)
-                                       character.getTouchHandler().onTouch(character, player,
-                                                                                 event.getPacket().getEntityUseActions().read(0) == EntityUseAction.INTERACT);
-                               }
-
-                           }
-
-                       });
+                            if (character != null) {
+                                character.getTouchHandler().onTouch(character, player,
+                                        event.getPacket().getEntityUseActions().read(0) == EntityUseAction.INTERACT);
+                            }
+                        }
+                    }
+                });
     }
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         BukkitCommon.getInstance().getCharacterManager().getCharacters().forEach(character -> {
-            if (character.getLocation().getWorld().equals(event.getPlayer().getLocation().getWorld()) && character.getLocation().distance(event.getPlayer().getLocation()) < MAX_DISTANCE)
+            if (character.getLocation().getWorld().equals(event.getPlayer().getLocation().getWorld()) &&
+                    character.getLocation().distance(event.getPlayer().getLocation()) < MAX_DISTANCE) {
                 character.show(event.getPlayer());
+            }
         });
     }
 
@@ -61,10 +64,12 @@ public class CharacterListener implements Listener {
             if (character.isShowing(event.getPlayer())) {
                 if (!character.getLocation().getWorld().equals(event.getTo().getWorld())) {
                     character.hide(event.getPlayer());
-                } else if (character.getLocation().distance(event.getTo()) > MAX_DISTANCE)
+                } else if (character.getLocation().distance(event.getTo()) > MAX_DISTANCE) {
                     character.hide(event.getPlayer());
+                }
             } else {
-                if (character.getLocation().getWorld().equals(event.getTo().getWorld()) && character.getLocation().distance(event.getTo()) < MAX_DISTANCE) {
+                if (character.getLocation().getWorld().equals(event.getTo().getWorld()) &&
+                        character.getLocation().distance(event.getTo()) < MAX_DISTANCE) {
                     character.show(event.getPlayer());
                 }
             }
@@ -78,10 +83,12 @@ public class CharacterListener implements Listener {
             if (character.isShowing(event.getPlayer())) {
                 if (!character.getLocation().getWorld().equals(event.getTo().getWorld())) {
                     character.hide(event.getPlayer());
-                } else if (character.getLocation().distance(event.getTo()) > MAX_DISTANCE)
+                } else if (character.getLocation().distance(event.getTo()) > MAX_DISTANCE) {
                     character.hide(event.getPlayer());
+                }
             } else {
-                if (character.getLocation().getWorld().equals(event.getTo().getWorld()) && character.getLocation().distance(event.getTo()) < MAX_DISTANCE) {
+                if (character.getLocation().getWorld().equals(event.getTo().getWorld()) &&
+                        character.getLocation().distance(event.getTo()) < MAX_DISTANCE) {
                     character.show(event.getPlayer());
                 }
             }
@@ -90,6 +97,7 @@ public class CharacterListener implements Listener {
 
     @EventHandler
     public void onPlayerJoin(PlayerQuitEvent event) {
-        BukkitCommon.getInstance().getCharacterManager().getCharacters().forEach(character -> character.hide(event.getPlayer()));
+        BukkitCommon.getInstance().getCharacterManager().getCharacters()
+                    .forEach(character -> character.hide(event.getPlayer()));
     }
 }
