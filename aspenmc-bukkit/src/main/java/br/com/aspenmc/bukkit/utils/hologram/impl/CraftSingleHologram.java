@@ -31,16 +31,15 @@ public class CraftSingleHologram implements Hologram {
     private String displayName;
     private Location location;
 
-    @Setter
     private TouchHandler<Hologram> touchHandler;
-    @Setter
     private ViewHandler viewHandler;
 
     private EntityArmorStand armorStand;
     private final Set<UUID> showing;
     private final Set<UUID> invisibleTo;
 
-    public CraftSingleHologram(String displayName, Location location, TouchHandler<Hologram> touchHandler, ViewHandler viewHandler) {
+    public CraftSingleHologram(String displayName, Location location, TouchHandler<Hologram> touchHandler,
+            ViewHandler viewHandler) {
         this.displayName = displayName;
         this.location = location;
         this.touchHandler = touchHandler;
@@ -68,7 +67,7 @@ public class CraftSingleHologram implements Hologram {
         this.armorStand.setCustomNameVisible(isCustomNameVisible());
 
         showing.stream().map(Bukkit::getPlayer).filter(Objects::nonNull).forEach(player -> {
-            sendMetadataPacket(player, hasViewHandler() ? viewHandler.onView(this, player, displayName) : displayName);
+            sendMetadataPacket(player, hasViewHandler() ? viewHandler.onView(player, displayName) : displayName);
         });
 
         return this;
@@ -80,7 +79,7 @@ public class CraftSingleHologram implements Hologram {
             return this;
         }
 
-        sendMetadataPacket(player, hasViewHandler() ? viewHandler.onView(this, player, displayName) : displayName);
+        sendMetadataPacket(player, hasViewHandler() ? viewHandler.onView(player, displayName) : displayName);
         return this;
     }
 
@@ -88,7 +87,7 @@ public class CraftSingleHologram implements Hologram {
     public Hologram teleport(Location location) {
         this.location = location;
         this.armorStand.setLocation(location.getX(), location.getY(), location.getZ(), location.getYaw(),
-                                    location.getPitch());
+                location.getPitch());
 
         for (Player player : Bukkit.getOnlinePlayers()) {
             hide(player);
@@ -123,8 +122,20 @@ public class CraftSingleHologram implements Hologram {
     }
 
     @Override
+    public Hologram setTouchHandler(TouchHandler<Hologram> touchHandler) {
+        this.touchHandler = touchHandler;
+        return this;
+    }
+
+    @Override
     public boolean hasViewHandler() {
         return getViewHandler() != null;
+    }
+
+    @Override
+    public Hologram setViewHandler(ViewHandler viewHandler) {
+        this.viewHandler = viewHandler;
+        return this;
     }
 
     @Override
@@ -136,9 +147,9 @@ public class CraftSingleHologram implements Hologram {
         showing.remove(player.getUniqueId());
 
         try {
-            ProtocolLibrary.getProtocolManager().sendServerPacket(player, new PacketBuilder(
-                    PacketType.Play.Server.ENTITY_DESTROY)
-                    .writeIntegerArray(0, new int[]{armorStand.getId()}).build());
+            ProtocolLibrary.getProtocolManager().sendServerPacket(player,
+                    new PacketBuilder(PacketType.Play.Server.ENTITY_DESTROY)
+                            .writeIntegerArray(0, new int[] { armorStand.getId() }).build());
         } catch (InvocationTargetException e) {
             throw new RuntimeException(e);
         }
@@ -158,7 +169,7 @@ public class CraftSingleHologram implements Hologram {
         playerConnection.sendPacket(new PacketPlayOutSpawnEntityLiving(armorStand));
 
         if (hasViewHandler()) {
-            sendMetadataPacket(player, viewHandler.onView(this, player, displayName));
+            sendMetadataPacket(player, viewHandler.onView(player, displayName));
         }
 
         return this;
@@ -223,7 +234,7 @@ public class CraftSingleHologram implements Hologram {
         armorStand.setCustomNameVisible(isCustomNameVisible());
 
         armorStand.setLocation(location.getX(), location.getY(), location.getZ(), location.getYaw(),
-                               location.getPitch());
+                location.getPitch());
     }
 
     private void sendMetadataPacket(Player player, String displayName) {

@@ -1,5 +1,6 @@
 package br.com.aspenmc.bukkit.listener;
 
+import br.com.aspenmc.CommonPlugin;
 import br.com.aspenmc.bukkit.BukkitCommon;
 import br.com.aspenmc.bukkit.event.player.PlayerMoveUpdateEvent;
 import br.com.aspenmc.bukkit.event.player.PlayerRealRespawnEvent;
@@ -33,7 +34,7 @@ public class HologramListener implements Listener {
 
         ProtocolLibrary.getProtocolManager().addPacketListener(
                 new PacketAdapter(BukkitCommon.getInstance(), ListenerPriority.LOWEST,
-                                  PacketType.Play.Client.USE_ENTITY) {
+                        PacketType.Play.Client.USE_ENTITY) {
 
                     @Override
                     public void onPacketReceiving(PacketEvent event) {
@@ -50,8 +51,8 @@ public class HologramListener implements Listener {
 
                         if (hologram.getEntityId() == entityId) {
                             hologram.getTouchHandler().onTouch(hologram, event.getPlayer(),
-                                                               event.getPacket().getEntityUseActions().read(0) ==
-                                                               EnumWrappers.EntityUseAction.INTERACT);
+                                    event.getPacket().getEntityUseActions().read(0) ==
+                                            EnumWrappers.EntityUseAction.INTERACT);
                             playerCooldown.put(event.getPlayer(), System.currentTimeMillis() + 200L);
                         }
                     }
@@ -73,23 +74,19 @@ public class HologramListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerRespawn(PlayerRealRespawnEvent event) {
-        new BukkitRunnable() {
+        CommonPlugin.getInstance().getPluginPlatform().runLater(() -> {
+            BukkitCommon.getInstance().getHologramManager().getHolograms().forEach(hologram -> {
+                if (hologram.getLocation().getWorld() == event.getPlayer().getLocation().getWorld()) {
+                    if (hologram.isBlocked(event.getPlayer())) return;
 
-            @Override
-            public void run() {
-                BukkitCommon.getInstance().getHologramManager().getHolograms().forEach(hologram -> {
-                    if (hologram.getLocation().getWorld() == event.getPlayer().getLocation().getWorld()) {
-                        if (hologram.isBlocked(event.getPlayer())) return;
-
-                        if (hologram.isShowingForPlayer(event.getPlayer()) &&
+                    if (hologram.isShowingForPlayer(event.getPlayer()) &&
                             hologram.getLocation().distance(event.getPlayer().getLocation()) < MAX_DISTANCE) {
-                            hologram.hide(event.getPlayer());
-                            hologram.show(event.getPlayer());
-                        }
+                        hologram.hide(event.getPlayer());
+                        hologram.show(event.getPlayer());
                     }
-                });
-            }
-        }.runTaskLater(BukkitCommon.getInstance(), 5L);
+                }
+            });
+        }, 5L);
     }
 
     @EventHandler
@@ -122,7 +119,7 @@ public class HologramListener implements Listener {
                 }
             } else {
                 if (hologram.getLocation().getWorld() == player.getLocation().getWorld() &&
-                    hologram.getLocation().distance(player.getLocation()) < MAX_DISTANCE) {
+                        hologram.getLocation().distance(player.getLocation()) < MAX_DISTANCE) {
                     hologram.show(player);
                 }
             }

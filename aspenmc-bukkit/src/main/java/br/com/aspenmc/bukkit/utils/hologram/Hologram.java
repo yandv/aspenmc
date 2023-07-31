@@ -80,7 +80,7 @@ public interface Hologram {
      * @param touchHandler The new touch handler
      */
 
-    void setTouchHandler(TouchHandler<Hologram> touchHandler);
+    Hologram setTouchHandler(TouchHandler<Hologram> touchHandler);
 
     boolean hasViewHandler();
 
@@ -98,7 +98,7 @@ public interface Hologram {
      * @param viewHandler The view handler of the hologram
      */
 
-    void setViewHandler(ViewHandler viewHandler);
+    Hologram setViewHandler(ViewHandler viewHandler);
 
     /**
      * Hide the hologram for the specified player
