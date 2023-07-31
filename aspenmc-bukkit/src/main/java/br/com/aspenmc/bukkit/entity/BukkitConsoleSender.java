@@ -3,6 +3,7 @@ package br.com.aspenmc.bukkit.entity;
 import br.com.aspenmc.CommonConst;
 import br.com.aspenmc.CommonPlugin;
 import br.com.aspenmc.entity.Sender;
+import br.com.aspenmc.language.Language;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -30,6 +31,11 @@ public class BukkitConsoleSender implements Sender {
     }
 
     @Override
+    public void performCommand(String command) {
+        Bukkit.dispatchCommand(sender, command);
+    }
+
+    @Override
     public void sendMessage(String... messages) {
         for (String message : messages) {
             sender.sendMessage(message);
@@ -46,6 +52,11 @@ public class BukkitConsoleSender implements Sender {
     @Override
     public boolean isPlayer() {
         return false;
+    }
+
+    @Override
+    public Language getLanguage() {
+        return CommonPlugin.getInstance().getDefaultLanguage();
     }
 
     @Override

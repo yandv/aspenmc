@@ -6,6 +6,7 @@ import lombok.Setter;
 import br.com.aspenmc.CommonPlugin;
 import br.com.aspenmc.entity.Member;
 import br.com.aspenmc.entity.member.configuration.LoginConfiguration;
+import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
@@ -28,6 +29,11 @@ public class BungeeMember extends Member {
         if (server == null) return;
 
         proxiedPlayer.connect(server.getServerInfo());
+    }
+
+    @Override
+    public void performCommand(String command) {
+        ProxyServer.getInstance().getPluginManager().dispatchCommand(proxiedPlayer, command);
     }
 
     @Override
