@@ -14,6 +14,8 @@ public class SkinChangeResponse extends Packet {
 
     private SkinResult skinResult;
 
+    private String errorMessage;
+
 
     public enum SkinResult {
 

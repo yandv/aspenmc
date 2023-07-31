@@ -6,6 +6,7 @@ import br.com.aspenmc.CommonPlugin;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Getter
 @AllArgsConstructor
@@ -15,7 +16,7 @@ public class Group {
 
     private final String groupName;
 
-    private List<String> permissions;
+    private Set<String> permissions;
 
     private String tag;
 
@@ -41,6 +42,20 @@ public class Group {
     public void setPaidGroup(boolean paidGroup) {
         this.paidGroup = paidGroup;
         CommonPlugin.getInstance().getPermissionData().updateGroup(this, "paidGroup");
+    }
+
+    public void addPermission(String permission) {
+        permissions.add(permission.toLowerCase());
+        CommonPlugin.getInstance().getPermissionData().updateGroup(this, "permissions");
+    }
+
+    public void removePermission(String permission) {
+        permissions.remove(permission.toLowerCase());
+        CommonPlugin.getInstance().getPermissionData().updateGroup(this, "permissions");
+    }
+
+    public boolean hasPermission(String permission) {
+        return permissions.contains(permission.toLowerCase());
     }
 
     public boolean hasTag() {
