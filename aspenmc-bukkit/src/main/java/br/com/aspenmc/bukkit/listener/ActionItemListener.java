@@ -6,12 +6,14 @@ import br.com.aspenmc.bukkit.utils.item.ActionItemStack;
 import br.com.aspenmc.bukkit.utils.item.ItemBuilder;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
@@ -45,6 +47,24 @@ public class ActionItemListener implements Listener {
                                                ActionItemStack.getNbtCompound(stack))));
     }
 
+    @EventHandler
+    public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
+        Player player = event.getPlayer();
+
+        if (player.getItemInHand() == null || player.getItemInHand().getType() == Material.AIR) return;
+
+        ItemStack stack = player.getItemInHand();
+        Optional<ActionItemStack.ActionHandler> optional = ActionItemStack.getActionHandlerByStack(stack);
+
+        if (!optional.isPresent()) return;
+
+        ActionItemStack.ActionHandler handler = optional.get();
+
+        event.setCancelled(!handler.onClick(
+                new ActionItemStack.ActionArgs(event.getPlayer(), event.getPlayer().getItemInHand(), event.getRightClicked(), null,
+                                               ActionItemStack.ActionType.RIGHT_CLICK,
+                                               ActionItemStack.getNbtCompound(stack))));
+    }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onBlockPlace(BlockPlaceEvent event) {

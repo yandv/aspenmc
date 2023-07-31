@@ -12,8 +12,6 @@ public class FileUtils {
     public static File createFile(String fileName, String path, boolean createIfNotExists) throws Exception {
         File file = new File(path + File.separatorChar + fileName);
 
-        System.out.println(file);
-
         if (!file.exists()) {
             URL url = FileUtils.class.getClassLoader().getResource(fileName);
 

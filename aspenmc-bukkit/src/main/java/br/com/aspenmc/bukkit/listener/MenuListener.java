@@ -6,6 +6,7 @@ import br.com.aspenmc.bukkit.event.server.ServerTickEvent;
 import br.com.aspenmc.bukkit.utils.menu.MenuHolder;
 import br.com.aspenmc.bukkit.utils.menu.MenuInventory;
 import br.com.aspenmc.bukkit.utils.menu.MenuItem;
+import br.com.aspenmc.bukkit.utils.menu.click.ClickArgs;
 import br.com.aspenmc.bukkit.utils.menu.click.ClickType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -77,9 +78,16 @@ public class MenuListener implements Listener {
             MenuItem item = menu.getItem(event.getSlot());
 
             try {
-                event.setCancelled(!item.getHandler()
-                                        .onClick(p, inv, ClickType.from(event.getAction()), event.getCurrentItem(),
-                                                event.getSlot()));
+                ClickArgs clickArgs = new ClickArgs(p, inv, ClickType.from(event.getAction()), item, event.getSlot());
+
+                item.getHandler().onClick(clickArgs);
+
+                event.setCancelled(clickArgs.isCancelled());
+
+                if (!item.getItemStack().isSimilar(clickArgs.getItemStack())) {
+                    event.setCurrentItem(clickArgs.getItemStack());
+                    menu.setItem(event.getSlot(), clickArgs.getMenuItem());
+                }
             } catch (Exception ex) {
                 event.setCancelled(true);
                 CommonPlugin.getInstance().getLogger().log(java.util.logging.Level.SEVERE,

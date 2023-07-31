@@ -1,8 +1,7 @@
 package br.com.aspenmc.bukkit.manager;
 
 import br.com.aspenmc.bukkit.BukkitCommon;
-import br.com.aspenmc.bukkit.serializer.LocationParser;
-import com.comphenix.net.bytebuddy.jar.asm.commons.Remapper;
+import br.com.aspenmc.bukkit.utils.serializer.LocationParser;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.bukkit.Bukkit;

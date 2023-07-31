@@ -43,6 +43,8 @@ public class MenuInventory {
 
     @Setter
     private MenuUpdateHandler updateHandler;
+    @Setter
+    private boolean updateOnOpen;
 
     @Setter
     private DragHandler dragHandler;
@@ -87,10 +89,6 @@ public class MenuInventory {
 
     public void addItem(ItemStack item, MenuClickHandler handler) {
         setItem(firstEmpty(), item, handler);
-    }
-
-    public void setItem(ItemStack item, int slot) {
-        setItem(slot, new MenuItem(item));
     }
 
     public void setItem(int slot, ItemStack item) {
@@ -225,6 +223,9 @@ public class MenuInventory {
         } else {
             p.openInventory(inventory);
         }
+
+        if (isUpdateOnOpen() && updateHandler != null)
+            updateHandler.onUpdate(this);
 
         Bukkit.getPluginManager().callEvent(
                 new PlayerOpenInventoryEvent(p, onePerPlayer ? p.getOpenInventory().getTopInventory() : inventory));

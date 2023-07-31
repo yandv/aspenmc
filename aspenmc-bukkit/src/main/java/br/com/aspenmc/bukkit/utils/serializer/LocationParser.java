@@ -1,4 +1,4 @@
-package br.com.aspenmc.bukkit.serializer;
+package br.com.aspenmc.bukkit.utils.serializer;
 
 import java.lang.reflect.Type;
 
