@@ -6,6 +6,7 @@ import br.com.aspenmc.entity.member.configuration.LoginConfiguration;
 import br.com.aspenmc.entity.member.configuration.PreferencesConfiguration;
 import br.com.aspenmc.entity.member.configuration.PunishConfiguration;
 import br.com.aspenmc.entity.member.gamer.Gamer;
+import br.com.aspenmc.language.Language;
 import lombok.Getter;
 import lombok.Setter;
 import br.com.aspenmc.permission.Group;
@@ -33,6 +34,8 @@ public abstract class Member implements Sender {
     private final LoginConfiguration loginConfiguration;
     private final PreferencesConfiguration preferencesConfiguration;
     private final PunishConfiguration punishConfiguration;
+
+    private String language;
 
     /*
      * Date
@@ -87,6 +90,8 @@ public abstract class Member implements Sender {
         this.preferencesConfiguration = new PreferencesConfiguration();
         this.punishConfiguration = new PunishConfiguration();
 
+        this.language = CommonPlugin.getInstance().getDefaultLanguage().name();
+
         this.firstLoginAt = System.currentTimeMillis();
         this.lastLoginAt = System.currentTimeMillis();
 
@@ -94,7 +99,7 @@ public abstract class Member implements Sender {
     }
 
     public boolean isUsingCustomSkin() {
-        return playerSkin != null;
+        return playerSkin != null && !playerSkin.equals(name);
     }
 
     public boolean isUsingFake() {
@@ -109,6 +114,16 @@ public abstract class Member implements Sender {
     public void setPlayerSkin(String playerSkin) {
         this.playerSkin = playerSkin;
         save("playerSkin");
+    }
+
+    public Language getLanguage() {
+        return Language.getByName(this.language);
+    }
+
+    public Language setLanguage(Language language) {
+        this.language = language.name();
+        save("language");
+        return getLanguage();
     }
 
     public void joinServer(String server, ServerType serverType) {
@@ -154,6 +169,10 @@ public abstract class Member implements Sender {
 
     public boolean hasGroup(Group group) {
         return groupMap.containsKey(group.getGroupName().toLowerCase());
+    }
+
+    public boolean hasGroup(String groupName) {
+        return groupMap.containsKey(groupName.toLowerCase());
     }
 
     public Optional<GroupInfo> getGroupInfo(Group group) {
@@ -208,8 +227,8 @@ public abstract class Member implements Sender {
 
         return CommonPlugin.getInstance().getPermissionManager().getTags().stream()
                            .filter(tag -> hasPermission("tag." + tag.getTagName().toLowerCase()) ||
-                                          groupStream.anyMatch(group -> (group.hasTag() && tag.getTagName()
-                                                                                              .equals(getServerGroup().getGroupName()))))
+                                   groupStream.anyMatch(group -> (group.hasTag() &&
+                                           tag.getTagName().equals(getServerGroup().getGroupName()))))
                            .collect(Collectors.toList());
     }
 
@@ -234,6 +253,10 @@ public abstract class Member implements Sender {
             higherGroup = null;
             save("groupMap");
         }
+    }
+
+    public void resetHigherGroup() {
+        higherGroup = null;
     }
 
     public long getSessionTime() {
@@ -326,5 +349,4 @@ public abstract class Member implements Sender {
     public boolean isPlayer() {
         return true;
     }
-
 }

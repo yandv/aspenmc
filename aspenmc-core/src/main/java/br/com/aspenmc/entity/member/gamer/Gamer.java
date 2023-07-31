@@ -4,7 +4,7 @@ import br.com.aspenmc.CommonPlugin;
 
 import java.util.UUID;
 
-public interface Gamer {
+public interface Gamer<T> {
 
     /**
      * Retrieve the unique id of the gamer
@@ -12,6 +12,12 @@ public interface Gamer {
      */
 
     UUID getUniqueId();
+
+    void loadEntity(T t);
+
+    T getEntity();
+
+    Class<T> getEntityClass();
 
     String getId();
 

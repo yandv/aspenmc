@@ -1,4 +1,4 @@
-package br.com.aspenmc.bukkit.scheduler;
+package br.com.aspenmc.bukkit.utils.scheduler;
 
 import br.com.aspenmc.BukkitConst;
 import br.com.aspenmc.bukkit.event.server.ServerTickEvent;

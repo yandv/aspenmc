@@ -7,11 +7,12 @@ import br.com.aspenmc.entity.member.gamer.Gamer;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
 
 public class MemberManager {
 
     private final Map<UUID, Member> memberMap;
-    private final Map<UUID, Map<String, Gamer>> gamerMap;
+    private final Map<String, Map<UUID, Gamer<?>>> gamerMap;
 
     private final Lock memberWriteLock = new ReentrantLock();
     private final Lock gamerWriteLock = new ReentrantLock();
@@ -30,10 +31,10 @@ public class MemberManager {
         }
     }
 
-    public <T extends Gamer> void loadGamer(UUID uniqueId, String gamerId, T gamer) {
+    public <K, T extends Gamer<K>> void loadGamer(UUID uniqueId, String gamerId, T gamer) {
         try {
             gamerWriteLock.lock();
-            this.gamerMap.computeIfAbsent(uniqueId, k -> new HashMap<>()).put(gamerId, gamer);
+            this.gamerMap.computeIfAbsent(gamerId, k -> new HashMap<>()).put(uniqueId, gamer);
         } finally {
             gamerWriteLock.unlock();
         }
@@ -51,14 +52,12 @@ public class MemberManager {
         return getMemberById(uniqueId).map(clazz::cast);
     }
 
-    public Optional<Gamer> getGamerById(UUID uniqueId, String gamerId) {
-        return this.gamerMap.getOrDefault(uniqueId, Collections.emptyMap()).values().stream()
-                            .filter(g -> g.getId().equalsIgnoreCase(gamerId)).findFirst();
+    public Optional<Gamer<?>> getGamerById(UUID uniqueId, String gamerId) {
+        return Optional.ofNullable(this.gamerMap.getOrDefault(gamerId, Collections.emptyMap()).get(uniqueId));
     }
 
-    public <T extends Gamer> Optional<T> getGamerById(UUID uniqueId, Class<T> clazz, String gamerId) {
-        return this.gamerMap.getOrDefault(uniqueId, Collections.emptyMap()).values().stream()
-                            .filter(g -> g.getId().equalsIgnoreCase(gamerId)).findFirst().map(clazz::cast);
+    public <K, T extends Gamer<K>> Optional<T> getGamerById(UUID uniqueId, Class<T> clazz, String gamerId) {
+        return getGamerById(uniqueId, gamerId).map(clazz::cast);
     }
 
     public Optional<? extends Member> getOrLoadByName(String playerName) {
@@ -88,12 +87,55 @@ public class MemberManager {
         return this.memberMap.values();
     }
 
-    public Collection<? extends Gamer> getGamers(UUID uniqueId) {
-        return this.gamerMap.getOrDefault(uniqueId, Collections.emptyMap()).values();
+    public <T extends Member> Collection<T> getMembers(Class<T> clazz) {
+        return this.memberMap.values().stream().filter(clazz::isInstance).map(clazz::cast).collect(Collectors.toList());
     }
 
-    public Collection<? extends Gamer> getGamers(Collection<UUID> ids, String gamerId) {
-        Set<Gamer> gamerSet = new HashSet<>();
+    public <K, T extends Gamer<K>> Collection<T> getGamers(Class<T> clazz) {
+        return this.gamerMap.values().stream().reduce(new HashSet<>(), (gamers, uuidGamerMap) -> {
+            uuidGamerMap.values().stream().filter(clazz::isInstance).map(clazz::cast).findFirst()
+                        .ifPresent(gamers::add);
+
+            return gamers;
+        }, (gamers, gamers2) -> {
+            gamers.addAll(gamers2);
+            return gamers;
+        });
+    }
+
+    public Collection<? extends Gamer<?>> getGamers(UUID uniqueId) {
+        return this.gamerMap.values().stream().reduce(new HashSet<>(), (gamers, uuidGamerMap) -> {
+            Gamer<?> gamer = uuidGamerMap.get(uniqueId);
+
+            if (gamer != null) {
+                gamers.add(gamer);
+            }
+
+            return gamers;
+        }, (gamers, gamers2) -> {
+            gamers.addAll(gamers2);
+            return gamers;
+        });
+    }
+
+    @SuppressWarnings("unchecked")
+    public <K> Collection<? extends Gamer<K>> getGamers(UUID uniqueId, Class<K> entity) {
+        return this.gamerMap.values().stream().reduce(new HashSet<>(), (gamers, uuidGamerMap) -> {
+            Gamer<?> gamer = uuidGamerMap.get(uniqueId);
+
+            if (gamer != null && gamer.getEntityClass() == entity) {
+                gamers.add((Gamer<K>) gamer);
+            }
+
+            return gamers;
+        }, (gamers, gamers2) -> {
+            gamers.addAll(gamers2);
+            return gamers;
+        });
+    }
+
+    public Collection<? extends Gamer<?>> getGamers(Collection<UUID> ids, String gamerId) {
+        Set<Gamer<?>> gamerSet = new HashSet<>();
 
         for (UUID id : ids) {
             getGamerById(id, gamerId).ifPresent(gamerSet::add);
@@ -102,7 +144,7 @@ public class MemberManager {
         return gamerSet;
     }
 
-    public <T extends Gamer> Collection<T> getGamers(Collection<UUID> ids, Class<T> gamerClass, String gamerId) {
+    public <K, T extends Gamer<K>> Collection<T> getGamers(Collection<UUID> ids, Class<T> gamerClass, String gamerId) {
         Set<T> gamerSet = new HashSet<>();
 
         for (UUID id : ids) {
@@ -125,13 +167,13 @@ public class MemberManager {
         try {
             gamerWriteLock.lock();
 
-            if (this.gamerMap.containsKey(uniqueId)) {
-                Map<String, Gamer> gamerMap = this.gamerMap.get(uniqueId);
+            if (this.gamerMap.containsKey(gamerId)) {
+                Map<UUID, Gamer<?>> uuidGamerMap = this.gamerMap.get(gamerId);
 
-                gamerMap.remove(gamerId);
+                uuidGamerMap.remove(uniqueId);
 
-                if (gamerMap.isEmpty()) {
-                    this.gamerMap.remove(uniqueId);
+                if (uuidGamerMap.isEmpty()) {
+                    this.gamerMap.remove(gamerId);
                 }
             }
         } finally {

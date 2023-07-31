@@ -18,11 +18,11 @@ public interface ViewHandler {
 	public static final ViewHandler EMPTY = new ViewHandler() {
 
 		@Override
-		public String onView(Hologram hologram, Player player, String text) {
+		public String onView(Player player, String text) {
 			return text;
 		}
 	};
 
-	String onView(Hologram hologram, Player player, String text);
+	String onView(Player player, String text);
 
 }

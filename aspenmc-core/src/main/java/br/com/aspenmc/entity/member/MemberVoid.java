@@ -20,6 +20,11 @@ public class MemberVoid extends Member {
     }
 
     @Override
+    public void performCommand(String command) {
+
+    }
+
+    @Override
     public void sendMessage(String... messages) {
         System.out.println("[MemberVoid - " + getName() + "] " + Joiner.on(' ').join(messages));
     }

@@ -6,6 +6,9 @@ import br.com.aspenmc.CommonPlugin;
 import br.com.aspenmc.utils.string.StringFormat;
 import net.md_5.bungee.api.ChatColor;
 
+import java.util.Arrays;
+import java.util.Set;
+
 @AllArgsConstructor
 @Getter
 public class Tag {
@@ -15,6 +18,24 @@ public class Tag {
     private String tagName;
 
     private String tagPrefix;
+
+    private Set<String> aliases;
+
+    private boolean translateable;
+
+    public Tag(int id, String tagName, String tagPrefix, Set<String> aliases) {
+        this(id, tagName, tagPrefix, aliases, false);
+    }
+
+    public void addAliases(String... aliases) {
+        this.aliases.addAll(Arrays.asList(aliases));
+        CommonPlugin.getInstance().getPermissionData().updateTag(this, "aliases");
+    }
+
+    public void removeAliases(String... aliases) {
+        Arrays.asList(aliases).forEach(this.aliases::remove);
+        CommonPlugin.getInstance().getPermissionData().updateTag(this, "aliases");
+    }
 
     public void setTagPrefix(String tagPrefix) {
         this.tagPrefix = tagPrefix;

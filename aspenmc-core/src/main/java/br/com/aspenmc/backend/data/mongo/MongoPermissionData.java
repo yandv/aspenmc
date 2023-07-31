@@ -7,6 +7,7 @@ import br.com.aspenmc.packet.type.server.group.GroupFieldUpdate;
 import br.com.aspenmc.packet.type.server.tag.TagCreate;
 import br.com.aspenmc.packet.type.server.tag.TagDelete;
 import br.com.aspenmc.packet.type.server.tag.TagFieldUpdate;
+import com.google.common.collect.Sets;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
@@ -21,10 +22,7 @@ import br.com.aspenmc.permission.Tag;
 import br.com.aspenmc.utils.json.JsonUtils;
 import org.bson.Document;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class MongoPermissionData implements PermissionData {
@@ -36,14 +34,15 @@ public class MongoPermissionData implements PermissionData {
         this.groupCollection = mongoConnection.createCollection("groups", collection -> {
             collection.createIndex(new Document("id", 1), new IndexOptions().unique(true));
             collection.createIndex(new Document("groupName", 1), new IndexOptions().unique(true));
-            collection.insertOne(Document.parse(
-                    CommonConst.GSON.toJson(new Group(0, "Membro", Arrays.asList("tag.membro"), "membro", true, false))));
+            collection.insertOne(Document.parse(CommonConst.GSON.toJson(
+                    new Group(0, "Membro", Sets.newHashSet("tag.membro"), "membro", true, false))));
         });
 
         this.tagCollection = mongoConnection.createCollection("tags", collection -> {
             collection.createIndex(new Document("id", 1), new IndexOptions().unique(true));
             collection.createIndex(new Document("tagName", 1), new IndexOptions().unique(true));
-            collection.insertOne(Document.parse(CommonConst.GSON.toJson(new Tag(0, "Membro", "§f"))));
+            collection.insertOne(Document.parse(CommonConst.GSON.toJson(
+                    new Tag(0, "Membro", "§f", Sets.newHashSet("default", "padrão", "padrao", "normal")))));
         });
     }
 
@@ -63,35 +62,35 @@ public class MongoPermissionData implements PermissionData {
     public Optional<Group> retrieveGroupByName(String groupName) {
         Document document = groupCollection.find(new Document("groupName", groupName)).first();
         return document == null ? Optional.empty() :
-               Optional.of(CommonConst.GSON.fromJson(CommonConst.GSON.toJson(document), Group.class));
+                Optional.of(CommonConst.GSON.fromJson(CommonConst.GSON.toJson(document), Group.class));
     }
 
     @Override
     public Optional<Tag> retrieveTagByName(String tagName) {
         Document document = tagCollection.find(new Document("tagName", tagName)).first();
         return document == null ? Optional.empty() :
-               Optional.of(CommonConst.GSON.fromJson(CommonConst.GSON.toJson(document), Tag.class));
+                Optional.of(CommonConst.GSON.fromJson(CommonConst.GSON.toJson(document), Tag.class));
     }
 
     @Override
     public Optional<Group> retrieveGroupById(int groupId) {
         Document document = groupCollection.find(new Document("id", groupId)).first();
         return document == null ? Optional.empty() :
-               Optional.of(CommonConst.GSON.fromJson(CommonConst.GSON.toJson(document), Group.class));
+                Optional.of(CommonConst.GSON.fromJson(CommonConst.GSON.toJson(document), Group.class));
     }
 
     @Override
     public Optional<Tag> retrieveTagById(int tagId) {
         Document document = tagCollection.find(new Document("id", tagId)).first();
         return document == null ? Optional.empty() :
-               Optional.of(CommonConst.GSON.fromJson(CommonConst.GSON.toJson(document), Tag.class));
+                Optional.of(CommonConst.GSON.fromJson(CommonConst.GSON.toJson(document), Tag.class));
     }
 
     @Override
     public List<Group> retrieveAllGroups() {
         return groupCollection.find().into(new ArrayList<>()).stream()
                               .map(document -> CommonConst.GSON.fromJson(CommonConst.GSON.toJson(document),
-                                                                         Group.class)).collect(Collectors.toList());
+                                      Group.class)).collect(Collectors.toList());
     }
 
     @Override
@@ -122,14 +121,12 @@ public class MongoPermissionData implements PermissionData {
             String fieldName = fields[i];
 
             if (tree.has(fieldName)) {
-                groupCollection.updateOne(Filters.eq("id", group.getId()), new Document("$set", new Document(fieldName,
-                                                                                                             JsonUtils.elementToBson(
-                                                                                                                     tree.get(
-                                                                                                                             fieldName)))));
+                groupCollection.updateOne(Filters.eq("id", group.getId()),
+                        new Document("$set", new Document(fieldName, JsonUtils.elementToBson(tree.get(fieldName)))));
                 values[i] = tree.get(fieldName);
             } else {
                 groupCollection.updateOne(Filters.eq("id", group.getId()),
-                                          new Document("$unset", new Document(fieldName, "")));
+                        new Document("$unset", new Document(fieldName, "")));
                 values[i] = JsonNull.INSTANCE;
             }
         }
@@ -147,14 +144,12 @@ public class MongoPermissionData implements PermissionData {
             String fieldName = fields[i];
 
             if (tree.has(fieldName)) {
-                tagCollection.updateOne(Filters.eq("id", tag.getId()), new Document("$set", new Document(fieldName,
-                                                                                                         JsonUtils.elementToBson(
-                                                                                                                 tree.get(
-                                                                                                                         fieldName)))));
+                tagCollection.updateOne(Filters.eq("id", tag.getId()),
+                        new Document("$set", new Document(fieldName, JsonUtils.elementToBson(tree.get(fieldName)))));
                 values[i] = tree.get(fieldName);
             } else {
                 tagCollection.updateOne(Filters.eq("id", tag.getId()),
-                                        new Document("$unset", new Document(fieldName, "")));
+                        new Document("$unset", new Document(fieldName, "")));
                 values[i] = JsonNull.INSTANCE;
             }
         }

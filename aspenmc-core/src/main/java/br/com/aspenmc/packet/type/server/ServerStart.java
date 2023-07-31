@@ -21,7 +21,7 @@ public class ServerStart extends Server {
         CommonPlugin.getInstance().getServerManager().addActiveServer(server);
         CommonPlugin.getInstance()
                     .debug("The server " + getServer().getServerId() + " (" + server.getServerAddress() + ":" +
-                           server.getServerPort() + ") has been started as a " + getServer().getServerType().getName() +
+                           server.getServerPort() + ") has been started as a " + getServer().getServerType().name() +
                            ".");
     }
 }

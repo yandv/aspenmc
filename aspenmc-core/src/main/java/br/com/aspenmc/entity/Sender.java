@@ -1,5 +1,6 @@
 package br.com.aspenmc.entity;
 
+import br.com.aspenmc.language.Language;
 import br.com.aspenmc.permission.Group;
 import net.md_5.bungee.api.chat.TextComponent;
 
@@ -42,6 +43,14 @@ public interface Sender {
     UUID getUniqueId();
 
     /**
+     * Performs a command as the sender
+     *
+     * @param command the command to perform
+     */
+
+    void performCommand(String command);
+
+    /**
      * Sends a message to the sender
      *
      * @param messages the messages to send
@@ -82,6 +91,14 @@ public interface Sender {
     boolean isPlayer();
 
     /**
+     * Retrieves the language of the sender
+     *
+     * @return the language of the sender
+     */
+
+    Language getLanguage();
+
+    /**
      * Checks if the sender has a permission
      *
      * @param permission the permission to check
@@ -89,6 +106,14 @@ public interface Sender {
      */
 
     boolean hasPermission(String permission);
+
+    default String t(String translateId, String defaultMessage, String... replaces) {
+        return getLanguage().t(translateId, defaultMessage, replaces);
+    }
+
+    default String translate(String translateId, String... replaces) {
+        return getLanguage().translate(translateId, replaces);
+    }
 
     Group getServerGroup();
 }

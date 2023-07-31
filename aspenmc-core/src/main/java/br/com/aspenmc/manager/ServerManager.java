@@ -64,13 +64,15 @@ public class ServerManager {
         return activeServers.get(serverName.toLowerCase());
     }
 
-    public ProxiedServer getServerByName(String serverName) {
-        for (ProxiedServer proxiedServer : activeServers.values())
-            if (proxiedServer.getServerId().toLowerCase().startsWith(serverName.toLowerCase())) {
-                return proxiedServer;
-            }
+    public boolean hasServer(String serverId) {
+        return activeServers.containsKey(serverId.toLowerCase());
+    }
 
-        return activeServers.get(serverName.toLowerCase());
+    public ProxiedServer getServerByName(String serverName) {
+        return activeServers.values().stream().filter(proxiedServer -> proxiedServer.getServerId().toLowerCase()
+                                                                                    .startsWith(
+                                                                                            serverName.toLowerCase()))
+                            .findFirst().orElse(null);
     }
 
     public Collection<ProxiedServer> getServers() {
@@ -78,19 +80,7 @@ public class ServerManager {
     }
 
     public BaseBalancer<ProxiedServer> getBalancer(ServerType type) {
-        if (type == null) return null;
-
-        return balancers.get(type);
-    }
-
-    public Set<UUID> getOnlinePlayers() {
-        Set<UUID> players = new HashSet<>();
-
-        for (ProxiedServer server : activeServers.values()) {
-            players.addAll(server.getPlayers());
-        }
-
-        return players;
+        return balancers.getOrDefault(type, null);
     }
 
     public int getTotalCount() {
@@ -98,7 +88,6 @@ public class ServerManager {
     }
 
     public int getTotalNumber(ServerType... serverTypes) {
-        return Arrays.stream(serverTypes).mapToInt(serverType -> getBalancer(serverType).getTotalNumber())
-                     .sum();
+        return Arrays.stream(serverTypes).mapToInt(serverType -> getBalancer(serverType).getTotalNumber()).sum();
     }
 }

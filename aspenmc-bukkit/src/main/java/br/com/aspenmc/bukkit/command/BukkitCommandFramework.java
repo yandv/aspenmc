@@ -26,6 +26,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 @Getter
 public class BukkitCommandFramework implements CommandFramework {
@@ -64,10 +65,9 @@ public class BukkitCommandFramework implements CommandFramework {
     }
 
     public boolean handleCommand(CommandSender sender, String label, org.bukkit.command.Command cmd, String[] args) {
-        Sender currentSender = sender instanceof Player ? CommonPlugin.getInstance().getMemberManager()
-                                                                      .getMemberById(((Player) sender).getUniqueId())
-                                                                      .orElse(null) :
-                               CommonPlugin.getInstance().getConsoleSender();
+        Sender currentSender = sender instanceof Player ?
+                CommonPlugin.getInstance().getMemberManager().getMemberById(((Player) sender).getUniqueId())
+                            .orElse(null) : CommonPlugin.getInstance().getConsoleSender();
         for (int i = args.length; i >= 0; i--) {
             StringBuilder buffer = new StringBuilder();
             buffer.append(label.toLowerCase());
@@ -88,23 +88,18 @@ public class BukkitCommandFramework implements CommandFramework {
                 }
 
                 if (command.runAsync() && Bukkit.isPrimaryThread()) {
-                    new BukkitRunnable() {
-
-                        @Override
-                        public void run() {
-                            try {
-                                entry.getKey().invoke(entry.getValue(), new CommandArgs(currentSender, label, args,
-                                                                                        cmdLabel.split("\\.").length -
-                                                                                        1));
-                            } catch (IllegalArgumentException | InvocationTargetException | IllegalAccessException e) {
-                                e.printStackTrace();
-                            }
+                    CommonPlugin.getInstance().getPluginPlatform().runAsync(() -> {
+                        try {
+                            entry.getKey().invoke(entry.getValue(),
+                                    new CommandArgs(currentSender, label, args, cmdLabel.split("\\.").length - 1));
+                        } catch (IllegalArgumentException | InvocationTargetException | IllegalAccessException e) {
+                            e.printStackTrace();
                         }
-                    }.runTaskAsynchronously(plugin);
+                    });
                 } else {
                     try {
-                        entry.getKey().invoke(entry.getValue(), new CommandArgs(currentSender, label, args,
-                                                                                cmdLabel.split("\\.").length - 1));
+                        entry.getKey().invoke(entry.getValue(),
+                                new CommandArgs(currentSender, label, args, cmdLabel.split("\\.").length - 1));
                     } catch (IllegalArgumentException | InvocationTargetException | IllegalAccessException e) {
                         e.printStackTrace();
                     }
@@ -123,7 +118,7 @@ public class BukkitCommandFramework implements CommandFramework {
             if (m.getAnnotation(Command.class) != null) {
                 Command command = m.getAnnotation(Command.class);
                 if (m.getParameterTypes().length != 1 ||
-                    !CommandArgs.class.isAssignableFrom(m.getParameterTypes()[0])) {
+                        !CommandArgs.class.isAssignableFrom(m.getParameterTypes()[0])) {
                     System.out.println("Unable to register command " + m.getName() + ". Unexpected method arguments");
                     continue;
                 }
@@ -171,7 +166,7 @@ public class BukkitCommandFramework implements CommandFramework {
         }
 
         IndexHelpTopic topic = new IndexHelpTopic(plugin.getName(), "All commands for " + plugin.getName(), null, help,
-                                                  "Below is a list of all " + plugin.getName() + " commands:");
+                "Below is a list of all " + plugin.getName() + " commands:");
         Bukkit.getServer().getHelpMap().addTopic(topic);
     }
 
@@ -197,6 +192,11 @@ public class BukkitCommandFramework implements CommandFramework {
         if (!command.usage().equalsIgnoreCase("") && cmdLabel == label) {
             map.getCommand(cmdLabel).setUsage(command.usage());
         }
+    }
+
+    public Collection<org.bukkit.command.Command> getCommands() {
+        return knownCommands.values().stream().filter(command -> command instanceof BukkitCommand)
+                            .collect(Collectors.toList());
     }
 
     private void registerCompleter(String label, Method m, Object obj) {
@@ -229,7 +229,7 @@ public class BukkitCommandFramework implements CommandFramework {
                     completer.addCompleter(label, m, obj);
                 } else {
                     System.out.println("Unable to register tab completer " + m.getName() +
-                                       ". A tab completer is already registered for that command!");
+                            ". A tab completer is already registered for that command!");
                 }
             } catch (Exception ex) {
                 ex.printStackTrace();
@@ -345,7 +345,7 @@ public class BukkitCommandFramework implements CommandFramework {
                 success = handleCommand(sender, commandLabel, this, args);
             } catch (Throwable ex) {
                 throw new CommandException("Unhandled exception executing command '" + commandLabel + "' in plugin " +
-                                           owningPlugin.getDescription().getFullName(), ex);
+                        owningPlugin.getDescription().getFullName(), ex);
             }
 
             if (!success && usageMessage.length() > 0) {
@@ -358,7 +358,8 @@ public class BukkitCommandFramework implements CommandFramework {
         }
 
         @Override
-        public List<String> tabComplete(CommandSender sender, String alias, String[] args) throws CommandException, IllegalArgumentException {
+        public List<String> tabComplete(CommandSender sender, String alias, String[] args)
+                throws CommandException, IllegalArgumentException {
             Validate.notNull(sender, "Sender cannot be null");
             Validate.notNull(args, "Arguments cannot be null");
             Validate.notNull(alias, "Alias cannot be null");
@@ -423,7 +424,8 @@ public class BukkitCommandFramework implements CommandFramework {
         }
 
         @Override
-        public List<String> onTabComplete(CommandSender sender, org.bukkit.command.Command command, String label, String[] args) {
+        public List<String> onTabComplete(CommandSender sender, org.bukkit.command.Command command, String label,
+                String[] args) {
             for (int i = args.length; i >= 0; i--) {
                 StringBuilder buffer = new StringBuilder();
                 buffer.append(label.toLowerCase());
@@ -440,7 +442,7 @@ public class BukkitCommandFramework implements CommandFramework {
                                 sender instanceof Player ? CommonPlugin.getInstance().getMemberManager()
                                                                        .getMemberById(((Player) sender).getUniqueId())
                                                                        .orElse(null) :
-                                CommonPlugin.getInstance().getConsoleSender(), label, args,
+                                        CommonPlugin.getInstance().getConsoleSender(), label, args,
                                 cmdLabel.split("\\.").length - 1));
                     } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
                         e.printStackTrace();

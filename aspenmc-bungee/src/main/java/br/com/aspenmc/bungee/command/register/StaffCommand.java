@@ -1,5 +1,7 @@
 package br.com.aspenmc.bungee.command.register;
 
+import br.com.aspenmc.bungee.entity.BungeeMember;
+import br.com.aspenmc.entity.Sender;
 import com.google.common.base.Joiner;
 import br.com.aspenmc.bungee.BungeeMain;
 import br.com.aspenmc.command.CommandArgs;
@@ -58,6 +60,13 @@ public class StaffCommand implements CommandHandler {
 
     @CommandFramework.Command(name = "glist", permission = "command.glist")
     public void glistCommand(CommandArgs cmdArgs) {
+        Sender sender = cmdArgs.getSender();
+        String[] args = cmdArgs.getArgs();
 
+        String serverId;
+
+        if (sender.isPlayer()) {
+            
+        }
     }
 }

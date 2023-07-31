@@ -7,16 +7,14 @@ import br.com.aspenmc.backend.type.RedisConnection;
 import br.com.aspenmc.bukkit.command.BukkitCommandFramework;
 import br.com.aspenmc.bukkit.entity.BukkitMember;
 import br.com.aspenmc.bukkit.event.player.group.PlayerChangedGroupEvent;
+import br.com.aspenmc.bukkit.event.server.GameStateChangeEvent;
 import br.com.aspenmc.bukkit.event.server.ServerUpdateEvent;
 import br.com.aspenmc.bukkit.listener.*;
-import br.com.aspenmc.bukkit.manager.CharacterManager;
-import br.com.aspenmc.bukkit.manager.HologramManager;
-import br.com.aspenmc.bukkit.manager.LocationManager;
-import br.com.aspenmc.bukkit.manager.VanishManager;
+import br.com.aspenmc.bukkit.manager.*;
 import br.com.aspenmc.bukkit.networking.BukkitPubSub;
 import br.com.aspenmc.bukkit.permission.regex.RegexPermissions;
 import br.com.aspenmc.bukkit.entity.BukkitConsoleSender;
-import br.com.aspenmc.bukkit.scheduler.UpdateScheduler;
+import br.com.aspenmc.bukkit.utils.scheduler.UpdateScheduler;
 import br.com.aspenmc.entity.member.gamer.Gamer;
 import br.com.aspenmc.packet.type.member.MemberGroupChange;
 import br.com.aspenmc.packet.type.member.server.ServerConnectRequest;
@@ -46,49 +44,64 @@ public abstract class BukkitCommon extends JavaPlugin implements CommonPlatform 
     protected RegexPermissions regexPerms;
 
     protected CharacterManager characterManager;
+    protected CombatlogManager combatlogManager;
+    protected CooldownManager cooldownManager;
     protected HologramManager hologramManager;
-    private LocationManager locationManager;
+    protected LocationManager locationManager;
     protected VanishManager vanishManager;
 
-    private ProxiedServer.GameState state;
+    private ProxiedServer.GameState state = ProxiedServer.GameState.UNKNOWN;
     private int time;
     @Setter
-    private boolean timeEnabled;
+    private boolean consoleControl = true;
+    @Setter
+    private boolean timerEnabled;
     private String mapName;
 
     @Setter
     private boolean tagControl = true;
 
     @Setter
-    private Set<Map.Entry<String, Class<? extends Gamer>>> gamerList;
+    private Set<Map.Entry<String, Class<? extends Gamer<Player>>>> gamerList;
 
     @Setter
     private boolean saveGamers = true;
 
+    @Setter
+    private boolean removePlayerDat = true;
+
+    private boolean pluginEnabled = true;
+
     @Override
     public void onLoad() {
-        instance = this;
+        try {
+            instance = this;
 
-        saveDefaultConfig();
+            saveDefaultConfig();
 
-        plugin = new CommonPlugin(this, getLogger());
+            plugin = new CommonPlugin(this, getLogger());
 
-        plugin.setConsoleSender(new BukkitConsoleSender());
+            plugin.setConsoleSender(new BukkitConsoleSender());
 
-        plugin.setServerAddress(Bukkit.getIp());
-        plugin.setServerPort(Bukkit.getPort());
+            plugin.setServerAddress(Bukkit.getIp());
+            plugin.setServerPort(Bukkit.getPort());
 
-        plugin.setServerId(getConfig().getString("serverId", "unnamed-server"));
-        plugin.setServerType(Optional.ofNullable(ServerType.getByName(getConfig().getString("serverType")))
-                                     .orElse(ServerType.LOBBY));
+            plugin.setServerId(getConfig().getString("serverId", "unnamed-server"));
+            plugin.setServerType(Optional.ofNullable(ServerType.getByName(getConfig().getString("serverType")))
+                                         .orElse(ServerType.LOBBY));
 
-        plugin.startConnection();
-        plugin.getServerData().startServer(Bukkit.getMaxPlayers());
+            plugin.startConnection();
+            plugin.getServerData().startServer(Bukkit.getMaxPlayers());
 
-        plugin.debug("Starting the server " + plugin.getServerId() + " (" + plugin.getServerType().name() + ").");
+            plugin.debug("Starting the server " + plugin.getServerId() + " (" + plugin.getServerType().name() + ").");
 
-        super.onLoad();
-        onCompleteLoad();
+            super.onLoad();
+            onCompleteLoad();
+        } catch (Exception e) {
+            getLogger().severe("An error occurred while loading the plugin.");
+            getLogger().log(java.util.logging.Level.SEVERE, e.getMessage(), e);
+            pluginEnabled = false;
+        }
     }
 
     public void onCompleteLoad() {
@@ -97,36 +110,50 @@ public abstract class BukkitCommon extends JavaPlugin implements CommonPlatform 
 
     @Override
     public void onEnable() {
-        regexPerms = new RegexPermissions();
-
-        runAsync(new RedisConnection.PubSubListener(plugin.getRedisConnection(), new BukkitPubSub(),
-                CommonConst.SERVER_PACKET_CHANNEL));
-
-        characterManager = new CharacterManager();
-        hologramManager = new HologramManager();
-        locationManager = new LocationManager();
-        vanishManager = new VanishManager();
-
-        if (plugin.getPermissionManager().getTags().isEmpty()) {
-            setTagControl(false);
+        if (!pluginEnabled) {
+            getLogger().severe("The plugin was not enabled due to an error in the loading process.");
+            Bukkit.shutdown();
+            return;
         }
 
-        gamerList = new HashSet<>();
+        try {
+            regexPerms = new RegexPermissions();
 
-        registerPacketHandlers();
-        registerListeners();
+            runAsync(new RedisConnection.PubSubListener(plugin.getRedisConnection(), new BukkitPubSub(),
+                    CommonConst.SERVER_PACKET_CHANNEL));
 
-        runLater(this::registerCommands, 7L);
-        runTimer(new UpdateScheduler(), 1, 1);
+            characterManager = new CharacterManager();
+            combatlogManager = new CombatlogManager();
+            cooldownManager = new CooldownManager();
+            hologramManager = new HologramManager();
+            locationManager = new LocationManager();
+            vanishManager = new VanishManager();
 
-        if (plugin.isServerLog()) {
-            plugin.loadServers();
+            if (plugin.getPermissionManager().getTags().isEmpty()) {
+                setTagControl(false);
+            }
+
+            gamerList = new HashSet<>();
+
+            registerPacketHandlers();
+            registerListeners();
+
+            runLater(this::registerCommands, 7L);
+            runTimer(new UpdateScheduler(), 1, 1);
+
+            if (plugin.isServerLog()) {
+                plugin.loadServers();
+            }
+
+            plugin.debug("Started the server " + plugin.getServerId() + " (" + plugin.getServerType().name() + ").");
+
+            super.onEnable();
+            onCompleteStart();
+        } catch (Exception e) {
+            getLogger().severe("An error occurred while enabling the plugin.");
+            getLogger().log(java.util.logging.Level.SEVERE, e.getMessage(), e);
+            Bukkit.shutdown();
         }
-
-        plugin.debug("Started the server " + plugin.getServerId() + " (" + plugin.getServerType().name() + ").");
-
-        super.onEnable();
-        onCompleteStart();
     }
 
     public void onCompleteStart() {
@@ -135,32 +162,59 @@ public abstract class BukkitCommon extends JavaPlugin implements CommonPlatform 
 
     @Override
     public void onDisable() {
+        try {
+            plugin.getServerData().stopServer();
+            plugin.debug("Stopped the server " + plugin.getServerId() + " (" + plugin.getServerType().name() + ").");
 
-        plugin.getServerData().stopServer();
-        plugin.debug("Stopped the server " + plugin.getServerId() + " (" + plugin.getServerType().name() + ").");
-
-        super.onDisable();
+            super.onDisable();
+        } catch (Exception e) {
+            getLogger().severe("An error occurred while disabling the plugin.");
+            getLogger().log(java.util.logging.Level.SEVERE, e.getMessage(), e);
+        }
     }
 
     public void updateState(ProxiedServer.GameState state, int time) {
+        ProxiedServer.GameState oldState = this.state;
         this.state = state;
         this.time = time;
         CommonPlugin.getInstance().getPacketManager()
                     .sendPacketAsync(new ServerUpdate(CommonPlugin.getInstance().getServerId(), state, time, mapName));
+
+        if (oldState != state) {
+            Bukkit.getPluginManager().callEvent(new GameStateChangeEvent(oldState, state));
+            CommonPlugin.getInstance()
+                        .debug("The game state changed from " + oldState.name() + " to " + state.name() + ".");
+        }
     }
 
     public void updateState(ProxiedServer.GameState state, int time, String mapName) {
+        ProxiedServer.GameState oldState = this.state;
+
         this.state = state;
         this.time = time;
         this.mapName = mapName;
+
         CommonPlugin.getInstance().getPacketManager()
                     .sendPacketAsync(new ServerUpdate(CommonPlugin.getInstance().getServerId(), state, time, mapName));
+
+        if (oldState != state) {
+            Bukkit.getPluginManager().callEvent(new GameStateChangeEvent(oldState, state));
+            CommonPlugin.getInstance()
+                        .debug("The game state changed from " + oldState.name() + " to " + state.name() + ".");
+        }
     }
 
     public void updateState(ProxiedServer.GameState state) {
-        this.state = state;
-        CommonPlugin.getInstance().getPacketManager()
-                    .sendPacketAsync(new ServerUpdate(CommonPlugin.getInstance().getServerId(), state, time, mapName));
+        ProxiedServer.GameState oldState = this.state;
+
+        if (oldState != state) {
+            this.state = state;
+            CommonPlugin.getInstance().getPacketManager().sendPacketAsync(
+                    new ServerUpdate(CommonPlugin.getInstance().getServerId(), state, time, mapName));
+            Bukkit.getPluginManager().callEvent(new GameStateChangeEvent(oldState, state));
+            CommonPlugin.getInstance()
+                        .debug("The game state changed from " + oldState.name() + " to " + state.name() + ".");
+        }
     }
 
     public void updateTime(int time) {
@@ -175,7 +229,7 @@ public abstract class BukkitCommon extends JavaPlugin implements CommonPlatform 
                     .sendPacketAsync(new ServerUpdate(CommonPlugin.getInstance().getServerId(), state, time, mapName));
     }
 
-    public void loadGamer(String gamerId, Class<? extends Gamer> gamerClass) {
+    public void loadGamer(String gamerId, Class<? extends Gamer<Player>> gamerClass) {
         gamerList.add(new AbstractMap.SimpleEntry<>(gamerId, gamerClass));
     }
 
@@ -224,11 +278,13 @@ public abstract class BukkitCommon extends JavaPlugin implements CommonPlatform 
         plugin.getPacketManager().onEnable();
 
         plugin.getPacketManager().registerHandler(MemberGroupChange.class, packet -> {
-            plugin.getMemberManager().getMemberById(packet.getPlayerId(), BukkitMember.class).ifPresent(
-                    member -> Bukkit.getPluginManager().callEvent(
-                            new PlayerChangedGroupEvent(member, packet.getGroupName(), packet.getExpiresAt(),
-                                    packet.getDuration(),
-                                    PlayerChangedGroupEvent.GroupAction.valueOf(packet.getGroupAction().name()))));
+            plugin.getMemberManager().getMemberById(packet.getPlayerId(), BukkitMember.class).ifPresent(member -> {
+                member.resetHigherGroup();
+                Bukkit.getPluginManager().callEvent(
+                        new PlayerChangedGroupEvent(member, packet.getGroupName(), packet.getExpiresAt(),
+                                packet.getDuration(),
+                                PlayerChangedGroupEvent.GroupAction.valueOf(packet.getGroupAction().name())));
+            });
         });
 
         plugin.getPacketManager().registerHandler(BungeeCommandResponse.class, packet -> {
@@ -272,8 +328,8 @@ public abstract class BukkitCommon extends JavaPlugin implements CommonPlatform 
                 "testforblocks", "setidletimeout", "replaceitem", "entitydata", "clone", "debug", "defaultgamemode",
                 "deop", "op", "filter", "icanhasbukkit", "list", "protocol", "reload", "restart", "rl", "scoreboard",
                 "seed", "spawnpoint", "spreadplayers", "stats", "trigger", "ver", "about", "achievement", "blockdata",
-                "title", "help", "plugins");
-        BukkitCommandFramework.INSTANCE.loadCommands("br.com.aspenmc.bukkit.command.register");
+                "title", "help", "plugins", "time");
+        BukkitCommandFramework.INSTANCE.loadCommands("br.com.aspenmc.bukkit");
         BukkitCommandFramework.INSTANCE.registerHelp();
     }
 
@@ -299,6 +355,11 @@ public abstract class BukkitCommon extends JavaPlugin implements CommonPlatform 
     @Override
     public void runAsyncTimer(Runnable runnable, long delay, long period) {
         Bukkit.getScheduler().runTaskTimerAsynchronously(BukkitCommon.getInstance(), runnable, delay, period);
+    }
+
+    @Override
+    public void runAsyncLater(Runnable runnable, long delay) {
+        Bukkit.getScheduler().runTaskLaterAsynchronously(BukkitCommon.getInstance(), runnable, delay);
     }
 
     @Override

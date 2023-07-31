@@ -14,6 +14,7 @@ import br.com.aspenmc.packet.type.member.teleport.MemberTeleportResponse;
 import br.com.aspenmc.permission.Group;
 import br.com.aspenmc.server.ServerType;
 import br.com.aspenmc.utils.string.StringFormat;
+import br.com.aspenmc.utils.string.TimeFormat;
 import com.google.common.base.Joiner;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.server.v1_8_R3.MinecraftServer;
@@ -49,6 +50,81 @@ public class ModeratorCommand implements CommandHandler {
         member.setBuildEnabled(buildEnabled);
         member.sendMessage(buildEnabled ? "§aVocê agora está no modo de construção." :
                 "§cVocê agora não está mais no modo de construção.");
+    }
+
+    @CommandFramework.Command(name = "time", aliases = { "tempo" }, permission = "command.time")
+    public void timeCommand(CommandArgs cmdArgs) {
+        Sender sender = cmdArgs.getSender();
+        String[] args = cmdArgs.getArgs();
+
+        if (args.length == 0) {
+            sender.sendMessage(" §a» §fUse §a" + cmdArgs.getLabel() + " <tempo> §fpara alterar o tempo do jogo.");
+            return;
+        }
+
+        switch (args[0].toLowerCase()) {
+        case "stop": {
+            BukkitCommon.getInstance().setTimerEnabled(!BukkitCommon.getInstance().isTimerEnabled());
+            BukkitCommon.getInstance().setConsoleControl(false);
+            sender.sendMessage(BukkitCommon.getInstance().isTimerEnabled() ? "§aO tempo do jogo foi retomado." :
+                    "§aO tempo do jogo foi parado.");
+            break;
+        }
+        case "console": {
+            BukkitCommon.getInstance().setConsoleControl(!BukkitCommon.getInstance().isConsoleControl());
+            sender.sendMessage(BukkitCommon.getInstance().isConsoleControl() ?
+                    "§aO tempo do jogo foi retomado para o comando do console." :
+                    "§aO tempo do jogo foi retirado do comando do console.");
+            break;
+        }
+        case "set": {
+            if (args.length == 1) {
+                sender.sendMessage(
+                        " §a» §fUse §a" + cmdArgs.getLabel() + " set <tempo> §fpara alterar o tempo do jogo.");
+                return;
+            }
+
+            Long time = 0L;
+
+            try {
+                time = Long.valueOf(args[1]);
+            } catch (Exception e) {
+                sender.sendMessage("§cO tempo inserido é inválido.");
+                return;
+            }
+
+            if (sender.isPlayer()) {
+                cmdArgs.getSenderAsMember(BukkitMember.class).getPlayer().getWorld().setTime(time);
+            } else {
+                long t = time;
+                Bukkit.getWorlds().stream().findFirst().ifPresent(world -> world.setTime(t));
+            }
+
+            sender.sendMessage("§aO tempo do mundo foi alterado para " + time + ".");
+            break;
+        }
+        default: {
+            long time;
+
+            try {
+                time = StringFormat.getTimeFromString(args[0], true);
+            } catch (Exception e) {
+                sender.sendMessage("§cO tempo inserido é inválido.");
+                return;
+            }
+
+            int seconds = (int) Math.floor((time - System.currentTimeMillis()) / 1000.0D);
+
+            if (seconds >= 60 * 120) {
+                seconds = 60 * 120;
+            }
+
+            sender.sendMessage(
+                    "§aO tempo do jogo foi alterado para " + StringFormat.formatTime(seconds, TimeFormat.NORMAL) + ".");
+            BukkitCommon.getInstance().updateTime(seconds);
+            break;
+        }
+        }
     }
 
     @CommandFramework.Command(name = "setlocation", aliases = { "setloc" }, permission = "command.location")
@@ -170,7 +246,7 @@ public class ModeratorCommand implements CommandHandler {
                     "§cO servidor " + CommonPlugin.getInstance().getServerId() + " foi fechado por " + reason);
         }
 
-        new BukkitRunnable() {
+        CommonPlugin.getInstance().getPluginPlatform().runTimer(new Runnable() {
 
             int tries = 0;
 
@@ -204,7 +280,7 @@ public class ModeratorCommand implements CommandHandler {
                     return;
                 }
             }
-        }.runTaskTimer(BukkitCommon.getInstance(), 0, 20);
+        }, 0, 20);
     }
 
     @SuppressWarnings("deprecation")

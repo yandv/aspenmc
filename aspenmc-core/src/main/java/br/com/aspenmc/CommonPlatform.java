@@ -59,6 +59,15 @@ public interface CommonPlatform {
     void runAsyncTimer(Runnable runnable, long delay, long period);
 
     /**
+     * Run a runnable after a delay asynchronously
+     *
+     * @param runnable The runnable to run
+     * @param delay The delay in milliseconds
+     */
+
+    void runAsyncLater(Runnable runnable, long delay);
+
+    /**
      * Run a runnable synchronously
      *
      * @param runnable The runnable to run
@@ -84,4 +93,5 @@ public interface CommonPlatform {
      */
 
     void runTimer(Runnable runnable, long delay, long period);
+
 }

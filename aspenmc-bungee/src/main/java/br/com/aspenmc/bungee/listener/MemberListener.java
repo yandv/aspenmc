@@ -3,10 +3,12 @@ package br.com.aspenmc.bungee.listener;
 import br.com.aspenmc.CommonPlugin;
 import br.com.aspenmc.bungee.BungeeMain;
 import br.com.aspenmc.bungee.entity.BungeeMember;
+import br.com.aspenmc.bungee.event.PlayerChangedGroupEvent;
 import br.com.aspenmc.bungee.utils.PlayerAPI;
 import br.com.aspenmc.entity.Member;
 import br.com.aspenmc.entity.member.Skin;
 import br.com.aspenmc.entity.member.configuration.LoginConfiguration;
+import br.com.aspenmc.packet.type.server.group.GroupFieldUpdate;
 import br.com.aspenmc.permission.Group;
 import br.com.aspenmc.punish.Punish;
 import br.com.aspenmc.punish.PunishType;
@@ -27,6 +29,10 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public class MemberListener implements Listener {
+
+    public MemberListener() {
+        CommonPlugin.getInstance().getPacketManager().registerHandler(GroupFieldUpdate.class, this::onGroupFieldUpdate);
+    }
 
     @EventHandler
     public void onLogin(LoginEvent event) {
@@ -60,15 +66,16 @@ public class MemberListener implements Listener {
             return;
         }
 
-        CommandSender sender = event.getSender();
-        Member member = CommonPlugin.getInstance().getMemberManager()
-                                    .getMemberById(((ProxiedPlayer) sender).getUniqueId()).orElse(null);
+        event.setHasPermission(CommonPlugin.getInstance().getMemberManager()
+                                           .getMemberById(((ProxiedPlayer) event.getSender()).getUniqueId())
+                                           .map(member ->
+                                                   member.hasSilentPermission(event.getPermission().toLowerCase()) ||
+                                                           member.hasSilentPermission("*")).orElse(false));
+    }
 
-        if (member == null) {
-            return;
-        }
-
-        event.setHasPermission(member.hasSilentPermission(event.getPermission()) || member.hasSilentPermission("*"));
+    @EventHandler
+    public void onPlayerChangedGroup(PlayerChangedGroupEvent event) {
+        calculatePermissions(event.getPlayer(), event.getMember());
     }
 
     @EventHandler
@@ -93,7 +100,7 @@ public class MemberListener implements Listener {
 
         CompletableFuture<BungeeMember> byNameFuture = CommonPlugin.getInstance().getMemberData()
                                                                    .loadMemberAsFutureByName(playerName,
-                                                                                             BungeeMember.class, true);
+                                                                           BungeeMember.class, true);
 
         CompletableFuture.allOf(byIdFuture, byNameFuture);
 
@@ -105,9 +112,9 @@ public class MemberListener implements Listener {
 
             if (byName == null) {
                 created = true;
-                member = new BungeeMember(uniqueId, playerName, loginEvent.getConnection().isOnlineMode() ?
-                                                                LoginConfiguration.AccountType.PREMIUM :
-                                                                LoginConfiguration.AccountType.CRACKED);
+                member = new BungeeMember(uniqueId, playerName,
+                        loginEvent.getConnection().isOnlineMode() ? LoginConfiguration.AccountType.PREMIUM :
+                                LoginConfiguration.AccountType.CRACKED);
                 CommonPlugin.getInstance().getMemberData().createMember(member);
                 CommonPlugin.getInstance().debug("The player " + member.getConstraintName() + " has been created.");
             } else {
@@ -131,9 +138,9 @@ public class MemberListener implements Listener {
 
         if (member.isUsingCustomSkin()) {
             Skin skin = member.getPlayerSkin().equals(CommonPlugin.getInstance().getDefaultSkin().getPlayerName()) ?
-                        CommonPlugin.getInstance().getDefaultSkin() :
-                        CommonPlugin.getInstance().getSkinData().loadData(member.getPlayerSkin())
-                                    .orElse(CommonPlugin.getInstance().getDefaultSkin());
+                    CommonPlugin.getInstance().getDefaultSkin() :
+                    CommonPlugin.getInstance().getSkinData().loadData(member.getPlayerSkin())
+                                .orElse(CommonPlugin.getInstance().getDefaultSkin());
 
             try {
                 PlayerAPI.changePlayerSkin(loginEvent.getConnection(), skin);
@@ -154,7 +161,7 @@ public class MemberListener implements Listener {
         member.loadConfiguration();
         CommonPlugin.getInstance().getMemberManager().loadMember(member);
         CommonPlugin.getInstance().debug("The player " + member.getConstraintName() + " has been loaded (" +
-                                         (System.currentTimeMillis() - start) + "ms).");
+                (System.currentTimeMillis() - start) + "ms).");
     }
 
     private void calculatePermissions(ProxiedPlayer player, BungeeMember member) {
@@ -173,5 +180,13 @@ public class MemberListener implements Listener {
                 player.setPermission(string.toLowerCase(), true);
             }
         }
+    }
+
+    private void onGroupFieldUpdate(GroupFieldUpdate packet) {
+        CommonPlugin.getInstance().getMemberManager().getMembers(BungeeMember.class).stream()
+                    .filter(member -> member.hasGroup(packet.getGroupName()))
+                    .filter(member -> member.getProxiedPlayer() != null).forEach(member -> {
+                        calculatePermissions(member.getProxiedPlayer(), member);
+                    });
     }
 }

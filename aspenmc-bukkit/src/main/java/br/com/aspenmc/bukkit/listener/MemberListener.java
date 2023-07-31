@@ -29,12 +29,8 @@ public class MemberListener implements Listener {
         long start = System.currentTimeMillis();
         CompletableFuture<BukkitMember> byId = CommonPlugin.getInstance().getMemberData()
                                                            .loadMemberAsFutureById(uniqueId, BukkitMember.class);
-        CompletableFuture<List<Gamer>> gamers = CommonPlugin.getInstance().getGamerData().loadGamer(uniqueId,
-                                                                                                    BukkitCommon
-                                                                                                            .getInstance()
-                                                                                                            .getGamerList()
-                                                                                                            .toArray(
-                                                                                                                    new Map.Entry[0]));
+        CompletableFuture<List<Gamer<Player>>> gamers = CommonPlugin.getInstance().getGamerData().loadGamer(uniqueId,
+                BukkitCommon.getInstance().getGamerList().toArray(new Map.Entry[0]));
 
         CompletableFuture.allOf(byId, gamers);
 
@@ -47,22 +43,22 @@ public class MemberListener implements Listener {
         }
 
         member.setSkin(member.getPlayerSkin().equals(CommonPlugin.getInstance().getDefaultSkin().getPlayerName()) ?
-                       CommonPlugin.getInstance().getDefaultSkin() :
-                       CommonPlugin.getInstance().getSkinData().loadData(member.getPlayerSkin()).orElse(null));
+                CommonPlugin.getInstance().getDefaultSkin() :
+                CommonPlugin.getInstance().getSkinData().loadData(member.getPlayerSkin()).orElse(null));
         member.loadConfiguration();
 
-        List<Gamer> gamerList = gamers.join();
+        List<Gamer<Player>> gamerList = gamers.join();
 
-        for (Gamer gamer : gamerList) {
+        for (Gamer<Player> gamer : gamerList) {
             member.loadGamer(gamer.getId(), gamer);
             CommonPlugin.getInstance()
                         .debug("The gamer " + gamer.getId() + " has been loaded for " + member.getConstraintName() +
-                               ".");
+                                ".");
         }
 
         CommonPlugin.getInstance().getMemberManager().loadMember(member);
         CommonPlugin.getInstance().debug("The player " + member.getConstraintName() + " has been loaded (" +
-                                         (System.currentTimeMillis() - start) + "ms).");
+                (System.currentTimeMillis() - start) + "ms).");
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -73,11 +69,14 @@ public class MemberListener implements Listener {
 
         if (member == null) {
             event.disallow(PlayerLoginEvent.Result.KICK_OTHER,
-                           "§cSeu perfil não foi carregado.\n§cTente iniciar uma nova conexão.");
+                    "§cSeu perfil não foi carregado.\n§cTente iniciar uma nova conexão.");
             return;
         }
 
         member.setPlayer(player);
+        CommonPlugin.getInstance().getMemberManager().getGamers(player.getUniqueId(), Player.class).forEach(gamer -> {
+            gamer.loadEntity(player);
+        });
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
@@ -94,7 +93,7 @@ public class MemberListener implements Listener {
                 () -> CommonPlugin.getInstance().getServerData().joinPlayer(event.getPlayer().getUniqueId()));
         CommonPlugin.getInstance().getMemberManager().getMemberById(event.getPlayer().getUniqueId()).ifPresent(
                 member -> member.joinServer(CommonPlugin.getInstance().getServerId(),
-                                            CommonPlugin.getInstance().getServerType()));
+                        CommonPlugin.getInstance().getServerType()));
     }
 
 

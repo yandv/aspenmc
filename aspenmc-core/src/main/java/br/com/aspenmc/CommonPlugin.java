@@ -9,10 +9,8 @@ import br.com.aspenmc.backend.type.MongoConnection;
 import br.com.aspenmc.backend.type.RedisConnection;
 import br.com.aspenmc.entity.Sender;
 import br.com.aspenmc.entity.member.Skin;
-import br.com.aspenmc.manager.MemberManager;
-import br.com.aspenmc.manager.PacketManager;
-import br.com.aspenmc.manager.PermissionManager;
-import br.com.aspenmc.manager.ServerManager;
+import br.com.aspenmc.language.Language;
+import br.com.aspenmc.manager.*;
 import br.com.aspenmc.packet.type.server.keepalive.KeepAliveRequest;
 import br.com.aspenmc.packet.type.server.keepalive.KeepAliveResponse;
 import br.com.aspenmc.server.ProxiedServer;
@@ -20,7 +18,6 @@ import br.com.aspenmc.server.ServerType;
 import br.com.aspenmc.utils.mojang.UUIDFetcher;
 import lombok.Getter;
 import lombok.Setter;
-import org.intellij.lang.annotations.Language;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,6 +56,9 @@ public class CommonPlugin {
     private Skin defaultSkin;
 
     @Setter
+    private LanguageManager languageManager = new LanguageManager();
+
+    @Setter
     private MemberManager memberManager = new MemberManager();
 
     @Setter
@@ -95,6 +95,9 @@ public class CommonPlugin {
 
     @Setter
     private boolean piratePlayersEnabled = true;
+
+    @Setter
+    private Language defaultLanguage = Language.PORTUGUESE;
 
 
     public CommonPlugin() {
@@ -158,6 +161,8 @@ public class CommonPlugin {
                                 server.getOnlinePlayers() + "/" + server.getMaxPlayers() + ") has been loaded!");
                         return;
                     }
+
+                    if (serverManager.hasServer(server.getServerId())) return;
 
                     if (attemp + 1 > 3) {
                         logger.log(Level.WARNING, "The server " + server.getServerId() +

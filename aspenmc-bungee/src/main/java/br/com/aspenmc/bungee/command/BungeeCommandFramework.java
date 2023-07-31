@@ -71,7 +71,7 @@ public class BungeeCommandFramework implements CommandFramework {
                         return true;
                     }
 
-                    if (!command.permission().isEmpty() && !member.hasPermission(command.permission())) {
+                    if (!command.permission().isEmpty() && !member.hasSilentPermission(command.permission()) && !member.hasSilentPermission("*")) {
                         member.sendMessage("§cVocê não tem permissão para executar esse comando.");
                         return true;
                     }

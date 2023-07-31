@@ -30,19 +30,25 @@ public class ServerCommand implements CommandHandler {
         String[] args = cmdArgs.getArgs();
 
         if (args.length == 0) {
-            sender.sendMessage(" §a» §fUse §a/" + cmdArgs.getLabel() + " <skin> §fpara alterar o skin.");
+            sender.sendMessage(sender.t("command.setdefaultskin.usage",
+                    " §a» §fUse §a/" + cmdArgs.getLabel() + " <skin> §fpara alterar o skin.", "%label%",
+                    cmdArgs.getLabel()));
             return;
         }
 
         Skin skin = CommonPlugin.getInstance().getSkinData().loadData(args[0]).orElse(null);
 
         if (skin == null) {
-            sender.sendMessage("§cO jogador " + args[0] + " não possui skin.");
+            sender.sendMessage(
+                    sender.t("command.setdefaultskin.no-skin", "§cO jogador " + args[0] + " não possui skin.",
+                            "%player%", args[0]));
             return;
         }
 
         CommonPlugin.getInstance().setDefaultSkin(skin);
-        sender.sendMessage("§aSkin default alterada para " + args[0] + ".");
+        sender.sendMessage(
+                sender.t("command.setdefaultskin.changed-success", "§aSkin default alterada para " + args[0] + ".",
+                        "%player%", args[0]));
     }
 
     @CommandFramework.Command(name = "servermanager", permission = "command.server")
@@ -58,7 +64,7 @@ public class ServerCommand implements CommandHandler {
 
             if (sender.hasPermission("command.sender.setservertype")) {
                 sender.sendMessage(" §a» §fUse §a/" + cmdArgs.getLabel() +
-                                   " setservertype <type> §fpara alterar o tipo do servidor.");
+                        " setservertype <type> §fpara alterar o tipo do servidor.");
             }
 
             return;
@@ -95,7 +101,7 @@ public class ServerCommand implements CommandHandler {
 
             if (args.length < 2) {
                 sender.sendMessage(" §a» §fUse §a/" + cmdArgs.getLabel() +
-                                   " setservertype <type> §fpara alterar o tipo do servidor.");
+                        " setservertype <type> §fpara alterar o tipo do servidor.");
                 return;
             }
 
@@ -133,7 +139,7 @@ public class ServerCommand implements CommandHandler {
               .forEach(player -> CommonPlugin.getInstance().getServerData().joinPlayer(player.getUniqueId()));
     }
 
-    @CommandFramework.Command(name = "tps", aliases = {"ticks"}, permission = "command.tps")
+    @CommandFramework.Command(name = "tps", aliases = { "ticks" }, permission = "command.tps")
     public void tpsCommand(CommandArgs cmdArgs) {
         Sender sender = cmdArgs.getSender();
 
@@ -173,7 +179,7 @@ public class ServerCommand implements CommandHandler {
                 for (Map.Entry<ProtocolVersion, Integer> entry : map.entrySet()) {
                     sender.sendMessage(
                             "      §f- " + entry.getKey().name().replace("MINECRAFT_", "").replace("_", ".") + ": §7" +
-                            entry.getValue() + " jogadores");
+                                    entry.getValue() + " jogadores");
                 }
             }
 
@@ -205,7 +211,7 @@ public class ServerCommand implements CommandHandler {
         cmdArgs.getSender().sendMessage(
                 "    §fMemória usada: §7" + usedMemory + "MB (" + ((usedMemory * 100) / allocatedMemory) + "%)");
         cmdArgs.getSender().sendMessage("    §fMemória livre: §7" + (allocatedMemory - usedMemory) + "MB (" +
-                                        (((allocatedMemory - usedMemory) * 100) / allocatedMemory) + "%)");
+                (((allocatedMemory - usedMemory) * 100) / allocatedMemory) + "%)");
         cmdArgs.getSender().sendMessage("    §fMemória máxima: §7" + allocatedMemory + "MB");
         cmdArgs.getSender()
                .sendMessage("    §fCPU: §7" + CommonConst.DECIMAL_FORMAT.format(CommonConst.getCpuUse()) + "%");
@@ -233,6 +239,6 @@ public class ServerCommand implements CommandHandler {
     private String format(double tps) {
         return (tps > BukkitConst.TPS * 0.9d ? ChatColor.GREEN :
                 (tps > BukkitConst.TPS * 0.8d ? ChatColor.YELLOW : ChatColor.RED)) +
-               (tps > BukkitConst.TPS ? "*" : "") + Math.min(Math.round(tps * 100.0D) / 100.0D, BukkitConst.TPS);
+                (tps > BukkitConst.TPS ? "*" : "") + Math.min(Math.round(tps * 100.0D) / 100.0D, BukkitConst.TPS);
     }
 }

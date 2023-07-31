@@ -12,11 +12,12 @@ public class PreferencesConfiguration {
     private boolean staffChatEnabled = true;
     private boolean seeingStaffChatEnabled = true;
 
-    private boolean adminRemoveItems;
-    private boolean adminOnLogin;
-    private boolean spectatorsEnabled;
+    private boolean adminRemoveItems = true;
+    private boolean adminOnLogin = true;
+    private boolean spectatorsEnabled = true;
 
-    private boolean tellEnabled;
+    private boolean tellEnabled = true;
+    private boolean chatEnabled = true;
 
     @Getter(AccessLevel.NONE)
     private transient Member member;
@@ -32,6 +33,20 @@ public class PreferencesConfiguration {
         if (this.seeingStaffChatEnabled == seeingStaffChatEnabled) return;
 
         this.seeingStaffChatEnabled = seeingStaffChatEnabled;
+        save();
+    }
+
+    public void setTellEnabled(boolean tellEnabled) {
+        if (this.tellEnabled == tellEnabled) return;
+
+        this.tellEnabled = tellEnabled;
+        save();
+    }
+
+    public void setChatEnabled(boolean chatEnabled) {
+        if (this.chatEnabled == chatEnabled) return;
+
+        this.chatEnabled = chatEnabled;
         save();
     }
 

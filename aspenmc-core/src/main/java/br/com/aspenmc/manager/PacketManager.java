@@ -18,8 +18,6 @@ import java.util.function.Function;
 
 public class PacketManager {
 
-    private ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
-
     private final Map<String, Handler<? extends Packet>> waitingPacketMap;
     private final Map<String, Class<? extends Packet>> packetMap;
 
@@ -131,7 +129,6 @@ public class PacketManager {
     }
 
     public void handleTimeoutPackets() {
-        readWriteLock.writeLock().lock();
         Iterator<Map.Entry<String, Handler<? extends Packet>>> iterator = waitingPacketMap.entrySet().iterator();
 
         while (iterator.hasNext()) {
