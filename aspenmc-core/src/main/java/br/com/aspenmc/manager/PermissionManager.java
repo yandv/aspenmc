@@ -1,5 +1,6 @@
 package br.com.aspenmc.manager;
 
+import com.google.common.collect.Sets;
 import lombok.Getter;
 import br.com.aspenmc.permission.Group;
 import br.com.aspenmc.permission.Tag;
@@ -10,7 +11,7 @@ import java.util.stream.Collectors;
 @Getter
 public class PermissionManager {
 
-    public static final Tag NULL_TAG = new Tag(0, "Membro", "§7");
+    public static final Tag NULL_TAG = new Tag(0, "Membro", "§7", Sets.newHashSet("default", "padrão", "padrao", "normal"));
 
     private final Map<String, Group> groupMap;
     private final Map<String, Tag> tagMap;

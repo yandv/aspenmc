@@ -4,6 +4,8 @@ import br.com.aspenmc.CommonPlugin;
 import br.com.aspenmc.bukkit.BukkitCommon;
 import br.com.aspenmc.bukkit.event.player.group.PlayerChangedGroupEvent;
 import br.com.aspenmc.entity.Member;
+import br.com.aspenmc.packet.Packet;
+import br.com.aspenmc.packet.type.server.group.GroupFieldUpdate;
 import br.com.aspenmc.permission.Group;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -28,6 +30,7 @@ public class PermissionListener implements Listener {
 
     public PermissionListener() {
         this.attachments = new HashMap<>();
+        CommonPlugin.getInstance().getPacketManager().registerHandler(GroupFieldUpdate.class, this::onGroupFieldUpdate);
     }
 
     @EventHandler(priority = EventPriority.LOW)
@@ -112,5 +115,17 @@ public class PermissionListener implements Listener {
         }
 
         return perm;
+    }
+
+    private void onGroupFieldUpdate(GroupFieldUpdate packet) {
+        CommonPlugin.getInstance().getMemberManager().getMembers().stream()
+                    .filter(member -> member.hasGroup(packet.getGroupName())).forEach(member -> {
+                        Player player = Bukkit.getPlayer(member.getUniqueId());
+
+                        if (player != null) {
+                            removeAttachment(player);
+                            updateAttachment(player);
+                        }
+                    });
     }
 }

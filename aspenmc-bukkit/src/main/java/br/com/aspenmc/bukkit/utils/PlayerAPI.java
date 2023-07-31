@@ -72,9 +72,8 @@ public class PlayerAPI {
                                                            .invoke(entityPlayer);
                 packet.getPlayerInfoDataLists().write(0, Arrays.asList(
                         new PlayerInfoData(WrappedGameProfile.fromPlayer(player), 0,
-                                           NativeGameMode.fromBukkit(player.getGameMode()),
-                                           getDisplayName != null ? WrappedChatComponent.fromHandle(getDisplayName) :
-                                           null)));
+                                NativeGameMode.fromBukkit(player.getGameMode()),
+                                getDisplayName != null ? WrappedChatComponent.fromHandle(getDisplayName) : null)));
             } catch (FieldAccessException | IllegalAccessException | IllegalArgumentException |
                      InvocationTargetException | NoSuchMethodException | SecurityException e1) {
                 e1.printStackTrace();
@@ -104,9 +103,8 @@ public class PlayerAPI {
                                                            .invoke(entityPlayer);
                 packet.getPlayerInfoDataLists().write(0, Arrays.asList(
                         new PlayerInfoData(WrappedGameProfile.fromPlayer(player), 0,
-                                           NativeGameMode.fromBukkit(player.getGameMode()),
-                                           getDisplayName != null ? WrappedChatComponent.fromHandle(getDisplayName) :
-                                           null)));
+                                NativeGameMode.fromBukkit(player.getGameMode()),
+                                getDisplayName != null ? WrappedChatComponent.fromHandle(getDisplayName) : null)));
             } catch (FieldAccessException | IllegalAccessException | IllegalArgumentException |
                      InvocationTargetException | NoSuchMethodException | SecurityException e1) {
                 e1.printStackTrace();
@@ -129,17 +127,13 @@ public class PlayerAPI {
     public static void respawnPlayer(Player player) {
         respawnSelf(player);
 
-        new BukkitRunnable() {
-
-            @Override
-            public void run() {
-                Bukkit.getOnlinePlayers().stream().filter(onlinePlayer -> !onlinePlayer.equals(player))
-                      .filter(onlinePlayer -> onlinePlayer.canSee(player)).forEach(onlinePlayer -> {
-                          onlinePlayer.hidePlayer(player);
-                          onlinePlayer.showPlayer(player);
-                      });
-            }
-        }.runTaskLater(BukkitCommon.getInstance(), 5l);
+        CommonPlugin.getInstance().getPluginPlatform().runLater(() -> {
+            Bukkit.getOnlinePlayers().stream().filter(onlinePlayer -> !onlinePlayer.equals(player))
+                  .filter(onlinePlayer -> onlinePlayer.canSee(player)).forEach(onlinePlayer -> {
+                      onlinePlayer.hidePlayer(player);
+                      onlinePlayer.showPlayer(player);
+                  });
+        }, 5L);
     }
 
     @SuppressWarnings("deprecation")
@@ -153,9 +147,8 @@ public class PlayerAPI {
                                                            .invoke(entityPlayer);
                 int ping = (int) MinecraftReflection.getEntityPlayerClass().getField("ping").get(entityPlayer);
                 data.add(new PlayerInfoData(WrappedGameProfile.fromPlayer(player), ping,
-                                            NativeGameMode.fromBukkit(player.getGameMode()),
-                                            getDisplayName != null ? WrappedChatComponent.fromHandle(getDisplayName) :
-                                            null));
+                        NativeGameMode.fromBukkit(player.getGameMode()),
+                        getDisplayName != null ? WrappedChatComponent.fromHandle(getDisplayName) : null));
             } catch (FieldAccessException | IllegalAccessException | IllegalArgumentException |
                      InvocationTargetException | NoSuchMethodException | SecurityException | NoSuchFieldException e1) {
                 e1.printStackTrace();
@@ -181,31 +174,28 @@ public class PlayerAPI {
         respawnPlayer.getWorldTypeModifier().write(0, player.getWorld().getWorldType());
         boolean flying = player.isFlying();
 
-        new BukkitRunnable() {
-
-            @Override
-            public void run() {
-                try {
-                    ProtocolLibrary.getProtocolManager().sendServerPacket(player, removePlayerInfo);
-                    ProtocolLibrary.getProtocolManager().sendServerPacket(player, addPlayerInfo);
-                    ProtocolLibrary.getProtocolManager().sendServerPacket(player, respawnPlayer);
-                    player.getInventory().setHeldItemSlot(player.getInventory().getHeldItemSlot());
-                    player.teleport(player.getLocation());
-                    player.setFlying(flying);
-                    player.setWalkSpeed(player.getWalkSpeed());
-                    player.setMaxHealth(player.getMaxHealth());
-                    player.setHealthScale(player.getHealthScale());
-                    player.setExp(player.getExp());
-                    player.setLevel(player.getLevel());
-                    player.updateInventory();
-                } catch (InvocationTargetException e) {
-                    e.printStackTrace();
-                }
+        CommonPlugin.getInstance().getPluginPlatform().runSync(() -> {
+            try {
+                ProtocolLibrary.getProtocolManager().sendServerPacket(player, removePlayerInfo);
+                ProtocolLibrary.getProtocolManager().sendServerPacket(player, addPlayerInfo);
+                ProtocolLibrary.getProtocolManager().sendServerPacket(player, respawnPlayer);
+                player.getInventory().setHeldItemSlot(player.getInventory().getHeldItemSlot());
+                player.teleport(player.getLocation());
+                player.setFlying(flying);
+                player.setWalkSpeed(player.getWalkSpeed());
+                player.setMaxHealth(player.getMaxHealth());
+                player.setHealthScale(player.getHealthScale());
+                player.setExp(player.getExp());
+                player.setLevel(player.getLevel());
+                player.updateInventory();
+            } catch (InvocationTargetException e) {
+                e.printStackTrace();
             }
-        }.runTask(BukkitCommon.getInstance());
+        });
     }
 
-    public static WrappedSignedProperty changePlayerSkin(Player player, String value, String signature, boolean respawn) {
+    public static WrappedSignedProperty changePlayerSkin(Player player, String value, String signature,
+            boolean respawn) {
         return changePlayerSkin(player, new WrappedSignedProperty("textures", value, signature));
     }
 
@@ -220,7 +210,7 @@ public class PlayerAPI {
         } catch (CacheLoader.InvalidCacheLoadException exception) {
             CommonPlugin.getInstance()
                         .debug("Failed to load skin for " + player.getUniqueId() + " (" + player.getName() + "): " +
-                               exception.getMessage());
+                                exception.getMessage());
             gameProfile.getProperties().clear();
         }
 
@@ -315,15 +305,18 @@ public class PlayerAPI {
 
     public static void title(Player player, String title, String subTitle) {
         if (ProtocolVersion.getProtocolVersion(player).getId() >= 47) {
-            sendPacket(player, new PacketBuilder(PacketType.Play.Server.TITLE)
-                    .writeTitleAction(0, EnumWrappers.TitleAction.TITLE)
-                    .writeChatComponents(0, WrappedChatComponent.fromText(title)).build());
+            sendPacket(player,
+                    new PacketBuilder(PacketType.Play.Server.TITLE).writeTitleAction(0, EnumWrappers.TitleAction.TITLE)
+                                                                   .writeChatComponents(0,
+                                                                           WrappedChatComponent.fromText(title))
+                                                                   .build());
             sendPacket(player, new PacketBuilder(PacketType.Play.Server.TITLE)
                     .writeTitleAction(0, EnumWrappers.TitleAction.SUBTITLE)
                     .writeChatComponents(0, WrappedChatComponent.fromText(subTitle)).build());
-            sendPacket(player, new PacketBuilder(PacketType.Play.Server.TITLE)
-                    .writeTitleAction(0, EnumWrappers.TitleAction.TIMES)
-                    .writeInteger(0, 10).writeInteger(1, 20).writeInteger(2, 20).build());
+            sendPacket(player,
+                    new PacketBuilder(PacketType.Play.Server.TITLE).writeTitleAction(0, EnumWrappers.TitleAction.TIMES)
+                                                                   .writeInteger(0, 10).writeInteger(1, 20)
+                                                                   .writeInteger(2, 20).build());
         }
     }
 
@@ -337,15 +330,18 @@ public class PlayerAPI {
 
     public static void title(Player player, String title, String subTitle, int fadeIn, int stayIn, int fadeOut) {
         if (ProtocolVersion.getProtocolVersion(player).getId() >= 47) {
-            sendPacket(player, new PacketBuilder(PacketType.Play.Server.TITLE)
-                    .writeTitleAction(0, EnumWrappers.TitleAction.TITLE)
-                    .writeChatComponents(0, WrappedChatComponent.fromText(title)).build());
+            sendPacket(player,
+                    new PacketBuilder(PacketType.Play.Server.TITLE).writeTitleAction(0, EnumWrappers.TitleAction.TITLE)
+                                                                   .writeChatComponents(0,
+                                                                           WrappedChatComponent.fromText(title))
+                                                                   .build());
             sendPacket(player, new PacketBuilder(PacketType.Play.Server.TITLE)
                     .writeTitleAction(0, EnumWrappers.TitleAction.SUBTITLE)
                     .writeChatComponents(0, WrappedChatComponent.fromText(subTitle)).build());
-            sendPacket(player, new PacketBuilder(PacketType.Play.Server.TITLE)
-                    .writeTitleAction(0, EnumWrappers.TitleAction.TIMES)
-                    .writeInteger(0, fadeIn).writeInteger(1, stayIn).writeInteger(2, fadeOut).build());
+            sendPacket(player,
+                    new PacketBuilder(PacketType.Play.Server.TITLE).writeTitleAction(0, EnumWrappers.TitleAction.TIMES)
+                                                                   .writeInteger(0, fadeIn).writeInteger(1, stayIn)
+                                                                   .writeInteger(2, fadeOut).build());
         }
     }
 
