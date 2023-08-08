@@ -5,6 +5,8 @@ import br.com.aspenmc.backend.type.RedisConnection;
 import br.com.aspenmc.bungee.entity.BungeeConsoleSender;
 import br.com.aspenmc.bungee.entity.BungeeMember;
 import br.com.aspenmc.bungee.event.PlayerChangedGroupEvent;
+import br.com.aspenmc.bungee.listener.ChatListener;
+import br.com.aspenmc.bungee.listener.LoginListener;
 import br.com.aspenmc.bungee.listener.MemberListener;
 import br.com.aspenmc.bungee.listener.ServerListener;
 import br.com.aspenmc.packet.type.member.MemberGroupChange;
@@ -26,6 +28,7 @@ import br.com.aspenmc.bungee.utils.PlayerAPI;
 import br.com.aspenmc.command.CommandFramework;
 import br.com.aspenmc.entity.Member;
 import br.com.aspenmc.server.ServerType;
+import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -39,8 +42,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Getter
 public class BungeeMain extends Plugin implements CommonPlatform {
@@ -53,6 +60,10 @@ public class BungeeMain extends Plugin implements CommonPlatform {
     private Configuration config;
 
     private MotdManager motdManager;
+
+    private boolean maintenance;
+    private long maintenanceTime;
+    private Set<UUID> maintenanceWhitelist;
 
     @Override
     public void onLoad() {
@@ -125,6 +136,21 @@ public class BungeeMain extends Plugin implements CommonPlatform {
         } catch (IOException ex) {
             ex.printStackTrace();
         }
+
+        maintenance = getConfig().getBoolean("maintenance", false);
+        maintenanceTime = getConfig().getLong("maintenanceTime", -1L);
+        maintenanceWhitelist = getConfig().contains("maintenanceWhitelist") ?
+                getConfig().getStringList("maintenanceWhitelist").stream().map(UUID::fromString)
+                           .collect(Collectors.toSet()) : new HashSet<>();
+    }
+
+    private void saveConfig() {
+        try {
+            ConfigurationProvider.getProvider(YamlConfiguration.class)
+                                 .save(config, new File(getDataFolder(), "config.yml"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void registerPacketHandler() {
@@ -158,8 +184,8 @@ public class BungeeMain extends Plugin implements CommonPlatform {
                 PlayerAPI.changePlayerSkin(player.getPendingConnection(), request.getSkin());
             } catch (NoSuchFieldException | IllegalAccessException exception) {
                 plugin.getPacketManager().sendPacket(
-                        new SkinChangeResponse(request.getPlayerId(), SkinChangeResponse.SkinResult.UNKNOWN_ERROR, exception.getMessage())
-                                .id(request.getId()).server(request.getSource()));
+                        new SkinChangeResponse(request.getPlayerId(), SkinChangeResponse.SkinResult.UNKNOWN_ERROR,
+                                exception.getMessage()).id(request.getId()).server(request.getSource()));
                 throw new RuntimeException(exception);
             }
 
@@ -170,12 +196,31 @@ public class BungeeMain extends Plugin implements CommonPlatform {
     }
 
     public void registerListeners() {
+        getProxy().getPluginManager().registerListener(this, new ChatListener());
         getProxy().getPluginManager().registerListener(this, new MemberListener());
+        getProxy().getPluginManager().registerListener(this, new LoginListener());
         getProxy().getPluginManager().registerListener(this, new ServerListener());
     }
 
     public void registerCommands() {
         BungeeCommandFramework.INSTANCE.loadCommands("br.com.aspenmc.bungee.command.register");
+    }
+
+    public void setMaintenance(boolean maintenance, long time) {
+        this.maintenance = maintenance;
+        this.maintenanceTime = -1L;
+
+        getConfig().set("maintenance", maintenance);
+        getConfig().set("maintenanceTime", time);
+        saveConfig();
+    }
+
+    public boolean isMaintenance() {
+        return maintenance && (maintenanceTime == -1L || maintenanceTime > System.currentTimeMillis());
+    }
+
+    public void setMaintenance(boolean maintenance) {
+        setMaintenance(maintenance, -1L);
     }
 
     @Override
@@ -244,6 +289,7 @@ public class BungeeMain extends Plugin implements CommonPlatform {
         plugin.getMemberManager().getMembers().stream().filter(member -> member.hasPermission("command.staffchat"))
               .filter(member -> member.getPreferencesConfiguration().isSeeingStaffChatEnabled())
               .filter(member -> member.getLoginConfiguration().isLogged()).forEach(member -> member.sendMessage(
-                      "§6Staff> " + sender.getDefaultTag().getRealPrefix() + sender.getName() + "§7: §f" + message));
+                      "§6Staff> " + sender.getDefaultTag().getRealPrefix() + sender.getName() + "§7: §f" +
+                              ChatColor.translateAlternateColorCodes('&', message)));
     }
 }

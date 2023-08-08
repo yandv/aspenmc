@@ -318,6 +318,7 @@ public abstract class BukkitCommon extends JavaPlugin implements CommonPlatform 
         Bukkit.getPluginManager().registerEvents(new MoveListener(), this);
         Bukkit.getPluginManager().registerEvents(new PermissionListener(), this);
         Bukkit.getPluginManager().registerEvents(new PlayerListener(), this);
+        Bukkit.getPluginManager().registerEvents(new SoupListener(), this);
         Bukkit.getPluginManager().registerEvents(new TagListener(), this);
         Bukkit.getPluginManager().registerEvents(new VanishListener(), this);
     }

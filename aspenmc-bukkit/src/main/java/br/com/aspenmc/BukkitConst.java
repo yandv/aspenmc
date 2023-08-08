@@ -8,4 +8,5 @@ public class BukkitConst {
     public static final String PERMISION_ADMIN_MODE = "command.admin";
 
     public static final String HANDLER_FIELD = "action-handler-id";
+    public static final int ITEMS_PER_PAGE = 21;
 }

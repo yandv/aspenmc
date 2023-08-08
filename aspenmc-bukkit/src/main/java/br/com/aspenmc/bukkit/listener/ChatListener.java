@@ -26,8 +26,7 @@ public class ChatListener implements Listener {
         Punish currentPunish = member.getPunishConfiguration().getCurrentPunish(PunishType.MUTE);
 
         if (currentPunish != null) {
-
-            player.sendMessage(currentPunish.getPunishMessage());
+            player.sendMessage(currentPunish.getPunishMessage(member.getLanguage()));
             event.setCancelled(true);
             return;
         }

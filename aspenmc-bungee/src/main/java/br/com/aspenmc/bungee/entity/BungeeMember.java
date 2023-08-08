@@ -23,6 +23,11 @@ public class BungeeMember extends Member {
     }
 
     @Override
+    public boolean hasPermission(String permission) {
+        return proxiedPlayer.hasPermission(permission) || super.hasPermission(permission);
+    }
+
+    @Override
     public void sendServer(String serverId) {
         ProxiedServer server = CommonPlugin.getInstance().getServerManager().getServer(serverId);
 
