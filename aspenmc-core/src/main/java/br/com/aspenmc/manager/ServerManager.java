@@ -83,6 +83,10 @@ public class ServerManager {
         return balancers.getOrDefault(type, null);
     }
 
+    public BaseBalancer<ProxiedServer> getBalancer(ServerType serverType, ServerType orElse) {
+        return balancers.getOrDefault(serverType, getBalancer(orElse));
+    }
+
     public int getTotalCount() {
         return activeServers.values().stream().mapToInt(ProxiedServer::getOnlinePlayers).sum();
     }

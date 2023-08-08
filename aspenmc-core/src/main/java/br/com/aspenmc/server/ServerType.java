@@ -21,7 +21,7 @@ public enum ServerType {
 
     HG("hg_lobby"),
 
-    ARENA, FPS, LAVA,
+    ARENA("pvp_lobby"), FPS("pvp_lobby"), LAVA("pvp_lobby"),
 
 
     LOGIN(true);
@@ -71,5 +71,12 @@ public enum ServerType {
 
     public static ServerType getByName(String name, ServerType orElse) {
         return SERVER_MAP.getOrDefault(name.toLowerCase(), orElse);
+    }
+
+    public static void main(String[] args) {
+        ServerType serverType = FPS;
+
+        System.out.println(serverType.getParent().getName());
+        System.out.println(serverType.hasParent());
     }
 }
