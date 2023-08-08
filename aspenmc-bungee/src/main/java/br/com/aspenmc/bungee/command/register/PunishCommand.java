@@ -54,7 +54,7 @@ public class PunishCommand implements CommandHandler {
         if (member instanceof BungeeMember) {
             BungeeMember bungeeMember = (BungeeMember) member;
 
-            bungeeMember.getProxiedPlayer().disconnect(punish.getPunishMessage());
+            bungeeMember.getProxiedPlayer().disconnect(punish.getPunishMessage(member.getLanguage()));
         }
 
         member.getPunishConfiguration().punish(punish);
@@ -102,7 +102,7 @@ public class PunishCommand implements CommandHandler {
         if (member instanceof BungeeMember) {
             BungeeMember bungeeMember = (BungeeMember) member;
 
-            bungeeMember.getProxiedPlayer().disconnect(punish.getPunishMessage());
+            bungeeMember.getProxiedPlayer().disconnect(punish.getPunishMessage(member.getLanguage()));
         }
 
         member.getPunishConfiguration().punish(punish);
@@ -175,7 +175,7 @@ public class PunishCommand implements CommandHandler {
         }
 
         member.getPunishConfiguration().punish(punish);
-        member.sendMessageFormatted(punish.getPunishMessage());
+        member.sendMessageFormatted(punish.getPunishMessage(member.getLanguage()));
         ;
         sender.sendMessageFormatted("§aO jogador %player% foi mutado com sucesso pelo motivo %reason%.", "%player%",
                                     member.getName(), "%reason%", reason);
@@ -219,7 +219,7 @@ public class PunishCommand implements CommandHandler {
         }
 
         member.getPunishConfiguration().punish(punish);
-        member.sendMessageFormatted(punish.getPunishMessage());
+        member.sendMessageFormatted(punish.getPunishMessage(member.getLanguage()));
         sender.sendMessageFormatted("§aO jogador %player% foi mutado com sucesso pelo motivo %reason%.", "%player%",
                                     member.getName(), "%reason%", reason);
     }

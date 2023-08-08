@@ -33,6 +33,12 @@ public class YourPreferencesInventory extends MenuInventory {
                           .setChatEnabled(!member.getPreferencesConfiguration().isChatEnabled());
                 });
 
+        createMenuItem("Convite para clans", "§7Receber ou não convites para entrar em clans.",
+                Material.PAPER, 12, member.getPreferencesConfiguration()::isClanInvitesEnabled, v -> {
+                    member.getPreferencesConfiguration()
+                          .setClanInvitesEnabled(!member.getPreferencesConfiguration().isClanInvitesEnabled());
+                });
+
         open(player);
     }
 

@@ -61,6 +61,11 @@ public class RedisSkinData implements SkinData {
     }
 
     @Override
+    public CompletableFuture<Skin> loadUserData(String playerName) {
+        return CompletableFuture.supplyAsync(() -> loadData(playerName).orElse(null), CommonConst.PRINCIPAL_EXECUTOR);
+    }
+
+    @Override
     public void save(Skin skin, int seconds) {
         try (Jedis jedis = CommonPlugin.getInstance().getRedisConnection().getPool().getResource()) {
             jedis.hmset(BASE_PATH + skin.getPlayerName().toLowerCase(), JsonUtils.objectToMap(skin));
@@ -85,7 +90,7 @@ public class RedisSkinData implements SkinData {
 
                     String value = jsonObject.get("value").getAsString();
                     String signature = jsonObject.has("signature") ? jsonObject.get("signature").getAsString() : "";
-                    return new String[]{value, signature};
+                    return new String[] { value, signature };
                 }
             }
         } catch (Exception e) {

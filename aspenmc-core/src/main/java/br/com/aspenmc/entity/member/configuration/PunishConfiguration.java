@@ -37,6 +37,14 @@ public class PunishConfiguration {
         }
     }
 
+    public int getCount(PunishType punishType) {
+        if (punishMap.containsKey(punishType)) {
+            return punishMap.get(punishType).size();
+        }
+
+        return 0;
+    }
+
     public void loadConfiguration(Member member) {
         this.member = member;
     }

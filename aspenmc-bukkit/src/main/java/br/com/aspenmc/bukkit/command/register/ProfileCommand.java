@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 
 public class ProfileCommand implements CommandHandler {
 
-    @CommandFramework.Command(name = "profile", console = false)
+    @CommandFramework.Command(name = "profile", aliases = { "perfil" }, console = false)
     public void profileCommand(CommandArgs cmdArgs) {
         new YourProfileInventory(cmdArgs.getSenderAsMember(BukkitMember.class).getPlayer());
     }

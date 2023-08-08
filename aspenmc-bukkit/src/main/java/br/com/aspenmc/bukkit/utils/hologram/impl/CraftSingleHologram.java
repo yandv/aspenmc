@@ -60,6 +60,10 @@ public class CraftSingleHologram implements Hologram {
         this(displayName, location, EMPTY_TOUCH_HANDLER, viewHandler);
     }
 
+    public CraftSingleHologram(String displayName) {
+        this(displayName, new Location(Bukkit.getWorlds().stream().findFirst().orElse(null), 0, 0, 0));
+    }
+
     @Override
     public Hologram setDisplayName(String displayName) {
         this.displayName = displayName;

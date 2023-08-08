@@ -4,6 +4,7 @@ import br.com.aspenmc.bukkit.utils.TouchHandler;
 import br.com.aspenmc.bukkit.utils.hologram.Hologram;
 import br.com.aspenmc.bukkit.utils.hologram.ViewHandler;
 import lombok.Getter;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
@@ -16,7 +17,8 @@ public class CraftHologram extends CraftSingleHologram {
     private final List<Hologram> linesBelow;
     private final List<Hologram> linesAbove;
 
-    public CraftHologram(String displayName, Location location, TouchHandler<Hologram> touchHandler, ViewHandler viewHandler) {
+    public CraftHologram(String displayName, Location location, TouchHandler<Hologram> touchHandler,
+            ViewHandler viewHandler) {
         super(displayName, location, touchHandler, viewHandler);
 
         this.linesBelow = new ArrayList<>();
@@ -29,6 +31,10 @@ public class CraftHologram extends CraftSingleHologram {
 
     public CraftHologram(String displayName, Location location, ViewHandler viewHandler) {
         this(displayName, location, EMPTY_TOUCH_HANDLER, viewHandler);
+    }
+
+    public CraftHologram(String displayName) {
+        this(displayName, new Location(Bukkit.getWorlds().stream().findFirst().orElse(null), 0, 0, 0));
     }
 
     @Override
@@ -47,17 +53,16 @@ public class CraftHologram extends CraftSingleHologram {
 
     @Override
     public Hologram addLineAbove(String line) {
-        this.linesAbove.add(new CraftSingleHologram(line, getLocation().clone().add(0.0D, (getLinesAbove().size() + 1) *
-                DISTANCE, 0.0D), getTouchHandler(),
+        this.linesAbove.add(new CraftSingleHologram(line,
+                getLocation().clone().add(0.0D, (getLinesAbove().size() + 1) * DISTANCE, 0.0D), getTouchHandler(),
                 getViewHandler()));
         return this;
     }
 
     @Override
     public Hologram addLineBelow(String line) {
-        this.linesBelow.add(new CraftSingleHologram(line, getLocation().clone().subtract(0.0D,
-                (getLinesBelow().size() + 1) *
-                        DISTANCE, 0.0D), getTouchHandler(),
+        this.linesBelow.add(new CraftSingleHologram(line,
+                getLocation().clone().subtract(0.0D, (getLinesBelow().size() + 1) * DISTANCE, 0.0D), getTouchHandler(),
                 getViewHandler()));
         return this;
     }
