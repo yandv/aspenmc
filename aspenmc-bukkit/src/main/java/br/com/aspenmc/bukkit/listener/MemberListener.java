@@ -42,9 +42,7 @@ public class MemberListener implements Listener {
             return;
         }
 
-        member.setSkin(member.getPlayerSkin().equals(CommonPlugin.getInstance().getDefaultSkin().getPlayerName()) ?
-                CommonPlugin.getInstance().getDefaultSkin() :
-                CommonPlugin.getInstance().getSkinData().loadData(member.getPlayerSkin()).orElse(null));
+        member.loadSkin();
         member.loadConfiguration();
 
         List<Gamer<Player>> gamerList = gamers.join();

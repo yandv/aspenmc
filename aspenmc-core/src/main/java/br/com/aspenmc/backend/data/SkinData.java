@@ -11,6 +11,8 @@ public interface SkinData {
 
 	Optional<Skin> loadData(String playerName);
 
+	CompletableFuture<Skin> loadUserData(String playerName);
+
 	void save(Skin skin, int seconds);
 
 	String[] loadSkinById(UUID uuid);

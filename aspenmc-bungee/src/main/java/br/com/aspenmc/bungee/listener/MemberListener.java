@@ -58,6 +58,13 @@ public class MemberListener implements Listener {
         member.getLoginConfiguration().reloadSession();
 
         calculatePermissions(player, member);
+
+        if (BungeeMain.getInstance().isMaintenance() &&
+                !BungeeMain.getInstance().getMaintenanceWhitelist().contains(player.getUniqueId()) &&
+                (!player.hasPermission("command.admin"))) {
+            player.disconnect("§cO servidor está em manutenção.\n§cTente novamente mais tarde.");
+            return;
+        }
     }
 
     @EventHandler
@@ -130,7 +137,7 @@ public class MemberListener implements Listener {
             Punish currentPunish = member.getPunishConfiguration().getCurrentPunish(PunishType.BAN);
 
             if (currentPunish != null) {
-                loginEvent.setCancelReason(currentPunish.getPunishMessage());
+                loginEvent.setCancelReason(currentPunish.getPunishMessage(member.getLanguage()));
                 loginEvent.setCancelled(true);
                 return;
             }

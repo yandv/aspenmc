@@ -57,10 +57,10 @@ public abstract class Member implements Sender {
      */
 
     private String currentServer;
-    private String currentServerType;
+    private ServerType currentServerType;
 
     private String lastServer;
-    private String lastServerType;
+    private ServerType lastServerType;
 
     private boolean online;
 
@@ -131,16 +131,8 @@ public abstract class Member implements Sender {
         this.lastServerType = this.currentServerType;
 
         this.currentServer = server;
-        this.currentServerType = serverType.name();
+        this.currentServerType = serverType;
         save("lastServer", "lastServerType", "currentServer", "currentServerType");
-    }
-
-    public ServerType getCurrentServerType() {
-        return Optional.ofNullable(ServerType.getByName(currentServerType)).orElse(ServerType.UNKNOWN);
-    }
-
-    public ServerType getLastServerType() {
-        return Optional.ofNullable(ServerType.getByName(lastServerType)).orElse(ServerType.UNKNOWN);
     }
 
     public boolean setTag(Tag tag) {
@@ -294,6 +286,19 @@ public abstract class Member implements Sender {
         punishConfiguration.loadConfiguration(this);
 
         this.cachedPermissions = new ArrayList<>();
+    }
+
+    public void loadSkin() {
+        setSkin(CommonPlugin.getInstance().getDefaultSkin());
+
+        if (!getPlayerSkin().equals(CommonPlugin.getInstance().getDefaultSkin().getPlayerName())) {
+            CommonPlugin.getInstance().getSkinData().loadUserData(getPlayerSkin())
+                    .whenComplete((skin, throwable) -> {
+                        if (skin != null) {
+                            setSkin(skin);
+                        }
+                    });
+        }
     }
 
     public boolean hasSilentPermission(String permission) {

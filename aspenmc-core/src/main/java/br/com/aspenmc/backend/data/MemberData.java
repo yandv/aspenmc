@@ -101,6 +101,8 @@ public interface MemberData {
         return loadMember(MemberVoid.class, filters);
     }
 
+    CompletableFuture<List<? extends Member>> loadMemberAsFuture(Bson filters);
+
     /**
      * Load a member by their name
      *
@@ -145,7 +147,7 @@ public interface MemberData {
     /**
      * Permanent delete a member from the database
      *
-     * @param playerId The UUID of the member
+     * @param uniqueId The UUID of the member
      */
 
     void deleteMember(UUID uniqueId);
