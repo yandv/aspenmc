@@ -13,14 +13,45 @@ public class PreferencesConfiguration {
     private boolean seeingStaffChatEnabled = true;
 
     private boolean adminRemoveItems = true;
-    private boolean adminOnLogin = true;
+    private short adminOnLogin = 0;
+    private boolean adminModeEnabled = false;
     private boolean spectatorsEnabled = true;
 
     private boolean tellEnabled = true;
     private boolean chatEnabled = true;
 
+    private boolean clanInvitesEnabled = true;
+
     @Getter(AccessLevel.NONE)
     private transient Member member;
+
+    public void setAdminOnLogin(short adminOnLogin) {
+        if (this.adminOnLogin == adminOnLogin) return;
+
+        this.adminOnLogin = adminOnLogin;
+        save();
+    }
+
+    public void setAdminModeEnabled(boolean adminModeEnabled) {
+        if (this.adminModeEnabled == adminModeEnabled) return;
+
+        this.adminModeEnabled = adminModeEnabled;
+        save();
+    }
+
+    public void setAdminRemoveItems(boolean adminRemoveItems) {
+        if (this.adminRemoveItems == adminRemoveItems) return;
+
+        this.adminRemoveItems = adminRemoveItems;
+        save();
+    }
+
+    public void setSpectatorsEnabled(boolean spectatorsEnabled) {
+        if (this.spectatorsEnabled == spectatorsEnabled) return;
+
+        this.spectatorsEnabled = spectatorsEnabled;
+        save();
+    }
 
     public void setStaffChatEnabled(boolean staffChatEnabled) {
         if (this.staffChatEnabled == staffChatEnabled) return;
@@ -50,6 +81,17 @@ public class PreferencesConfiguration {
         save();
     }
 
+    public void setClanInvitesEnabled(boolean clanInvitesEnabled) {
+        if (this.clanInvitesEnabled == clanInvitesEnabled) return;
+
+        this.clanInvitesEnabled = clanInvitesEnabled;
+        save();
+    }
+
+    public boolean isAdminOnLogin() {
+        return adminOnLogin == 0 || (adminOnLogin == 1 && adminModeEnabled);
+    }
+
     private void save() {
         if (member != null) {
             member.save("preferencesConfiguration");
@@ -59,5 +101,4 @@ public class PreferencesConfiguration {
     public void loadConfiguration(Member member) {
         this.member = member;
     }
-
 }

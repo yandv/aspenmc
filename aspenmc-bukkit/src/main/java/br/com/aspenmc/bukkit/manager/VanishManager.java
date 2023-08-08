@@ -95,6 +95,7 @@ public class VanishManager {
         }
 
         adminSet.add(player.getUniqueId());
+        member.getPreferencesConfiguration().setAdminModeEnabled(true);
 
         Group group = hidePlayer(player);
         player.sendMessage("§dVocê entrou no modo admin.\n§dVocê está invísivel para " + group.getGroupName() + " e abaixo.");
@@ -129,6 +130,7 @@ public class VanishManager {
             }
 
             adminSet.remove(player.getUniqueId());
+            member.getPreferencesConfiguration().setAdminModeEnabled(false);
 
             showPlayer(player);
             player.sendMessage("§dVocê entrou no modo jogador.\n§dVocê está visível para todos os jogadores.");
