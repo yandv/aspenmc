@@ -49,6 +49,9 @@ public class MenuInventory {
     @Setter
     private DragHandler dragHandler;
 
+    @Setter
+    private MenuClickHandler playerInventoryClickHandler = MenuClickHandler.EMPTY_HANDLER;
+
     public MenuInventory(String title, int rows) {
         this(title, rows, InventoryType.CHEST, false);
     }

@@ -76,6 +76,12 @@ public class MongoMemberData implements MemberData {
                                .collect(Collectors.toList());
     }
 
+    @Override
+    public CompletableFuture<List<? extends Member>> loadMemberAsFuture(Bson filters) {
+        return CompletableFuture.supplyAsync(() -> loadMember(filters),
+                CommonConst.PRINCIPAL_EXECUTOR);
+    }
+
     public <T extends Member> Optional<T> getRedisPlayer(UUID uuid, Class<T> clazz) {
         Member player;
 

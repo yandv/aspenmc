@@ -1,13 +1,18 @@
 package br.com.aspenmc.bukkit.command.register;
 
 import br.com.aspenmc.BukkitConst;
+import br.com.aspenmc.CommonConst;
 import br.com.aspenmc.CommonPlugin;
 import br.com.aspenmc.bukkit.BukkitCommon;
 import br.com.aspenmc.bukkit.entity.BukkitMember;
 import br.com.aspenmc.bukkit.event.server.LocationChangeEvent;
+import br.com.aspenmc.bukkit.menu.staff.YourPreferencesInventory;
+import br.com.aspenmc.bukkit.menu.staff.account.UserInventory;
+import br.com.aspenmc.bukkit.menu.staff.account.UserPunishHistoryInventory;
 import br.com.aspenmc.command.CommandArgs;
 import br.com.aspenmc.command.CommandFramework;
 import br.com.aspenmc.command.CommandHandler;
+import br.com.aspenmc.entity.Member;
 import br.com.aspenmc.entity.Sender;
 import br.com.aspenmc.packet.type.member.teleport.MemberTeleportRequest;
 import br.com.aspenmc.packet.type.member.teleport.MemberTeleportResponse;
@@ -21,7 +26,6 @@ import net.minecraft.server.v1_8_R3.MinecraftServer;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -30,16 +34,74 @@ import java.util.stream.Collectors;
 
 public class ModeratorCommand implements CommandHandler {
 
+    @CommandFramework.Command(name = "account", aliases = { "contas", "acc", "conta" }, permission = CommonConst.SERVER_FULL_PERMISSION)
+    public void accountCommand(CommandArgs cmdArgs) {
+        Sender sender = cmdArgs.getSender();
+        String[] args = cmdArgs.getArgs();
+
+        if (args.length == 0) {
+            sender.sendMessage(sender.t("command.account.usage",
+                    " §a» §fUse §a/%label% <player>§f para ver informações sobre um jogador.", "%label%",
+                    cmdArgs.getLabel()));
+            return;
+        }
+
+        Member member = CommonPlugin.getInstance().getMemberManager().getOrLoadByName(args[0]).orElse(null);
+
+        if (member == null) {
+            sender.sendMessage(sender.translate("account-not-found", "%player%", args[0]));
+            return;
+        }
+
+        if (sender.isPlayer()) {
+            new UserInventory(cmdArgs.getSenderAsMember(BukkitMember.class).getPlayer(), member);
+        } else {
+            sender.sendMessage("em breve... nos cinemas");
+        }
+    }
+
+    @CommandFramework.Command(name = "punishinfo", aliases = { "pinfo" }, permission = CommonConst.SERVER_FULL_PERMISSION)
+    public void punishInfoCommand(CommandArgs cmdArgs) {
+        Sender sender = cmdArgs.getSender();
+        String[] args = cmdArgs.getArgs();
+
+        if (args.length == 0) {
+            sender.sendMessage(sender.t("command.punishinfo.usage",
+                    " §a» §fUse §a/%label% <player>§f para ver informações sobre um jogador.", "%label%",
+                    cmdArgs.getLabel()));
+            return;
+        }
+
+        Member member = CommonPlugin.getInstance().getMemberManager().getOrLoadByName(args[0]).orElse(null);
+
+        if (member == null) {
+            sender.sendMessage(sender.translate("account-not-found", "%player%", args[0]));
+            return;
+        }
+
+        if (sender.isPlayer()) {
+            new UserPunishHistoryInventory(cmdArgs.getSenderAsMember(BukkitMember.class).getPlayer(), member, null);
+        } else {
+            sender.sendMessage("em breve... nos cinemas");
+        }
+    }
+
     @CommandFramework.Command(name = "admin", aliases = { "adm" }, console = false,
             permission = BukkitConst.PERMISION_ADMIN_MODE)
     public void adminCommand(CommandArgs cmdArgs) {
-        Player player = ((BukkitMember) cmdArgs.getSenderAsMember(BukkitMember.class)).getPlayer();
+        Player player = cmdArgs.getSenderAsMember(BukkitMember.class).getPlayer();
 
         if (BukkitCommon.getInstance().getVanishManager().isPlayerInAdmin(player)) {
             BukkitCommon.getInstance().getVanishManager().setPlayer(player);
         } else {
             BukkitCommon.getInstance().getVanishManager().setPlayerInAdmin(player);
         }
+    }
+
+    @CommandFramework.Command(name = "spreferences", aliases = { "staffpreferences" }, console = false,
+            permission = BukkitConst.PERMISION_ADMIN_MODE)
+    public void staffPreferencesCommand(CommandArgs cmdArgs) {
+        new YourPreferencesInventory(cmdArgs.getSenderAsMember(BukkitMember.class).getPlayer());
     }
 
     @CommandFramework.Command(name = "build", permission = "command.build")

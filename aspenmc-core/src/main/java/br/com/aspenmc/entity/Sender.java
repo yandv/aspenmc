@@ -111,6 +111,10 @@ public interface Sender {
         return getLanguage().t(translateId, defaultMessage, replaces);
     }
 
+    default String t(String translateId) {
+        return getLanguage().translate(translateId);
+    }
+
     default String translate(String translateId, String... replaces) {
         return getLanguage().translate(translateId, replaces);
     }

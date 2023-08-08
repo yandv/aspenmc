@@ -1,1 +1,12 @@
-{}
+{
+  "menu.your-profile-inventory.preferences-item.name": "§aSuas preferências",
+  "scoreboard-players": "Players",
+  "menu.your-profile-inventory.skin-item.name": "§aSua pele",
+  "menu.your-profile-inventory.statistics-item.name": "§aSuas estatísticas",
+  "menu.your-profile-inventory.language-item.name": "§aSeu idioma",
+  "command.language.language-already-set": "§cO seu idioma atual já é Português.",
+  "command.language.translation-set": "\u0026aTradução atualizada com sucesso.",
+  "menu.your-language.portuguese.lore": "\u00267Idioma português falado pelos brasileiros",
+  "menu.your-language.title": "§7Seu idioma",
+  "menu.your-language.english.lore": "test"
+}

@@ -1,12 +1,12 @@
 serverId: proxy.aspenmc.com.br
 
 motds:
-  server_not_found:
-    header: '&6&lAspenMC &8&l» &7&lServer not found'
-    footer: '&7The server you are trying to connect to does not exist.'
+  server-not-found:
+    header: '&6&lAspenMC &8&l» &7&lO servidor não foi encontrado.'
+    footer: '&7O servidor que você tentou acessar não foi encontrado.'
   maintenance:
-    header: '&6&lAspenMC &8&l» &7&lMaintenance'
-    footer: '&7The server is currently in maintenance mode.'
+    header: '&6&lAspenMC &8&l» &7&lO servidor está em manutenção.'
+    footer: '&7Estamos trabalhando para melhorar sua experiência.'
   random:
     principal:
       header: '&6&lAspenMC &8&l» &7&lTest'

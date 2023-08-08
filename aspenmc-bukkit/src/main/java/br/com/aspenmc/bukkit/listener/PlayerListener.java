@@ -65,10 +65,12 @@ public class PlayerListener implements Listener {
             }
 
             if (playerRealRespawnEvent.isDropItems()) {
-                playerRealRespawnEvent.getDrops().forEach(
-                        itemStack -> playerRealRespawnEvent.getDropLocation().getWorld()
-                                                           .dropItemNaturally(playerRealRespawnEvent.getDropLocation(),
-                                                                   itemStack));
+                playerRealRespawnEvent.getDrops().forEach(itemStack -> {
+                    if (itemStack != null) {
+                        playerRealRespawnEvent.getDropLocation().getWorld()
+                                              .dropItemNaturally(playerRealRespawnEvent.getDropLocation(), itemStack);
+                    }
+                });
             }
         }, 3L);
     }

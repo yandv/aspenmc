@@ -58,27 +58,33 @@ public class MenuListener implements Listener {
 
         if (inv.getHolder() == null || !(inv.getHolder() instanceof MenuHolder)) return;
 
+        Player p = (Player) event.getWhoClicked();
+        MenuHolder holder = (MenuHolder) inv.getHolder();
+        MenuInventory menu = holder.getMenu();
+
         if (event.getClickedInventory() != inv || !(event.getWhoClicked() instanceof Player) || event.getSlot() <= 0) {
-            event.setCancelled(true);
+            ClickArgs clickArgs = new ClickArgs(p, inv, menu, ClickType.from(event.getAction()),
+                    new MenuItem(event.getCurrentItem()), event.getSlot());
+            menu.getPlayerInventoryClickHandler().onClick(clickArgs);
+            event.setCancelled(clickArgs.isCancelled());
             return;
         }
 
         if (event.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY ||
                 event.getAction() == InventoryAction.HOTBAR_SWAP ||
                 event.getAction() == InventoryAction.HOTBAR_MOVE_AND_READD) {
-            event.setCancelled(true);
+            ClickArgs clickArgs = new ClickArgs(p, inv, menu, ClickType.from(event.getAction()),
+                    new MenuItem(event.getCurrentItem()), event.getSlot());
+            menu.getPlayerInventoryClickHandler().onClick(clickArgs);
+            event.setCancelled(clickArgs.isCancelled());
             return;
         }
 
-        MenuHolder holder = (MenuHolder) inv.getHolder();
-        MenuInventory menu = holder.getMenu();
-
         if (menu.hasItem(event.getSlot())) {
-            Player p = (Player) event.getWhoClicked();
             MenuItem item = menu.getItem(event.getSlot());
 
             try {
-                ClickArgs clickArgs = new ClickArgs(p, inv, ClickType.from(event.getAction()), item, event.getSlot());
+                ClickArgs clickArgs = new ClickArgs(p, inv, menu, ClickType.from(event.getAction()), item, event.getSlot());
 
                 item.getHandler().onClick(clickArgs);
 
@@ -94,6 +100,7 @@ public class MenuListener implements Listener {
                         "Error while clicking on menu item " + (item.getItemStack().hasItemMeta() ?
                                 item.getItemStack().getItemMeta().getDisplayName() :
                                 item.getItemStack().getType().name()) + " in menu " + menu.getTitle(), ex);
+                return;
             }
         } else {
             event.setCancelled(true);

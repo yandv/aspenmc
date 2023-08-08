@@ -1,5 +1,6 @@
 package br.com.aspenmc;
 
+import br.com.aspenmc.entity.member.Skin;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -52,7 +53,8 @@ public class CommonConst {
     public static final String WEBSITE = "www.aspenmc.com.br";
     public static final String DISCORD = "discord.gg/aspenmc";
 
-    public static final String PRINCIPAL_DIRECTORY = "C:/Users/ALLAN/Desktop/allan/Servidores/AspenMC/";
+    public static final String PRINCIPAL_DIRECTORY = "C:/Users/Administrator/Desktop/AspenMC/";
+
 
     public static Double getCpuUse() {
         try {

@@ -33,7 +33,7 @@ public class LanguageManager {
             try {
                 JsonObject jsonObject = JsonUtils.fileToJson(
                         FileUtils.createFile(language.name().toLowerCase() + ".json",
-                                             CommonConst.PRINCIPAL_DIRECTORY + "translations", true)).getAsJsonObject();
+                                CommonConst.PRINCIPAL_DIRECTORY + "translations", true)).getAsJsonObject();
 
                 Map<String, String> map = new HashMap<>();
 
@@ -49,7 +49,8 @@ public class LanguageManager {
         }
     }
 
-    public String translateOrDefault(Language language, String translationId, String defaultMessage, String... replaces) {
+    public String translateOrDefault(Language language, String translationId, String defaultMessage,
+            String... replaces) {
         if (!translationMap.containsKey(language)) {
             translationMap.put(language, new HashMap<>());
         }
@@ -61,8 +62,7 @@ public class LanguageManager {
         if (languageMap.containsKey(translationId)) {
             translation = languageMap.get(translationId);
         } else {
-            CommonPlugin.getInstance().getPluginPlatform()
-                        .runAsync(() -> setTranslation(language, translationId, defaultMessage));
+            setTranslation(language, translationId, defaultMessage);
             translation = defaultMessage;
         }
 
@@ -73,8 +73,32 @@ public class LanguageManager {
         return ChatColor.translateAlternateColorCodes('&', translation);
     }
 
+    public String translateOrDefault(Language language, String translationId, String defaultMessage) {
+        if (!translationMap.containsKey(language)) {
+            translationMap.put(language, new HashMap<>());
+        }
+
+        Map<String, String> languageMap = translationMap.get(language);
+
+        String translation;
+
+        if (languageMap.containsKey(translationId)) {
+            translation = languageMap.get(translationId);
+        } else {
+            setTranslation(language, translationId, defaultMessage);
+            translation = defaultMessage;
+        }
+
+        return ChatColor.translateAlternateColorCodes('&', translation);
+    }
+
+
     public String translate(Language language, String translationId, String... replaces) {
         return translateOrDefault(language, translationId, "{" + translationId + "}", replaces);
+    }
+
+    public String translate(Language language, String translationId) {
+        return translateOrDefault(language, translationId, "{" + translationId + "}");
     }
 
     public String translate(Language language, Translation translation, String... replaces) {
@@ -82,21 +106,26 @@ public class LanguageManager {
     }
 
     public void setTranslation(Language language, String translationId, String translation) {
-        translationMap.computeIfAbsent(language, v -> new HashMap<>()).put(translationId, translation);
+        translation(language, translationId, translation);
 
-        CommonPlugin.getInstance().getPacketManager()
-                    .sendPacket(new TranslationUpdate(language, translationId, translation));
+        CommonPlugin.getInstance().getPluginPlatform().runAsync(() -> {
+            CommonPlugin.getInstance().getPacketManager()
+                        .sendPacket(new TranslationUpdate(language.name(), translationId, translation));
 
-        try {
-            JsonUtils.saveJsonAsFile(CommonConst.GSON_PRETTY.toJson(translationMap.get(language)),
-                                     language.name().toLowerCase() + ".json",
-                                     CommonConst.PRINCIPAL_DIRECTORY + "translations");
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+            try {
+                JsonUtils.saveJsonAsFile(CommonConst.GSON_PRETTY.toJson(translationMap.get(language)),
+                        language.name().toLowerCase() + ".json", CommonConst.PRINCIPAL_DIRECTORY + "translations");
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        });
     }
 
     public Map<String, String> getTranslations(Language language) {
         return translationMap.get(language);
+    }
+
+    public void translation(Language language, String translationId, String translation) {
+        translationMap.computeIfAbsent(language, k -> new HashMap<>()).put(translationId, translation);
     }
 }

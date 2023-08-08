@@ -58,6 +58,17 @@ public class Language {
     /**
      * Retrieve the translation by the id and replace the placeholders
      *
+     * @param translateId id of the translation
+     * @return the translation
+     */
+
+    public String translate(String translateId) {
+        return CommonPlugin.getInstance().getLanguageManager().translate(this, translateId);
+    }
+
+    /**
+     * Retrieve the translation by the id and replace the placeholders
+     *
      * @param translation translation
      * @param replaces    placeholders
      * @return the translation
@@ -78,6 +89,15 @@ public class Language {
     @Override
     public String toString() {
         return name();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Language) {
+            return ((Language) obj).name().equals(name());
+        }
+
+        return false;
     }
 
     public static final Map<String, Language> LANGUAGE_MAP;
