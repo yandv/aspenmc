@@ -24,7 +24,7 @@ import java.util.concurrent.CompletableFuture;
 public class RedisSkinData implements SkinData {
 
     private static final String BASE_PATH = "skin-data:";
-    private static final int TIME_TO_EXPIRE = 60 * 60 * 12;
+    private static final int TIME_TO_EXPIRE = 60 * 60 * 24 * 3;
 
 
     @Override
@@ -55,7 +55,7 @@ public class RedisSkinData implements SkinData {
 
         Skin skinData = new Skin(playerName, uniqueId, skin[0], skin[1]);
 
-        save(skinData, TIME_TO_EXPIRE);
+        save(skinData);
 
         return Optional.of(skinData);
     }
@@ -66,10 +66,10 @@ public class RedisSkinData implements SkinData {
     }
 
     @Override
-    public void save(Skin skin, int seconds) {
+    public void save(Skin skin) {
         try (Jedis jedis = CommonPlugin.getInstance().getRedisConnection().getPool().getResource()) {
             jedis.hmset(BASE_PATH + skin.getPlayerName().toLowerCase(), JsonUtils.objectToMap(skin));
-            jedis.expire(BASE_PATH + skin.getPlayerName().toLowerCase(), 60 * 60 * 24 * 3);
+            jedis.expire(BASE_PATH + skin.getPlayerName().toLowerCase(), TIME_TO_EXPIRE);
             jedis.save();
         }
     }

@@ -1,6 +1,8 @@
 package br.com.aspenmc.entity;
 
+import br.com.aspenmc.CommonConst;
 import br.com.aspenmc.CommonPlugin;
+import br.com.aspenmc.clan.Clan;
 import br.com.aspenmc.entity.member.Skin;
 import br.com.aspenmc.entity.member.configuration.LoginConfiguration;
 import br.com.aspenmc.entity.member.configuration.PreferencesConfiguration;
@@ -30,6 +32,7 @@ public abstract class Member implements Sender {
     private Map<String, GroupInfo> groupMap;
     private Map<String, Long> permissions;
     private String tag;
+    private UUID clanId;
 
     private final LoginConfiguration loginConfiguration;
     private final PreferencesConfiguration preferencesConfiguration;
@@ -65,6 +68,7 @@ public abstract class Member implements Sender {
     private boolean online;
 
     private transient String higherGroup;
+    private transient boolean staff;
 
     private transient List<String> cachedPermissions;
 
@@ -76,7 +80,7 @@ public abstract class Member implements Sender {
         this.name = name;
 
         if (accountType == LoginConfiguration.AccountType.CRACKED) {
-            this.playerSkin = CommonPlugin.getInstance().getDefaultSkin().getPlayerName();
+            this.playerSkin = CommonConst.DEFAULT_SKIN_NAME;
         } else {
             this.playerSkin = name;
         }
@@ -98,8 +102,25 @@ public abstract class Member implements Sender {
         handleDefaultGroup(true);
     }
 
+    public void setClan(Clan clan) {
+        this.clanId = clan == null ? null : clan.getClanId();
+        save("clanId");
+    }
+
+    public boolean hasClan() {
+        return clanId != null;
+    }
+
+    public Optional<Clan> getClan() {
+        return CommonPlugin.getInstance().getClanManager().getClanById(clanId);
+    }
+
     public boolean isUsingCustomSkin() {
-        return playerSkin != null && !playerSkin.equals(name);
+        return !playerSkin.equals(name);
+    }
+
+    public boolean isUsingDefaultSkin() {
+        return playerSkin.equals(CommonConst.DEFAULT_SKIN_NAME);
     }
 
     public boolean isUsingFake() {
@@ -112,6 +133,10 @@ public abstract class Member implements Sender {
     }
 
     public void setPlayerSkin(String playerSkin) {
+        if (playerSkin == null) {
+            playerSkin = this.name;
+        }
+
         this.playerSkin = playerSkin;
         save("playerSkin");
     }
@@ -153,6 +178,7 @@ public abstract class Member implements Sender {
 
             if (defaultGroup != null) {
                 this.higherGroup = defaultGroup.getGroupName();
+                this.staff = defaultGroup.isStaff();
             }
         }
 
@@ -291,13 +317,12 @@ public abstract class Member implements Sender {
     public void loadSkin() {
         setSkin(CommonPlugin.getInstance().getDefaultSkin());
 
-        if (!getPlayerSkin().equals(CommonPlugin.getInstance().getDefaultSkin().getPlayerName())) {
-            CommonPlugin.getInstance().getSkinData().loadUserData(getPlayerSkin())
-                    .whenComplete((skin, throwable) -> {
-                        if (skin != null) {
-                            setSkin(skin);
-                        }
-                    });
+        if (!isUsingDefaultSkin()) {
+            CommonPlugin.getInstance().getSkinData().loadUserData(getPlayerSkin()).whenComplete((skin, throwable) -> {
+                if (skin != null) {
+                    setSkin(skin);
+                }
+            });
         }
     }
 
@@ -328,15 +353,15 @@ public abstract class Member implements Sender {
     public abstract void sendServer(String serverId);
 
 
-    public <T extends Gamer> void loadGamer(String gamerId, T gamer) {
+    public <E, T extends Gamer<E>> void loadGamer(String gamerId, T gamer) {
         CommonPlugin.getInstance().getMemberManager().loadGamer(uniqueId, gamerId, gamer);
     }
 
-    public Gamer getGamer(String gamerId) {
+    public Gamer<?> getGamer(String gamerId) {
         return CommonPlugin.getInstance().getMemberManager().getGamerById(uniqueId, gamerId).orElse(null);
     }
 
-    public <T extends Gamer> T getGamer(Class<T> clazz, String gamerId) {
+    public <E, T extends Gamer<E>> T getGamer(Class<T> clazz, String gamerId) {
         return CommonPlugin.getInstance().getMemberManager().getGamerById(uniqueId, gamerId).map(clazz::cast)
                            .orElse(null);
     }

@@ -14,8 +14,12 @@ import br.com.aspenmc.bukkit.manager.*;
 import br.com.aspenmc.bukkit.networking.BukkitPubSub;
 import br.com.aspenmc.bukkit.permission.regex.RegexPermissions;
 import br.com.aspenmc.bukkit.entity.BukkitConsoleSender;
+import br.com.aspenmc.bukkit.protocol.impl.LimiterInjector;
+import br.com.aspenmc.bukkit.protocol.impl.MessageInjector;
+import br.com.aspenmc.bukkit.utils.hologram.impl.RankingHologram;
 import br.com.aspenmc.bukkit.utils.scheduler.UpdateScheduler;
 import br.com.aspenmc.entity.member.gamer.Gamer;
+import br.com.aspenmc.entity.member.status.StatusType;
 import br.com.aspenmc.packet.type.member.MemberGroupChange;
 import br.com.aspenmc.packet.type.member.server.ServerConnectRequest;
 import br.com.aspenmc.packet.type.member.server.ServerConnectResponse;
@@ -24,10 +28,13 @@ import br.com.aspenmc.packet.type.server.command.BungeeCommandRequest;
 import br.com.aspenmc.packet.type.server.command.BungeeCommandResponse;
 import br.com.aspenmc.server.ProxiedServer;
 import br.com.aspenmc.server.ServerType;
+import br.com.aspenmc.utils.ProtocolVersion;
+import com.comphenix.protocol.ProtocolLibrary;
 import lombok.Getter;
 import lombok.Setter;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -63,6 +70,7 @@ public abstract class BukkitCommon extends JavaPlugin implements CommonPlatform 
 
     @Setter
     private Set<Map.Entry<String, Class<? extends Gamer<Player>>>> gamerList;
+    private Set<StatusType> preloadedStatus;
 
     @Setter
     private boolean saveGamers = true;
@@ -92,6 +100,9 @@ public abstract class BukkitCommon extends JavaPlugin implements CommonPlatform 
 
             plugin.startConnection();
             plugin.getServerData().startServer(Bukkit.getMaxPlayers());
+
+            new LimiterInjector();
+            new MessageInjector();
 
             plugin.debug("Starting the server " + plugin.getServerId() + " (" + plugin.getServerType().name() + ").");
 
@@ -134,6 +145,7 @@ public abstract class BukkitCommon extends JavaPlugin implements CommonPlatform 
             }
 
             gamerList = new HashSet<>();
+            preloadedStatus = new HashSet<>();
 
             registerPacketHandlers();
             registerListeners();
@@ -177,8 +189,9 @@ public abstract class BukkitCommon extends JavaPlugin implements CommonPlatform 
         ProxiedServer.GameState oldState = this.state;
         this.state = state;
         this.time = time;
-        CommonPlugin.getInstance().getPacketManager()
-                    .sendPacketAsync(new ServerUpdate(CommonPlugin.getInstance().getServerId(), state, time, mapName));
+        CommonPlugin.getInstance().getPacketManager().sendPacketAsync(
+                new ServerUpdate(CommonPlugin.getInstance().getServerId(), CommonPlugin.getInstance().getServerType(),
+                        state, time, mapName));
 
         if (oldState != state) {
             Bukkit.getPluginManager().callEvent(new GameStateChangeEvent(oldState, state));
@@ -194,8 +207,9 @@ public abstract class BukkitCommon extends JavaPlugin implements CommonPlatform 
         this.time = time;
         this.mapName = mapName;
 
-        CommonPlugin.getInstance().getPacketManager()
-                    .sendPacketAsync(new ServerUpdate(CommonPlugin.getInstance().getServerId(), state, time, mapName));
+        CommonPlugin.getInstance().getPacketManager().sendPacketAsync(
+                new ServerUpdate(CommonPlugin.getInstance().getServerId(), CommonPlugin.getInstance().getServerType(),
+                        state, time, mapName));
 
         if (oldState != state) {
             Bukkit.getPluginManager().callEvent(new GameStateChangeEvent(oldState, state));
@@ -210,7 +224,8 @@ public abstract class BukkitCommon extends JavaPlugin implements CommonPlatform 
         if (oldState != state) {
             this.state = state;
             CommonPlugin.getInstance().getPacketManager().sendPacketAsync(
-                    new ServerUpdate(CommonPlugin.getInstance().getServerId(), state, time, mapName));
+                    new ServerUpdate(CommonPlugin.getInstance().getServerId(),
+                            CommonPlugin.getInstance().getServerType(), state, time, mapName));
             Bukkit.getPluginManager().callEvent(new GameStateChangeEvent(oldState, state));
             CommonPlugin.getInstance()
                         .debug("The game state changed from " + oldState.name() + " to " + state.name() + ".");
@@ -219,18 +234,28 @@ public abstract class BukkitCommon extends JavaPlugin implements CommonPlatform 
 
     public void updateTime(int time) {
         this.time = time;
-        CommonPlugin.getInstance().getPacketManager()
-                    .sendPacketAsync(new ServerUpdate(CommonPlugin.getInstance().getServerId(), state, time, mapName));
+        CommonPlugin.getInstance().getPacketManager().sendPacketAsync(
+                new ServerUpdate(CommonPlugin.getInstance().getServerId(), CommonPlugin.getInstance().getServerType(),
+                        state, time, mapName));
     }
 
     public void updateMapName(String mapName) {
         this.mapName = mapName;
-        CommonPlugin.getInstance().getPacketManager()
-                    .sendPacketAsync(new ServerUpdate(CommonPlugin.getInstance().getServerId(), state, time, mapName));
+        CommonPlugin.getInstance().getPacketManager().sendPacketAsync(
+                new ServerUpdate(CommonPlugin.getInstance().getServerId(), CommonPlugin.getInstance().getServerType(),
+                        state, time, mapName));
+    }
+
+    public void register(RankingHologram.Loader loader, String... texts) {
+        getHologramManager().loadHologram(new RankingHologram(loader, texts));
     }
 
     public void loadGamer(String gamerId, Class<? extends Gamer<Player>> gamerClass) {
         gamerList.add(new AbstractMap.SimpleEntry<>(gamerId, gamerClass));
+    }
+
+    public void loadStatus(StatusType statusType) {
+        preloadedStatus.add(statusType);
     }
 
     public void sendPlayerToServer(Player player, String... serversIds) {
@@ -294,6 +319,7 @@ public abstract class BukkitCommon extends JavaPlugin implements CommonPlatform 
                                 command.getPermission()));
 
                 for (String alias : command.getAliases()) {
+                    if (alias.contains("\\.")) continue;
                     BukkitCommandFramework.INSTANCE.getKnownCommands().put(alias,
                             BukkitCommandFramework.INSTANCE.createCommand(alias, command.getName(),
                                     command.getPermission()));
@@ -329,7 +355,7 @@ public abstract class BukkitCommon extends JavaPlugin implements CommonPlatform 
                 "testforblocks", "setidletimeout", "replaceitem", "entitydata", "clone", "debug", "defaultgamemode",
                 "deop", "op", "filter", "icanhasbukkit", "list", "protocol", "reload", "restart", "rl", "scoreboard",
                 "seed", "spawnpoint", "spreadplayers", "stats", "trigger", "ver", "about", "achievement", "blockdata",
-                "title", "help", "plugins", "time");
+                "title", "help", "plugins", "time", "teleport", "tp");
         BukkitCommandFramework.INSTANCE.loadCommands("br.com.aspenmc.bukkit");
         BukkitCommandFramework.INSTANCE.registerHelp();
     }
@@ -388,5 +414,13 @@ public abstract class BukkitCommon extends JavaPlugin implements CommonPlatform 
     public UUID getUniqueId(String playerName) {
         Player player = Bukkit.getPlayer(playerName);
         return player == null ? null : player.getUniqueId();
+    }
+
+    public int getPing(Player player) {
+        return ((CraftPlayer) player).getHandle().ping;
+    }
+
+    public ProtocolVersion getProtocolVersion(Player player) {
+        return ProtocolVersion.getById(ProtocolLibrary.getProtocolManager().getProtocolVersion(player));
     }
 }

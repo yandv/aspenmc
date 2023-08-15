@@ -1,6 +1,7 @@
 package br.com.aspenmc.packet.type.server;
 
 import br.com.aspenmc.server.ProxiedServer;
+import br.com.aspenmc.server.ServerType;
 import lombok.Getter;
 import br.com.aspenmc.CommonPlugin;
 
@@ -18,20 +19,20 @@ public class ServerUpdate extends Server {
     private int time;
     private String mapName;
 
-    public ServerUpdate(String serverId, UUID playerId, UpdateType updateType) {
-        super(serverId);
+    public ServerUpdate(String serverId, ServerType serverType, UUID playerId, UpdateType updateType) {
+        super(serverId, serverType);
         this.playerId = playerId;
         this.updateType = updateType;
     }
 
-    public ServerUpdate(String serverId, int maxPlayers) {
-        super(serverId);
+    public ServerUpdate(String serverId, ServerType serverType, int maxPlayers) {
+        super(serverId, serverType);
         this.maxPlayers = maxPlayers;
         this.updateType = UpdateType.MAX_PLAYERS;
     }
 
-    public ServerUpdate(String serverId, ProxiedServer.GameState state, int time, String mapName) {
-        super(serverId);
+    public ServerUpdate(String serverId, ServerType serverType, ProxiedServer.GameState state, int time, String mapName) {
+        super(serverId, serverType);
         this.state = state;
         this.time = time;
         this.mapName = mapName;

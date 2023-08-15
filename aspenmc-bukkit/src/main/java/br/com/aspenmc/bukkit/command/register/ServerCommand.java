@@ -4,7 +4,7 @@ import br.com.aspenmc.BukkitConst;
 import br.com.aspenmc.CommonConst;
 import br.com.aspenmc.CommonPlugin;
 import br.com.aspenmc.bukkit.BukkitCommon;
-import br.com.aspenmc.bukkit.utils.ProtocolVersion;
+import br.com.aspenmc.utils.ProtocolVersion;
 import br.com.aspenmc.command.CommandArgs;
 import br.com.aspenmc.command.CommandFramework;
 import br.com.aspenmc.command.CommandHandler;
@@ -162,9 +162,9 @@ public class ServerCommand implements CommandHandler {
             Map<ProtocolVersion, Integer> map = new HashMap<>();
 
             for (Player player : Bukkit.getOnlinePlayers()) {
-                ping += ProtocolVersion.getPing(player);
+                ping += BukkitCommon.getInstance().getPing(player);
 
-                ProtocolVersion version = ProtocolVersion.getProtocolVersion(player);
+                ProtocolVersion version = BukkitCommon.getInstance().getProtocolVersion(player);
 
                 map.putIfAbsent(version, 0);
                 map.put(version, map.get(version) + 1);

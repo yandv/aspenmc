@@ -4,6 +4,7 @@ import br.com.aspenmc.CommonPlugin;
 import br.com.aspenmc.bukkit.utils.item.ItemBuilder;
 import br.com.aspenmc.bukkit.utils.menu.MenuInventory;
 import br.com.aspenmc.entity.Member;
+import br.com.aspenmc.entity.member.MemberVoid;
 import com.mongodb.client.model.Filters;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -21,7 +22,7 @@ public class UserInventory extends MenuInventory {
     }
 
     public UserInventory(Player player, Member target, List<? extends Member> otherAccounts) {
-        super("§7", 5);
+        super("§7Conta de " + target.getName(), 5);
 
         this.target = target;
         this.otherAccounts = otherAccounts;
@@ -42,9 +43,10 @@ public class UserInventory extends MenuInventory {
 
     private void createItemAccounts(int slot, int accounts) {
         setItem(slot, new ItemBuilder().name("§aTodas as contas").formatLore(
-                                               accounts == 0 ? "§7Nenhuma outra conta encontrada." : "§7O membro possui " + (accounts == -1 ? "..." : accounts + "") +
-                                                       " conta(s) cadastrada(s) no servidor.", "§7Clique para ver todas as " + "contas.").type(Material.BOOK)
-                                       .build(), clickArgs -> {
+                accounts == 0 ? "§7Nenhuma outra conta encontrada." :
+                        "§7O membro possui " + (accounts == -1 ? "..." : accounts + "") +
+                                " conta(s) cadastrada(s) no servidor.",
+                "§7Clique " + "para" + " ver todas as " + "contas.").type(Material.BOOK).build(), clickArgs -> {
             if (accounts == -1) return;
 
             new OthersUserInventory(clickArgs.getPlayer(), target, otherAccounts, this);
@@ -52,17 +54,15 @@ public class UserInventory extends MenuInventory {
 
         if (accounts == -1) {
             CommonPlugin.getInstance().getMemberData()
-                        .loadMemberAsFuture(Filters.eq("ipAddress", target.getIpAddress()))
+                        .getMembers(Filters.eq("ipAddress", target.getIpAddress()), MemberVoid.class)
                         .whenComplete((members, throwable) -> {
                             if (throwable != null) {
                                 throwable.printStackTrace();
                                 return;
                             }
 
-                            members.forEach(Member::loadSkin);
-                            members.removeIf(member -> member.getUniqueId().equals(target.getUniqueId()));
                             otherAccounts = members;
-                            createItemAccounts(slot, members.size());
+                            createItemAccounts(slot, members.size() - 1);
                         });
         }
     }

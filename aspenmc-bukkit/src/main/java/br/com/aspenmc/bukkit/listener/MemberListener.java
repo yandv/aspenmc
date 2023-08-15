@@ -5,6 +5,7 @@ import br.com.aspenmc.bukkit.BukkitCommon;
 import br.com.aspenmc.bukkit.entity.BukkitMember;
 import br.com.aspenmc.entity.Member;
 import br.com.aspenmc.entity.member.gamer.Gamer;
+import br.com.aspenmc.entity.member.status.Status;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -28,11 +29,17 @@ public class MemberListener implements Listener {
 
         long start = System.currentTimeMillis();
         CompletableFuture<BukkitMember> byId = CommonPlugin.getInstance().getMemberData()
-                                                           .loadMemberAsFutureById(uniqueId, BukkitMember.class);
-        CompletableFuture<List<Gamer<Player>>> gamers = CommonPlugin.getInstance().getGamerData().loadGamer(uniqueId,
-                BukkitCommon.getInstance().getGamerList().toArray(new Map.Entry[0]));
+                                                           .getMemberById(uniqueId, BukkitMember.class);
+        CompletableFuture<List<? extends Gamer<Player>>> gamers = CommonPlugin.getInstance().getGamerData()
+                                                                              .loadGamer(uniqueId,
+                                                                                      BukkitCommon.getInstance()
+                                                                                                  .getGamerList()
+                                                                                                  .toArray(
+                                                                                                          new Map.Entry[0]));
+        CompletableFuture<List<Status>> loadStatus = CommonPlugin.getInstance().getStatusData().getStatusById(uniqueId,
+                BukkitCommon.getInstance().getPreloadedStatus());
 
-        CompletableFuture.allOf(byId, gamers);
+        CompletableFuture.allOf(byId, gamers, loadStatus);
 
         BukkitMember member = byId.join();
 
@@ -45,13 +52,19 @@ public class MemberListener implements Listener {
         member.loadSkin();
         member.loadConfiguration();
 
-        List<Gamer<Player>> gamerList = gamers.join();
+        List<? extends Gamer<Player>> gamerList = gamers.join();
 
         for (Gamer<Player> gamer : gamerList) {
             member.loadGamer(gamer.getId(), gamer);
             CommonPlugin.getInstance()
                         .debug("The gamer " + gamer.getId() + " has been loaded for " + member.getConstraintName() +
                                 ".");
+        }
+
+        for (Status status : loadStatus.join()) {
+            CommonPlugin.getInstance().getStatusManager().loadStatus(status);
+            CommonPlugin.getInstance().debug("The status " + status.getStatusType().name() + " has been loaded for " +
+                    member.getConstraintName() + ".");
         }
 
         CommonPlugin.getInstance().getMemberManager().loadMember(member);

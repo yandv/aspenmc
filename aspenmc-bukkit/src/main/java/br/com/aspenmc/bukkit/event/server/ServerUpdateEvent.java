@@ -3,6 +3,7 @@ package br.com.aspenmc.bukkit.event.server;
 import br.com.aspenmc.bukkit.event.NormalEvent;
 import br.com.aspenmc.packet.type.server.ServerUpdate;
 import br.com.aspenmc.server.ProxiedServer;
+import br.com.aspenmc.server.ServerType;
 import lombok.Getter;
 
 import java.util.UUID;
@@ -11,6 +12,7 @@ import java.util.UUID;
 public class ServerUpdateEvent extends NormalEvent {
 
     private String serverId;
+    private ServerType serverType;
 
     private ServerUpdate.UpdateType updateType;
 
@@ -23,6 +25,7 @@ public class ServerUpdateEvent extends NormalEvent {
 
     public ServerUpdateEvent(ServerUpdate serverUpdate) {
         this.serverId = serverUpdate.getServerId();
+        this.serverType = serverUpdate.getType();
         this.updateType = serverUpdate.getUpdateType();
         this.playerId = serverUpdate.getPlayerId();
         this.maxPlayers = serverUpdate.getMaxPlayers();

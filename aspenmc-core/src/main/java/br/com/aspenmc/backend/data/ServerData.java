@@ -57,7 +57,7 @@ public interface ServerData {
      * @param maxPlayers Max players of the server
      */
 
-    void setMaxPlayers(String serverId, int maxPlayers);
+    void setMaxPlayers(String serverId, ServerType serverType, int maxPlayers);
 
     /**
      * Add a player to the server list
@@ -74,7 +74,7 @@ public interface ServerData {
      * @param uniqueId The player's unique id
      */
 
-    void joinPlayer(String serverId, UUID uniqueId);
+    void joinPlayer(String serverId, ServerType serverType, UUID uniqueId);
 
     /**
      * Remove a player from the server list
@@ -91,7 +91,7 @@ public interface ServerData {
      * @param uniqueId The player's unique id
      */
 
-    void leavePlayer(String serverId, UUID uniqueId);
+    void leavePlayer(String serverId, ServerType serverType, UUID uniqueId);
 
     /**
      * Fetch all the players on a server

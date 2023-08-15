@@ -50,8 +50,8 @@ public class VanishListener implements Listener {
         Player player = event.getPlayer();
         CommonPlugin.getInstance().getMemberManager().getMemberById(player.getUniqueId()).ifPresent(member -> {
             if (player.hasPermission(BukkitConst.PERMISION_ADMIN_MODE) &&
-                (member.getPreferencesConfiguration().isAdminOnLogin() ||
-                 playersToTeleport.containsKey(player.getUniqueId()))) {
+                    (member.getPreferencesConfiguration().isAdminOnLogin() ||
+                            playersToTeleport.containsKey(player.getUniqueId()))) {
                 BukkitCommon.getInstance().getVanishManager().setPlayerInAdmin(player);
 
                 if (playersToTeleport.containsKey(player.getUniqueId())) {

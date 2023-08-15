@@ -5,44 +5,21 @@ import br.com.aspenmc.entity.member.MemberVoid;
 import org.bson.conversions.Bson;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public interface MemberData {
 
     /**
-     * Loads a member by their UUID
-     *
-     * @param playerId The UUID of the member
-     * @param clazz The class of the member instance
-     * @return Optional of the member instance
-     * @param <T> The type of the member instance
-     */
-
-    <T extends Member> Optional<T> loadMemberById(UUID playerId, Class<T> clazz);
-
-    /**
-     * Loads a member by their UUID
-     *
-     * @param playerId The UUID of the member
-     * @return Optional of the member as MemberVoid
-     */
-
-    default Optional<MemberVoid> loadMemberById(UUID playerId) {
-        return loadMemberById(playerId, MemberVoid.class);
-    }
-
-    /**
      * Loads a member by their name
      *
      * @param playerId The name of the member
-     * @param clazz The class of the member instance
+     * @param clazz    The class of the member instance
+     * @param <T>      The type of the member instance
      * @return CompletableFuture of the member instance
-     * @param <T> The type of the member instance
      */
 
-    <T extends Member> CompletableFuture<T> loadMemberAsFutureById(UUID playerId, Class<T> clazz);
+    <T extends Member> CompletableFuture<T> getMemberById(UUID playerId, Class<T> clazz);
 
     /**
      * Loads a member by their name
@@ -51,69 +28,21 @@ public interface MemberData {
      * @return CompletableFuture of the member as MemberVoid
      */
 
-    default CompletableFuture<MemberVoid> loadMemberAsFutureById(UUID playerId) {
-        return loadMemberAsFutureById(playerId, MemberVoid.class);
+    default CompletableFuture<MemberVoid> getMemberById(UUID playerId) {
+        return getMemberById(playerId, MemberVoid.class);
     }
-
-    /**
-     * Loads a member by their name
-     *
-     * @param playerName The name of the member
-     * @param clazz The class of the member instance
-     * @param ignoreCase Whether or not to ignore case
-     * @return Optional of the member instance
-     * @param <T> The type of the member instance
-     */
-
-    <T extends Member> Optional<T> loadMemberByName(String playerName, Class<T> clazz, boolean ignoreCase);
-
-    /**
-     * Loads a member by their name
-     *
-     * @param playerName The name of the member
-     * @param ignoreCase Whether or not to ignore case
-     * @return Optional of the member as MemberVoid
-     */
-
-    default Optional<MemberVoid> loadMemberByName(String playerName, boolean ignoreCase) {
-        return loadMemberByName(playerName, MemberVoid.class, ignoreCase);
-    }
-
-    /**
-     * Loads a list of members by filters
-     *
-     * @param clazz The class of the member instance
-     * @param filters The filters to apply
-     * @return List of members
-     * @param <T> The type of the member instance
-     */
-
-    <T extends Member> List<T> loadMember(Class<T> clazz, Bson filters);
-
-    /**
-     * Loads a list of members by filters
-     *
-     * @param filters The filters to apply
-     * @return List of members as MemberVoid
-     */
-
-    default List<MemberVoid> loadMember(Bson filters) {
-        return loadMember(MemberVoid.class, filters);
-    }
-
-    CompletableFuture<List<? extends Member>> loadMemberAsFuture(Bson filters);
 
     /**
      * Load a member by their name
      *
      * @param playerName The name of the member
-     * @param clazz The class of the member instance
+     * @param clazz      The class of the member instance
      * @param ignoreCase Whether or not to ignore case
+     * @param <T>        The type of the member instance
      * @return CompletableFuture of the member instance
-     * @param <T> The type of the member instance
      */
 
-    <T extends Member> CompletableFuture<T> loadMemberAsFutureByName(String playerName, Class<T> clazz, boolean ignoreCase);
+    <T extends Member> CompletableFuture<T> getMemberByName(String playerName, Class<T> clazz, boolean ignoreCase);
 
     /**
      * Load a member by their name
@@ -123,9 +52,22 @@ public interface MemberData {
      * @return CompletableFuture of the member as MemberVoid
      */
 
-    default CompletableFuture<MemberVoid> loadMemberAsFutureByName(String playerName, boolean ignoreCase) {
-        return loadMemberAsFutureByName(playerName, MemberVoid.class, ignoreCase);
+    default CompletableFuture<MemberVoid> getMemberByName(String playerName, boolean ignoreCase) {
+        return getMemberByName(playerName, MemberVoid.class, ignoreCase);
     }
+
+    /**
+     * Load members by a Bson filter
+     *
+     * @param bson  The filter
+     * @param clazz The class of the member instance
+     * @param <T>   The type of the member instance
+     * @return CompletableFuture of the member instance
+     */
+
+    <T extends Member> CompletableFuture<List<T>> getMembers(Bson bson, Class<T> clazz);
+
+    void updateMany(String fieldName, Object value, UUID... ids);
 
     /**
      * Updates a member

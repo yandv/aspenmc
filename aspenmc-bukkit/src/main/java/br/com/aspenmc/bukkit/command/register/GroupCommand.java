@@ -13,6 +13,7 @@ import br.com.aspenmc.packet.type.server.group.GroupFieldUpdate;
 import br.com.aspenmc.permission.Group;
 import br.com.aspenmc.permission.GroupInfo;
 import br.com.aspenmc.permission.Tag;
+import br.com.aspenmc.utils.string.MessageBuilder;
 import br.com.aspenmc.utils.string.StringFormat;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
@@ -43,6 +44,8 @@ public class GroupCommand implements CommandHandler {
                     " setdefault <groupName> <true:false> §fpara definir um grupo como padrão.");
             sender.sendMessage(" §a» §fUse §a/" + cmdArgs.getLabel() +
                     " setpaid <groupName> <true:false> §fpara definir um grupo como vip.");
+            sender.sendMessage(" §a» §fUse §a/" + cmdArgs.getLabel() +
+                    " setstaff <nome> <true:false> §fpara definir se um grupo é da equipe ou não.");
 
             sender.sendMessage("");
             sender.sendMessage(" §a» §fUse §a/" + cmdArgs.getLabel() + " <player>§f para ver o grupo de um jogador.");
@@ -185,7 +188,8 @@ public class GroupCommand implements CommandHandler {
                 break;
             }
 
-            Group group = new Group(groupId, StringFormat.formatString(groupName), new HashSet<>(), null, false, false);
+            Group group = new Group(groupId, StringFormat.formatString(groupName), new HashSet<>(), null, false, false,
+                    false);
 
             sender.sendMessage("§aO grupo \"" + groupName + "\" foi criado com sucesso.");
             CommonPlugin.getInstance().getPermissionManager().loadGroup(group);
@@ -310,6 +314,35 @@ public class GroupCommand implements CommandHandler {
             group.setPaidGroup(paidGroup);
             sender.sendMessage("§aO grupo \"" + group.getGroupName() + "\" " + (paidGroup ? "agora é" : "agora não é") +
                     " um grupo vip.");
+            break;
+        }
+        case "setstaff": {
+            if (args.length == 1) {
+                sender.sendMessage(" §a» §fUse §a/" + cmdArgs.getLabel() +
+                        " setstaff <nome> <true:false> §fpara definir se um grupo é da equipe ou não.");
+                break;
+            }
+
+            Optional<Group> optionalGroup = CommonPlugin.getInstance().getPermissionManager().getGroupByName(args[1]);
+
+            if (!optionalGroup.isPresent()) {
+                sender.sendMessage("§cO grupo \"" + args[1] + "\" não existe.");
+                return;
+            }
+
+            Group group = optionalGroup.get();
+
+            if (args.length == 2) {
+                sender.sendMessage(" §a» §fUse §a/" + cmdArgs.getLabel() + " setstaff " + group.getGroupName() +
+                        " <true:false> §fpara definir se um grupo é da equipe ou não.");
+                return;
+            }
+
+            boolean staff = StringFormat.parseBoolean(args[2]);
+
+            group.setStaff(staff);
+            sender.sendMessage("§aO grupo \"" + group.getGroupName() + "\" " + (staff ? "agora é" : "agora não é") +
+                    " um grupo da equipe.");
             break;
         }
         default: {
@@ -477,15 +510,34 @@ public class GroupCommand implements CommandHandler {
             if (sender instanceof Member) {
                 Member member = (Member) sender;
                 List<Tag> tagList = CommonPlugin.getInstance().getPermissionManager().getTags().stream()
-                                                .filter(member::hasTag).collect(Collectors.toList());
+                                                .filter(member::hasTag).sorted(Comparator.comparingInt(Tag::getId))
+                                                .collect(Collectors.toList());
 
                 if (tagList.isEmpty()) {
-                    sender.sendMessage("§cNão há nenhuma tag criada.");
+                    sender.sendMessage(
+                            sender.t("command.tag.no-tags", "§cNenhum tag disponível no momento para você."));
                     return;
                 }
 
-                sender.sendMessage("§aTags disponíveis: " +
-                        tagList.stream().map(Tag::getColoredName).collect(Collectors.joining("§f, ")));
+                MessageBuilder messageBuilder = new MessageBuilder(
+                        member.t("command.tag.list-prefix", "§aTags disponíveis: "));
+
+                for (int i = 0; i < tagList.size(); i++) {
+                    Tag tag = tagList.get(i);
+
+                    messageBuilder.extra(new MessageBuilder(tag.getColoredName()).setHoverEvent(
+                            member.t("command.tag.example",
+                                    "§eExemplo: %tagPrefix% %player%\n\n§eClique para selecionar.", "%tagPrefix%",
+                                    tag.getTagPrefix())).setClickEvent("/tag " + tag.getTagName()));
+
+                    if (i == tagList.size() - 1) {
+                        messageBuilder.extra("§f.");
+                    } else {
+                        messageBuilder.extra("§f, ");
+                    }
+                }
+
+                sender.sendMessage(messageBuilder.create());
             }
             return;
         }

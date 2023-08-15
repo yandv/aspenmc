@@ -12,11 +12,11 @@ import java.util.UUID;
 import br.com.aspenmc.CommonPlugin;
 import br.com.aspenmc.bukkit.BukkitCommon;
 import br.com.aspenmc.entity.member.Skin;
+import br.com.aspenmc.utils.ProtocolVersion;
 import com.comphenix.protocol.wrappers.*;
 import com.google.common.cache.CacheLoader;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
@@ -304,7 +304,7 @@ public class PlayerAPI {
     }
 
     public static void title(Player player, String title, String subTitle) {
-        if (ProtocolVersion.getProtocolVersion(player).getId() >= 47) {
+        if (BukkitCommon.getInstance().getProtocolVersion(player).getId() >= 47) {
             sendPacket(player,
                     new PacketBuilder(PacketType.Play.Server.TITLE).writeTitleAction(0, EnumWrappers.TitleAction.TITLE)
                                                                    .writeChatComponents(0,
@@ -321,7 +321,7 @@ public class PlayerAPI {
     }
 
     public static void subtitle(Player player, String subTitle) {
-        if (ProtocolVersion.getProtocolVersion(player).getId() >= 47) {
+        if (BukkitCommon.getInstance().getProtocolVersion(player).getId() >= 47) {
             sendPacket(player, new PacketBuilder(PacketType.Play.Server.TITLE)
                     .writeTitleAction(0, EnumWrappers.TitleAction.SUBTITLE)
                     .writeChatComponents(0, WrappedChatComponent.fromText(subTitle)).build());
@@ -329,7 +329,7 @@ public class PlayerAPI {
     }
 
     public static void title(Player player, String title, String subTitle, int fadeIn, int stayIn, int fadeOut) {
-        if (ProtocolVersion.getProtocolVersion(player).getId() >= 47) {
+        if (BukkitCommon.getInstance().getProtocolVersion(player).getId() >= 47) {
             sendPacket(player,
                     new PacketBuilder(PacketType.Play.Server.TITLE).writeTitleAction(0, EnumWrappers.TitleAction.TITLE)
                                                                    .writeChatComponents(0,

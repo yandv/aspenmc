@@ -32,74 +32,79 @@ public class MongoMemberData implements MemberData {
         });
     }
 
+
     @Override
-    public <T extends Member> Optional<T> loadMemberById(UUID playerId, Class<T> clazz) {
-        Optional<T> optional = getRedisPlayer(playerId, clazz);
+    public <T extends Member> CompletableFuture<T> getMemberById(UUID playerId, Class<T> clazz) {
+        return CompletableFuture.supplyAsync(() -> {
+            T t = getRedisPlayer(playerId, clazz);
 
-        if (optional.isPresent()) {
-            return optional;
-        }
+            if (t != null) {
+                return t;
+            }
 
-        Document document = memberCollection.find(Filters.eq("uniqueId", playerId.toString())).first();
-        return document == null ? Optional.empty() :
-               Optional.of(CommonConst.GSON.fromJson(CommonConst.GSON.toJson(document), clazz));
+            Document document = memberCollection.find(Filters.eq("uniqueId", playerId.toString())).first();
+            return document == null ? null : CommonConst.GSON.fromJson(CommonConst.GSON.toJson(document), clazz);
+        }, CommonConst.PRINCIPAL_EXECUTOR);
     }
 
     @Override
-    public <T extends Member> CompletableFuture<T> loadMemberAsFutureById(UUID playerId, Class<T> clazz) {
-        return CompletableFuture.supplyAsync(
-                () -> getRedisPlayer(playerId, clazz).orElse(loadMemberById(playerId, clazz).orElse(null)),
-                CommonConst.PRINCIPAL_EXECUTOR);
+    public <T extends Member> CompletableFuture<T> getMemberByName(String playerName, Class<T> clazz,
+            boolean ignoreCase) {
+        return CompletableFuture.supplyAsync(() -> {
+            Document document = memberCollection.find(Filters.eq("name",
+                                                        ignoreCase ?
+                                                                new Document("$regex", "^" + playerName + "$").append("$options", "i") : playerName))
+                                                .first();
+            return document == null ? null : CommonConst.GSON.fromJson(CommonConst.GSON.toJson(document), clazz);
+        }, CommonConst.PRINCIPAL_EXECUTOR);
     }
 
     @Override
-    public <T extends Member> Optional<T> loadMemberByName(String playerName, Class<T> clazz, boolean ignoreCase) {
-        Document document = memberCollection.find(Filters.eq("name", ignoreCase ? new Document("$regex",
-                                                                                               "^" + playerName +
-                                                                                               "$").append("$options",
-                                                                                                           "i") :
-                                                                     playerName)).first();
-        return document == null ? Optional.empty() :
-               Optional.of(CommonConst.GSON.fromJson(CommonConst.GSON.toJson(document), clazz));
+    public <T extends Member> CompletableFuture<List<T>> getMembers(Bson bson, Class<T> clazz) {
+        return CompletableFuture.supplyAsync(() -> {
+            return memberCollection.find(bson).into(new ArrayList<>()).stream()
+                                   .map(document -> CommonConst.GSON.fromJson(CommonConst.GSON.toJson(document), clazz))
+                                   .collect(Collectors.toList());
+        }, CommonConst.PRINCIPAL_EXECUTOR);
     }
 
-    @Override
-    public <T extends Member> CompletableFuture<T> loadMemberAsFutureByName(String playerName, Class<T> clazz, boolean ignoreCase) {
-        return CompletableFuture.supplyAsync(() -> loadMemberByName(playerName, clazz, ignoreCase).orElse(null),
-                                             CommonConst.PRINCIPAL_EXECUTOR);
-    }
-
-    @Override
-    public <T extends Member> List<T> loadMember(Class<T> clazz, Bson filters) {
-        return memberCollection.find(filters).into(new ArrayList<>()).stream()
-                               .map(document -> CommonConst.GSON.fromJson(CommonConst.GSON.toJson(document), clazz))
-                               .collect(Collectors.toList());
-    }
-
-    @Override
-    public CompletableFuture<List<? extends Member>> loadMemberAsFuture(Bson filters) {
-        return CompletableFuture.supplyAsync(() -> loadMember(filters),
-                CommonConst.PRINCIPAL_EXECUTOR);
-    }
-
-    public <T extends Member> Optional<T> getRedisPlayer(UUID uuid, Class<T> clazz) {
+    public <T extends Member> T getRedisPlayer(UUID uuid, Class<T> clazz) {
         Member player;
 
         try (Jedis jedis = CommonPlugin.getInstance().getRedisConnection().getPool().getResource()) {
             if (!jedis.exists("account:" + uuid.toString())) {
-                return Optional.empty();
+                return null;
             }
 
             Map<String, String> fields = jedis.hgetAll("account:" + uuid.toString());
 
             if (fields == null || fields.isEmpty() || fields.size() < Member.class.getDeclaredFields().length - 1) {
-                return Optional.empty();
+                return null;
             }
 
             player = JsonUtils.mapToObject(fields, clazz);
         }
 
-        return Optional.of(clazz.cast(player));
+        return clazz.cast(player);
+    }
+
+    @Override
+    public void updateMany(String fieldName, Object value, UUID... ids) {
+        CompletableFuture.runAsync(() -> {
+            String[] fields = new String[] { fieldName };
+            JsonElement[] values = new JsonElement[] { value == null ? JsonNull.INSTANCE : JsonUtils.jsonTree(value) };
+
+            for (UUID id : ids) {
+                if (value != null) {
+                    memberCollection.updateOne(Filters.eq("uniqueId", id.toString()),
+                            new Document("$set", new Document(fieldName, JsonUtils.elementToBson(values[0]))));
+                } else {
+                    memberCollection.updateOne(Filters.eq("uniqueId", id.toString()),
+                            new Document("$unset", new Document(fieldName, "")));
+                }
+                CommonPlugin.getInstance().getPacketManager().sendPacket(new MemberFieldUpdate(id, fields, values));
+            }
+        }, CommonConst.PRINCIPAL_EXECUTOR);
     }
 
     @Override
@@ -113,12 +118,12 @@ public class MongoMemberData implements MemberData {
 
                 if (tree.has(fieldName)) {
                     memberCollection.updateOne(Filters.eq("uniqueId", member.getUniqueId().toString()),
-                                               new Document("$set", new Document(fieldName, JsonUtils.elementToBson(
-                                                       tree.get(fieldName)))));
+                            new Document("$set",
+                                    new Document(fieldName, JsonUtils.elementToBson(tree.get(fieldName)))));
                     values[i] = tree.get(fieldName);
                 } else {
                     memberCollection.updateOne(Filters.eq("uniqueId", member.getUniqueId().toString()),
-                                               new Document("$unset", new Document(fieldName, "")));
+                            new Document("$unset", new Document(fieldName, "")));
                     values[i] = JsonNull.INSTANCE;
                 }
             }

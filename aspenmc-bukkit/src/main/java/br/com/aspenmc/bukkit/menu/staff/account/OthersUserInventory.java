@@ -21,11 +21,7 @@ public class OthersUserInventory extends MenuInventory {
 
     public OthersUserInventory(Player player, Member target, int page, List<? extends Member> otherAccounts,
             MenuInventory menuInventory) {
-        super("§7", 5);
-
-        setItem(13, new ItemBuilder().name("§a" + target.getName()).type(Material.SKULL_ITEM).durability(3)
-                                     .skin(target.getSkin())
-                                     .formatLore("\n§fRank: " + target.getDefaultTag().getColoredName()).build());
+        super("§7Contas " + target.getName(), 5);
 
         int pageStart = 0;
         int pageEnd = BukkitConst.ITEMS_PER_PAGE;
@@ -68,5 +64,22 @@ public class OthersUserInventory extends MenuInventory {
 
             w += 1;
         }
+
+        if (page > 1) {
+            setItem(39, new ItemBuilder().type(Material.ARROW).name("§aPágina " + (page - 1)).lore("").build(),
+                    clickArgs -> new OthersUserInventory(clickArgs.getPlayer(), target, page - 1, otherAccounts,
+                            menuInventory));
+        } else if (menuInventory != null) {
+            setItem(39, new ItemBuilder().name("§aRetorna para " + menuInventory.getTitle()).formatLore("§7Clique para voltar.").type(Material.ARROW)
+                                         .build(), clickArgs -> menuInventory.open(player));
+        }
+
+        if (Math.ceil(otherAccounts.size() / BukkitConst.ITEMS_PER_PAGE) + 1 > page) {
+            setItem(41, new ItemBuilder().type(Material.ARROW).name("§aPágina " + (page + 1)).lore("").build(),
+                    clickArgs -> new OthersUserInventory(clickArgs.getPlayer(), target, page + 1, otherAccounts,
+                            menuInventory));
+        }
+
+        open(player);
     }
 }

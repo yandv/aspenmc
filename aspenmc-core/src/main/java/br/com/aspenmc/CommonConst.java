@@ -26,8 +26,8 @@ public class CommonConst {
     public static final ExecutorService PRINCIPAL_EXECUTOR = Executors.newSingleThreadExecutor(
             new ThreadFactoryBuilder().setNameFormat("HighMC - Executor").build());
 
-    public static final Gson GSON = new GsonBuilder()
-            .excludeFieldsWithModifiers(Modifier.TRANSIENT, Modifier.STATIC).create();
+    public static final Gson GSON = new GsonBuilder().excludeFieldsWithModifiers(Modifier.TRANSIENT, Modifier.STATIC)
+                                                     .create();
 
     public static final Gson GSON_PRETTY = new GsonBuilder().setPrettyPrinting().create();
 
@@ -48,19 +48,33 @@ public class CommonConst {
 
     public static final String SERVER_FULL_PERMISSION = "server.full";
 
-    public static final String SKIN_FETCHER = "https://sessionserver.mojang.com/session/minecraft/profile/%s?unsigned=false";
+    public static final String SKIN_FETCHER =
+            "https://sessionserver.mojang" + ".com/session/minecraft/profile/%s?unsigned=false";
 
     public static final String WEBSITE = "www.aspenmc.com.br";
     public static final String DISCORD = "discord.gg/aspenmc";
 
     public static final String PRINCIPAL_DIRECTORY = "C:/Users/Administrator/Desktop/AspenMC/";
+    public static final String DEFAULT_SKIN_NAME = "Sem pele";
+    public static final String DEFAULT_SKIN_VALUE =
+            "ewogICJ0aW1lc3RhbXAiIDogMTY3NzI0NTI0OTE5MCwKICAicHJvZmlsZUlkIiA6ICI4NzQ3ODgyNjc2NzI0OTk1ODU1ODMwN2FiMWI3ZDRjZCIsCiAgInByb2ZpbGVOYW1lIiA6ICJUZXN0ZSIsCiAgInNpZ25hdHVyZVJlcXVpcmVkIiA6IHRydWUsCiAgInRleHR1cmVzIiA6IHsKICAgICJTS0lOIiA6IHsKICAgICAgInVybCIgOiAiaHR0cDovL3RleHR1cmVzLm1pbmVjcmFmdC5uZXQvdGV4dHVyZS8yYzFjYzE5YzYzZDM4MmI3ZTI5MzhkZWE4NGZmZmYzODYxMmJkM2IwNjM3NzY4NzkwZTZkNTJkNzEwNDZhNGIyIgogICAgfQogIH0KfQ==";
+    public static final String SIGNATURE =
+            "qBgm2nqCyotJW0obDPws0w0iFjlyAK1kEyc3bAPukNPEu6mhdXi2VtVhSeQoW80DlTCn8Svcxzu2/8PGxYbT5/DkvHfA" +
+                    "/yqgrgN6r3rSktC/AQMw6QxX/+h0r76ySO5VbcwPyhqekBcyu" +
+                    "+EnuvOJ8nwdUKdVdZaHN4BYiHBtaKCwkG6GuhfrsDnxC5sjHa1GxkY9w9Wb83Zwn1lW" +
+                    "+qFI8leeobYhPcmO9Y6a2B0u76yc55UoeHdxuuehtweeAKI3pKaCO0ckMBRMV4qhPbvWIFNJhNDTfjrR4JWwK4+tmq" +
+                    "//3C470Cz4NQg0rNpe5yCBhxctn3yBJrs5M0fQKH559UdQ5wmdYufMtHy8HIa16jqn58UhJxN4P0A8KNwrL8qIOe67nCny" +
+                    "+aATOWBo/IAywA4rITFsTAVCP5ViJyNOszEi4oj+/xbdUoDpqeLHJGJmef+PoP5oSvNfha/ZfTYXD+b4odN5SDema7xS" +
+                    "/JLl774zDJCBPH47Y8fkY5tYdM/gk7lODMZHCRDCVErhXQqI4Bu9fY5z4Hnl8nUqQjKAn6UNjRA0xkxtL9SUPqD2l" +
+                    "+OaUay9rJhcoyLNPr55v8P9qbHi1bg7zlcaXFMBcPiUdG8karSl8fhyfQ27AF94lF5L3kSH5yxa" +
+                    "+ksOYYrXImRvDIsiFs45sqvFF0TnI8NQRYU=";
 
 
     public static Double getCpuUse() {
         try {
             MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
             ObjectName name = ObjectName.getInstance("java.lang:type=OperatingSystem");
-            AttributeList list = mbs.getAttributes(name, new String[]{"ProcessCpuLoad"});
+            AttributeList list = mbs.getAttributes(name, new String[] { "ProcessCpuLoad" });
 
             if (list.isEmpty()) {
                 return Double.NaN;

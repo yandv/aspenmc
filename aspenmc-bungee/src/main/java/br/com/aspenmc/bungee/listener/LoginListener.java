@@ -15,7 +15,7 @@ public class LoginListener implements Listener {
     public void onPreLogin(PreLoginEvent event) {
         String playerName = event.getConnection().getName();
 
-        if (CommonConst.NAME_PATTERN.matcher(playerName).matches()) {
+        if (!CommonConst.NAME_PATTERN.matcher(playerName).matches()) {
             event.setCancelReason(
                     "§cO seu nick não é permitido.\n" +
                     "§cPara entrar com um nick válido é necessário que ele:\n" +

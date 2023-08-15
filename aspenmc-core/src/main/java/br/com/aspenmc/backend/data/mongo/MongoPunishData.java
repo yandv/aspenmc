@@ -22,11 +22,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-public class PunishDataImpl implements PunishData {
+public class MongoPunishData implements PunishData {
 
     private final MongoCollection<Document> punishCollection;
 
-    public PunishDataImpl(MongoConnection mongoConnection) {
+    public MongoPunishData(MongoConnection mongoConnection) {
         this.punishCollection = mongoConnection.createCollection("punishs", collection -> {
             collection.createIndex(new Document("punishId", 1), new IndexOptions().unique(true));
         });

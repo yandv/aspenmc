@@ -85,7 +85,9 @@ public class ProfileCommand implements CommandHandler {
         Skin skin = CommonPlugin.getInstance().getSkinData().loadData(skinName).orElse(null);
 
         if (skin == null) {
-            member.sendMessage("§cNenhuma skin encontrada para o usuário " + skinName + ".");
+            member.sendMessage(
+                    member.t("command.skin.skin-not-found", "§cNenhuma skin encontrada para o usuário %player%.",
+                            "%player%", skinName));
             return;
         }
 
@@ -94,7 +96,7 @@ public class ProfileCommand implements CommandHandler {
                         new SkinChangeRequest(member.getUniqueId(), CommonPlugin.getInstance().getDefaultSkin())), 500,
                 packet -> {
                     if (packet == null) {
-                        member.sendMessage("§cO servidor não conseguiu alterar sua skin, tente novamente.");
+                        member.sendMessage(member.t("skin-change-error"));
                         return;
                     }
 
@@ -103,7 +105,7 @@ public class ProfileCommand implements CommandHandler {
                         Bukkit.getPluginManager().callEvent(new PlayerChangedSkinEvent(member, skin));
                         member.setPlayerSkin(skinName);
                         member.setSkin(skin);
-                        member.sendMessage("§aSua skin foi alterada para " + skinName + ".");
+                        member.sendMessage(member.translate("skin-changed-sucess", "%player%", skinName));
                     } else {
                         member.sendMessage("§c" + packet.getErrorMessage());
                     }
@@ -123,7 +125,7 @@ public class ProfileCommand implements CommandHandler {
                 CommonPlugin.getInstance().getPacketManager()
                             .sendPacket(new SkinChangeRequest(member.getUniqueId(), newSkin)), 500, packet -> {
                     if (packet == null) {
-                        member.sendMessage("§cNão foi possível alterar sua skin.");
+                        member.sendMessage(member.t("skin-change-error"));
                         return;
                     }
 
@@ -132,7 +134,8 @@ public class ProfileCommand implements CommandHandler {
                         Bukkit.getPluginManager().callEvent(new PlayerChangedSkinEvent(member, newSkin));
                         member.setPlayerSkin(member.getName());
                         member.setSkin(newSkin);
-                        member.sendMessage("§aSua skin foi alterada para " + member.getName() + ".");
+                        member.sendMessage(
+                                member.translate("skin-changed-to-default-sucess", "%player%", member.getName()));
                     } else {
                         member.sendMessage("§c" + packet.getErrorMessage());
                     }
@@ -185,7 +188,7 @@ public class ProfileCommand implements CommandHandler {
         CompletableFuture<UUID> idFuture = CompletableFuture.supplyAsync(
                 () -> CommonPlugin.getInstance().getMojangId(fakeName));
         CompletableFuture<? extends Member> memberFuture = CommonPlugin.getInstance().getMemberData()
-                                                                       .loadMemberAsFutureByName(fakeName, true);
+                                                                       .getMemberByName(fakeName, true);
 
         CompletableFuture.allOf(idFuture, memberFuture);
 
@@ -215,7 +218,7 @@ public class ProfileCommand implements CommandHandler {
                     PlayerAPI.changePlayerSkin(member.getPlayer(), CommonPlugin.getInstance().getDefaultSkin(), true);
 
                     member.setSkin(CommonPlugin.getInstance().getDefaultSkin());
-                    member.setPlayerSkin(CommonPlugin.getInstance().getDefaultSkin().getPlayerName());
+                    member.setPlayerSkin(CommonConst.DEFAULT_SKIN_NAME);
 
                     Bukkit.getPluginManager()
                           .callEvent(new PlayerChangedSkinEvent(member, CommonPlugin.getInstance().getDefaultSkin()));

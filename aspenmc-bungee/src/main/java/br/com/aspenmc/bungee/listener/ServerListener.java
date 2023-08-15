@@ -5,6 +5,7 @@ import br.com.aspenmc.CommonPlugin;
 import br.com.aspenmc.bungee.BungeeMain;
 import br.com.aspenmc.entity.Member;
 import br.com.aspenmc.entity.member.configuration.LoginConfiguration;
+import br.com.aspenmc.language.Language;
 import br.com.aspenmc.server.ProxiedServer;
 import br.com.aspenmc.server.ServerType;
 import net.md_5.bungee.api.Callback;
@@ -21,9 +22,12 @@ import java.util.UUID;
 
 public class ServerListener implements Listener {
 
+    public static final ServerType LOGIN_SERVER = ServerType.LOBBY;
+
     @EventHandler
     public void onSearchServer(SearchServerEvent event) {
         ProxiedPlayer player = event.getPlayer();
+        Language language = Language.getLanguage(player.getUniqueId());
         LoginConfiguration.LoginResult loginResult = CommonPlugin.getInstance().getMemberManager()
                                                                  .getMemberById(player.getUniqueId())
                                                                  .map(Member::getLoginConfiguration)
@@ -34,10 +38,10 @@ public class ServerListener implements Listener {
         switch (loginResult) {
         case SESSION_EXPIRED:
         case NOT_LOGGED:
-            serverType = ServerType.LOGIN;
+            serverType = LOGIN_SERVER;
             break;
         case SESSION_RESTORED:
-            player.sendMessage("§aSua sessão foi restaurada.");
+            player.sendMessage(language.t("session-restored", "§aSua sessão foi restaurada."));
         default:
             serverType = ServerType.LOBBY;
             break;
@@ -47,9 +51,9 @@ public class ServerListener implements Listener {
 
         if (server == null || server.getServerInfo() == null) {
             event.setCancelled(true);
-            event.setCancelMessage(
+            event.setCancelMessage(language.t("no-server-available",
                     "§c§lASPENMC\n§c\n§cNenhum servidor disponível no momento.\n§cTente novamente em alguns instantes" +
-                            ".");
+                            "."));
             return;
         }
 
@@ -72,10 +76,15 @@ public class ServerListener implements Listener {
 
         ProxiedServer toServer = CommonPlugin.getInstance().getServerManager().getServer(event.getTarget().getName());
 
-        if (toServer == null || toServer.getServerType() == ServerType.LOGIN) return;
+        if (toServer == null || toServer.getServerType() == LOGIN_SERVER) return;
 
         event.setCancelled(true);
-        player.sendMessage("§cSua sessão ainda não permite o acesso a este servidor.");
+
+        if (player.getServer() == null || player.getServer().getInfo() == null) {
+            player.disconnect("§cSua sessão ainda não permite o acesso a este servidor.");
+        } else {
+            player.sendMessage("§cSua sessão ainda não permite o acesso a este servidor.");
+        }
     }
 
     @EventHandler

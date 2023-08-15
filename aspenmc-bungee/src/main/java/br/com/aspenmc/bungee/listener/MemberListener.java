@@ -5,6 +5,7 @@ import br.com.aspenmc.bungee.BungeeMain;
 import br.com.aspenmc.bungee.entity.BungeeMember;
 import br.com.aspenmc.bungee.event.PlayerChangedGroupEvent;
 import br.com.aspenmc.bungee.utils.PlayerAPI;
+import br.com.aspenmc.clan.Clan;
 import br.com.aspenmc.entity.Member;
 import br.com.aspenmc.entity.member.Skin;
 import br.com.aspenmc.entity.member.configuration.LoginConfiguration;
@@ -12,9 +13,7 @@ import br.com.aspenmc.packet.type.server.group.GroupFieldUpdate;
 import br.com.aspenmc.permission.Group;
 import br.com.aspenmc.punish.Punish;
 import br.com.aspenmc.punish.PunishType;
-import br.com.aspenmc.utils.string.StringFormat;
 import com.google.common.collect.ImmutableList;
-import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.LoginEvent;
 import net.md_5.bungee.api.event.PermissionCheckEvent;
@@ -92,6 +91,14 @@ public class MemberListener implements Listener {
                         member.stopSession();
 
                         CommonPlugin.getInstance().getMemberManager().unloadMember(member.getUniqueId());
+                        CommonPlugin.getInstance().getClanManager().removeInvites(member.getUniqueId());
+
+                        member.getClan().ifPresent(clan -> {
+                            if (clan.getOnlineMembers().isEmpty()) {
+                                CommonPlugin.getInstance().getClanManager().unloadClan(clan.getClanId());
+                            }
+                        });
+
                         CommonPlugin.getInstance()
                                     .debug("The player " + member.getConstraintName() + " has been unloaded.");
                     });
@@ -103,11 +110,11 @@ public class MemberListener implements Listener {
 
         long start = System.currentTimeMillis();
         CompletableFuture<BungeeMember> byIdFuture = CommonPlugin.getInstance().getMemberData()
-                                                                 .loadMemberAsFutureById(uniqueId, BungeeMember.class);
+                                                                 .getMemberById(uniqueId, BungeeMember.class);
 
         CompletableFuture<BungeeMember> byNameFuture = CommonPlugin.getInstance().getMemberData()
-                                                                   .loadMemberAsFutureByName(playerName,
-                                                                           BungeeMember.class, true);
+                                                                   .getMemberByName(playerName, BungeeMember.class,
+                                                                           true);
 
         CompletableFuture.allOf(byIdFuture, byNameFuture);
 
@@ -143,20 +150,48 @@ public class MemberListener implements Listener {
             }
         }
 
-        if (member.isUsingCustomSkin()) {
-            Skin skin = member.getPlayerSkin().equals(CommonPlugin.getInstance().getDefaultSkin().getPlayerName()) ?
-                    CommonPlugin.getInstance().getDefaultSkin() :
-                    CommonPlugin.getInstance().getSkinData().loadData(member.getPlayerSkin())
-                                .orElse(CommonPlugin.getInstance().getDefaultSkin());
+        Skin skin = null;
 
-            try {
-                PlayerAPI.changePlayerSkin(loginEvent.getConnection(), skin);
-            } catch (NoSuchFieldException | IllegalAccessException ex) {
-                CommonPlugin.getInstance().getLogger()
-                            .log(java.util.logging.Level.SEVERE, "Error while changing the player skin.", ex);
+        if (member.isUsingDefaultSkin()) {
+            skin = CommonPlugin.getInstance().getDefaultSkin();
+        } else if (member.isUsingCustomSkin()) {
+            skin = CommonPlugin.getInstance().getSkinData().loadData(member.getPlayerSkin())
+                               .orElse(CommonPlugin.getInstance().getDefaultSkin());
+        } else {
+            skin = PlayerAPI.getPlayerSkin(loginEvent.getConnection(), CommonPlugin.getInstance().getDefaultSkin());
+            CommonPlugin.getInstance().getSkinData().save(skin);
+        }
+
+        try {
+            PlayerAPI.changePlayerSkin(loginEvent.getConnection(), skin);
+        } catch (NoSuchFieldException | IllegalAccessException ex) {
+            CommonPlugin.getInstance().getLogger()
+                        .log(java.util.logging.Level.SEVERE, "Error while changing the player skin.", ex);
+        }
+
+        member.setSkin(skin);
+
+        if (member.hasClan()) {
+            BungeeMember finalMember = member;
+
+            Clan clan = CommonPlugin.getInstance().getClanManager().getClanById(finalMember.getUniqueId()).orElse(null);
+
+            if (clan == null) {
+                CommonPlugin.getInstance().getClanData().getClanById(member.getClanId(), Clan.class)
+                            .whenComplete((c, throwable) -> {
+                                if (throwable != null) {
+                                    throwable.printStackTrace();
+                                    finalMember.sendMessage(
+                                            "§cO servidor não conseguiu carregar o seu clan, tentaremos novamente " +
+                                                    "mais tarde.");
+                                    return;
+                                }
+
+                                if (c.update(finalMember)) CommonPlugin.getInstance().getClanManager().loadClan(c);
+                            });
+            } else {
+                clan.update(finalMember);
             }
-
-            member.setSkin(skin);
         }
 
         SocketAddress socket = loginEvent.getConnection().getSocketAddress();

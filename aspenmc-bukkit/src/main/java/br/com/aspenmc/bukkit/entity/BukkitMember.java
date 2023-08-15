@@ -44,7 +44,7 @@ public class BukkitMember extends Member {
             PlayerLanguageChangedEvent playerChangedEvent = new PlayerLanguageChangedEvent(this,
                     playerEvent.getNewLanguage());
 
-            Bukkit.getPluginManager().callEvent(playerEvent);
+            Bukkit.getPluginManager().callEvent(playerChangedEvent);
             return super.setLanguage(playerEvent.getNewLanguage());
         }
 

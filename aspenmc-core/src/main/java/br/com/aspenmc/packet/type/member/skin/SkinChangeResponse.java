@@ -20,6 +20,7 @@ public class SkinChangeResponse extends Packet {
     public enum SkinResult {
 
         SUCCESS,
+        PLAYER_NOT_FOUND,
         UNKNOWN_ERROR
     }
 }

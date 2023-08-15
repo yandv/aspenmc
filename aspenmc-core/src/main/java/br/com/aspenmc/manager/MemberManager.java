@@ -65,14 +65,15 @@ public class MemberManager {
                                       .findFirst().orElse(null);
 
         if (member == null) {
-            return CommonPlugin.getInstance().getMemberData().loadMemberByName(playerName, true).map(m -> {
-                m.loadConfiguration();
-                return m;
-            });
+            member = CommonPlugin.getInstance().getMemberData().getMemberByName(playerName, true).join();
+
+            if (member != null) {
+                member.loadConfiguration();
+            }
         }
 
 
-        return Optional.of(member);
+        return Optional.ofNullable(member);
     }
 
     public <T extends Member> Optional<T> getOrLoadById(UUID uniqueId, Class<T> clazz) {
@@ -80,7 +81,11 @@ public class MemberManager {
             return Optional.of(clazz.cast(this.memberMap.get(uniqueId)));
         }
 
-        return CommonPlugin.getInstance().getMemberData().loadMemberById(uniqueId, clazz);
+        T member = CommonPlugin.getInstance().getMemberData().getMemberById(uniqueId, clazz).join();
+
+        if (member == null) return Optional.empty();
+        member.loadConfiguration();
+        return Optional.of(member);
     }
 
     public Collection<? extends Member> getMembers() {

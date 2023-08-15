@@ -27,7 +27,7 @@ public class MemberFieldUpdate extends Packet {
                 try {
                     Field field = Reflection.getField(Member.class, fields[i]);
                     Object object = values[i] == null || values[i].isJsonNull() ? null :
-                                    CommonConst.GSON.fromJson(values[i], field.getType());
+                            CommonConst.GSON.fromJson(values[i], field.getType());
 
                     field.setAccessible(true);
                     field.set(member, object);

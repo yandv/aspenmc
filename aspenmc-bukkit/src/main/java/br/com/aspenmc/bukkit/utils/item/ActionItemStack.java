@@ -42,12 +42,14 @@ public class ActionItemStack {
     private ActionHandler actionHandler;
 
     private boolean placeable;
+    private boolean inventoryClick;
 
     public ActionItemStack(ItemStack itemStack, String id, ActionHandler actionHandler, boolean placeable) {
         this.itemStack = itemStack;
         this.id = id;
         this.actionHandler = actionHandler;
         this.placeable = placeable;
+        this.inventoryClick = true;
         registerActionHandler(id, actionHandler);
     }
 

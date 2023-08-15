@@ -1,13 +1,14 @@
 package br.com.aspenmc.packet.type.server;
 
+import br.com.aspenmc.server.ServerType;
 import lombok.Getter;
 import br.com.aspenmc.CommonPlugin;
 
 @Getter
 public class ServerStop extends Server {
 
-    public ServerStop(String serverId) {
-        super(serverId);
+    public ServerStop(String serverId, ServerType serverType) {
+        super(serverId, serverType);
     }
 
     @Override

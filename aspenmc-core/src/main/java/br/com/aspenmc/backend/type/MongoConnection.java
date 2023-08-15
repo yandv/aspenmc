@@ -38,15 +38,15 @@ public class MongoConnection implements Database {
 
     public MongoConnection(String hostName, String userName, String passWord, String dataBase, int port) {
         this(IP_PATTERN.matcher(hostName).matches() ?
-             "mongodb://" + (userName.isEmpty() ? "" : userName + ":" + passWord + "@") + hostName + "/" + dataBase +
-             "?retryWrites=true&w=majority" :
-             "mongodb+srv://" + (userName.isEmpty() ? "" : userName + ":" + passWord + "@") + hostName + "/" +
-             dataBase + "?retryWrites=true&w=majority");
+                "mongodb://" + (userName.isEmpty() ? "" : userName + ":" + passWord + "@") + hostName + "/" + dataBase +
+                        "?retryWrites=true&w=majority" :
+                "mongodb+srv://" + (userName.isEmpty() ? "" : userName + ":" + passWord + "@") + hostName + "/" +
+                        dataBase + "?retryWrites=true&w=majority");
     }
 
     public MongoConnection(Credentials credentials) {
         this(credentials.getHostName(), credentials.getUserName(), credentials.getPassWord(), credentials.getDatabase(),
-             credentials.getPort());
+                credentials.getPort());
     }
 
     public MongoConnection(String hostName, String userName, String passWord, String dataBase) {
@@ -73,7 +73,8 @@ public class MongoConnection implements Database {
         return client.getDatabase(database);
     }
 
-    public MongoCollection<Document> createCollection(String databaseName, String collectionName, Consumer<MongoCollection<Document>> consumer) {
+    public MongoCollection<Document> createCollection(String databaseName, String collectionName,
+            Consumer<MongoCollection<Document>> consumer) {
         MongoDatabase mongoDatabase = getDatabase(databaseName);
 
         if (mongoDatabase.listCollectionNames().into(new ArrayList<>()).stream()
@@ -85,8 +86,13 @@ public class MongoConnection implements Database {
         return mongoDatabase.getCollection(collectionName);
     }
 
-    public MongoCollection<Document> createCollection(String collectionName, Consumer<MongoCollection<Document>> consumer) {
+    public MongoCollection<Document> createCollection(String collectionName,
+            Consumer<MongoCollection<Document>> consumer) {
         return createCollection(getDataBase(), collectionName, consumer);
+    }
+
+    public MongoCollection<Document> createCollection(String collectionName) {
+        return createCollection(collectionName, consumer -> {});
     }
 
 

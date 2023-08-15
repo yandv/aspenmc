@@ -15,7 +15,7 @@ import java.util.function.Supplier;
 public class YourPreferencesInventory extends MenuInventory {
 
     public YourPreferencesInventory(Player player) {
-        super("§7Suas estatísticas", 4);
+        super("§7Suas preferências", 4);
 
         Member member = CommonPlugin.getInstance().getMemberManager().getMemberById(player.getUniqueId()).orElse(null);
 

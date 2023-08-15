@@ -22,7 +22,10 @@ public class SkinInventory extends MenuInventory {
 
         setItem(11,
                 new ItemBuilder().name("§aAlterar sua skin").lore("§7Clique para alterar sua skin").type(Material.PAPER)
-                                 .build(), clickArgs -> member.performCommand("skin"));
+                                 .build(), clickArgs -> {
+                    member.sendMessage(member.t("command.skin.usage"));
+                    player.closeInventory();
+                });
 
         setItem(12, new ItemBuilder().name("§aBiblioteca").formatLore(
                                              "§7Clique para ver as skins disponibilizadas gratuitamente pelo " +

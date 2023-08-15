@@ -34,7 +34,8 @@ import java.util.stream.Collectors;
 
 public class ModeratorCommand implements CommandHandler {
 
-    @CommandFramework.Command(name = "account", aliases = { "contas", "acc", "conta" }, permission = CommonConst.SERVER_FULL_PERMISSION)
+    @CommandFramework.Command(name = "profile", aliases = { "perfil" },
+            permission = CommonConst.SERVER_FULL_PERMISSION)
     public void accountCommand(CommandArgs cmdArgs) {
         Sender sender = cmdArgs.getSender();
         String[] args = cmdArgs.getArgs();
@@ -60,7 +61,8 @@ public class ModeratorCommand implements CommandHandler {
         }
     }
 
-    @CommandFramework.Command(name = "punishinfo", aliases = { "pinfo" }, permission = CommonConst.SERVER_FULL_PERMISSION)
+    @CommandFramework.Command(name = "punishinfo", aliases = { "pinfo" },
+            permission = CommonConst.SERVER_FULL_PERMISSION)
     public void punishInfoCommand(CommandArgs cmdArgs) {
         Sender sender = cmdArgs.getSender();
         String[] args = cmdArgs.getArgs();
@@ -98,7 +100,7 @@ public class ModeratorCommand implements CommandHandler {
         }
     }
 
-    @CommandFramework.Command(name = "spreferences", aliases = { "staffpreferences" }, console = false,
+    @CommandFramework.Command(name = "spreferences", aliases = { "staffpreferences", "sprefs", "spref" }, console = false,
             permission = BukkitConst.PERMISION_ADMIN_MODE)
     public void staffPreferencesCommand(CommandArgs cmdArgs) {
         new YourPreferencesInventory(cmdArgs.getSenderAsMember(BukkitMember.class).getPlayer());
@@ -484,28 +486,25 @@ public class ModeratorCommand implements CommandHandler {
             break;
         }
         case 2: {
-//            if (args[0].equalsIgnoreCase("location")) {
-//                if (cmdArgs.isPlayer()) {
-//                    Player player = cmdArgs.getSenderAsMember(BukkitMember.class).getPlayer();
-//                    String locationName = args[1];
-//
-//                    if (BukkitCommon.getInstance().getLocationManager().hasLocation(locationName)) {
-//                        org.bukkit.Location location = BukkitCommon.getInstance().getLocationManager()
-//                                                                   .getLocation(locationName);
-//
-//                        player.teleport(location);
-//                        sender.sendMessage("§aVocê foi teleportado para a localização " + locationName + ".");
-////                        staffLog("O jogador " + sender.getName() + " teleportou-se para a localização " +
-// locationName +
-////                                 ".");
-//                    } else {
-//                        sender.sendMessage("§cA localização " + locationName + " não foi encontrada.");
-//                    }
-//                } else {
-//                    sender.sendMessage("§cVocê precisa ser um jogador para executar este comando.");
-//                }
-//                return;
-//            }
+            if (args[0].equalsIgnoreCase("location")) {
+                if (cmdArgs.isPlayer()) {
+                    Player player = cmdArgs.getSenderAsMember(BukkitMember.class).getPlayer();
+                    String locationName = args[1];
+
+                    if (BukkitCommon.getInstance().getLocationManager().hasLocation(locationName)) {
+                        org.bukkit.Location location = BukkitCommon.getInstance().getLocationManager()
+                                                                   .getLocation(locationName);
+
+                        player.teleport(location);
+                        sender.sendMessage("§aVocê foi teleportado para a localização " + locationName + ".");
+                    } else {
+                        sender.sendMessage("§cA localização " + locationName + " não foi encontrada.");
+                    }
+                } else {
+                    sender.sendMessage("§cVocê precisa ser um jogador para executar este comando.");
+                }
+                return;
+            }
 
             Player player = Bukkit.getPlayer(args[0]);
 

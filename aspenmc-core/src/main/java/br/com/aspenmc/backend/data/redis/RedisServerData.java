@@ -22,27 +22,28 @@ public class RedisServerData implements ServerData {
     @Override
     public void startServer(int maxPlayers) {
         startServer(new ProxiedServer(CommonPlugin.getInstance().getServerAddress(),
-                                      CommonPlugin.getInstance().getServerPort(),
-                                      CommonPlugin.getInstance().getServerId(),
-                                      CommonPlugin.getInstance().getServerType(), new HashSet<>(), maxPlayers, true),
-                    maxPlayers);
+                CommonPlugin.getInstance().getServerPort(), CommonPlugin.getInstance().getServerId(),
+                CommonPlugin.getInstance().getServerType(), new HashSet<>(), maxPlayers, true), maxPlayers);
     }
 
     @Override
     public void startServer(ProxiedServer server, int maxPlayers) {
         try (Jedis jedis = CommonPlugin.getInstance().getRedisConnection().getPool().getResource()) {
             Pipeline pipe = jedis.pipelined();
-            pipe.sadd(REDIS_SERVER_PREFIX + "type:" + server.getServerType().getName().toLowerCase(), server.getServerId());
+            pipe.sadd(REDIS_SERVER_PREFIX + "type:" + server.getServerType().getName().toLowerCase(),
+                    server.getServerId());
+
             Map<String, String> map = new HashMap<>();
             map.put("type", server.getServerType().getName().toLowerCase());
             map.put("maxplayers", Integer.toString(server.getMaxPlayers()));
             map.put("joinenabled", Boolean.toString(server.isJoinEnabled()));
             map.put("address", server.getServerAddress());
             map.put("port", Integer.toString(server.getServerPort()));
-            map.put("map", "");
-            map.put("time", "");
-            map.put("state", "");
+            map.put("map", server.getMapName());
+            map.put("time", "" + server.getTime());
+            map.put("state", "" + server.getState().name().toLowerCase());
             map.put("starttime", Long.toString(System.currentTimeMillis()));
+
             pipe.hmset(REDIS_SERVER_PREFIX + server.getServerId(), map);
             pipe.del(REDIS_SERVER_PREFIX + server.getServerId() + ":players");
             pipe.sync();
@@ -66,55 +67,55 @@ public class RedisServerData implements ServerData {
             pipe.sync();
         }
 
-        sendPacket(new ServerStop(serverId));
+        sendPacket(new ServerStop(serverId, serverType));
     }
 
     @Override
     public void setMaxPlayers(int maxPlayers) {
-        setMaxPlayers(CommonPlugin.getInstance().getServerId(), maxPlayers);
+        setMaxPlayers(CommonPlugin.getInstance().getServerId(), CommonPlugin.getInstance().getServerType(), maxPlayers);
     }
 
     @Override
-    public void setMaxPlayers(String serverId, int maxPlayers) {
+    public void setMaxPlayers(String serverId, ServerType serverType, int maxPlayers) {
         try (Jedis jedis = CommonPlugin.getInstance().getRedisConnection().getPool().getResource()) {
             Pipeline pipe = jedis.pipelined();
             pipe.hset(REDIS_SERVER_PREFIX + serverId, "maxplayers", Integer.toString(maxPlayers));
             pipe.sync();
         }
 
-        sendPacket(new ServerUpdate(serverId, maxPlayers));
+        sendPacket(new ServerUpdate(serverId, serverType, maxPlayers));
     }
 
     @Override
     public void joinPlayer(UUID uniqueId) {
-        joinPlayer(CommonPlugin.getInstance().getServerId(), uniqueId);
+        joinPlayer(CommonPlugin.getInstance().getServerId(), CommonPlugin.getInstance().getServerType(), uniqueId);
     }
 
     @Override
-    public void joinPlayer(String serverId, UUID uniqueId) {
+    public void joinPlayer(String serverId, ServerType serverType, UUID uniqueId) {
         try (Jedis jedis = CommonPlugin.getInstance().getRedisConnection().getPool().getResource()) {
             Pipeline pipe = jedis.pipelined();
             pipe.sadd(REDIS_SERVER_PREFIX + serverId + ":players", uniqueId.toString());
             pipe.sync();
         }
 
-        sendPacket(new ServerUpdate(serverId, uniqueId, ServerUpdate.UpdateType.JOIN));
+        sendPacket(new ServerUpdate(serverId, serverType, uniqueId, ServerUpdate.UpdateType.JOIN));
     }
 
     @Override
     public void leavePlayer(UUID uniqueId) {
-        leavePlayer(CommonPlugin.getInstance().getServerId(), uniqueId);
+        leavePlayer(CommonPlugin.getInstance().getServerId(), CommonPlugin.getInstance().getServerType(), uniqueId);
     }
 
     @Override
-    public void leavePlayer(String serverId, UUID uniqueId) {
+    public void leavePlayer(String serverId, ServerType serverType, UUID uniqueId) {
         try (Jedis jedis = CommonPlugin.getInstance().getRedisConnection().getPool().getResource()) {
             Pipeline pipe = jedis.pipelined();
             pipe.sadd(REDIS_SERVER_PREFIX + serverId + ":players", uniqueId.toString());
             pipe.sync();
         }
 
-        sendPacket(new ServerUpdate(serverId, uniqueId, ServerUpdate.UpdateType.LEAVE));
+        sendPacket(new ServerUpdate(serverId, serverType, uniqueId, ServerUpdate.UpdateType.LEAVE));
     }
 
     @Override
@@ -179,20 +180,24 @@ public class RedisServerData implements ServerData {
     }
 
     private ProxiedServer createProxiedServer(Jedis jedis, String serverId) {
-        ServerType serverType = ServerType.getByName(jedis.hget(REDIS_SERVER_PREFIX + serverId, "type"));
-        int maxPlayers = Integer.parseInt(jedis.hget(REDIS_SERVER_PREFIX + serverId, "maxplayers"));
-        boolean joinEnabled = Boolean.parseBoolean(jedis.hget(REDIS_SERVER_PREFIX + serverId, "joinenabled"));
-        String serverAddress = jedis.hget(REDIS_SERVER_PREFIX + serverId, "address");
-        int serverPort = Integer.parseInt(jedis.hget(REDIS_SERVER_PREFIX + serverId, "port"));
-                /*String serverMap = jedis.hget(REDIS_SERVER_PREFIX + serverId, "map");
-                int time = Integer.parseInt(jedis.hget(REDIS_SERVER_PREFIX + serverId, "time"));
-                String state = jedis.hget(REDIS_SERVER_PREFIX + serverId + ":type", "state");*/
-        long startTime = Long.parseLong(jedis.hget(REDIS_SERVER_PREFIX + serverId, "starttime"));
+        Map<String, String> jedisMap = jedis.hgetAll(REDIS_SERVER_PREFIX + serverId);
+
+        ServerType serverType = ServerType.getByName(jedisMap.get("type"));
+        int maxPlayers = Integer.parseInt(jedisMap.get("maxplayers"));
+        boolean joinEnabled = Boolean.parseBoolean(jedisMap.get("joinenabled"));
+        String serverAddress = jedisMap.get("address");
+        int serverPort = Integer.parseInt(jedisMap.get("port"));
+        String serverMap = jedisMap.get("map");
+        int time = Integer.parseInt(jedisMap.get("time"));
+        ProxiedServer.GameState state = ProxiedServer.GameState.valueOf(jedisMap.get("state").toUpperCase());
+        long startTime = Long.parseLong(jedisMap.get("starttime"));
         Set<UUID> players = jedis.smembers(REDIS_SERVER_PREFIX + serverId + ":players").stream().map(UUID::fromString)
                                  .collect(Collectors.toSet());
 
         ProxiedServer server = new ProxiedServer(serverAddress, serverPort, serverId, serverType, players, maxPlayers,
-                                                 joinEnabled);
+                joinEnabled, state, time, serverMap);
+
+        server.setStartTime(startTime);
 
         server.setPlayers(players);
         return server;

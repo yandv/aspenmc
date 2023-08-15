@@ -9,14 +9,13 @@ import java.util.concurrent.CompletableFuture;
 public interface SkinData {
 
 
-	Optional<Skin> loadData(String playerName);
+    Optional<Skin> loadData(String playerName);
 
-	CompletableFuture<Skin> loadUserData(String playerName);
+    CompletableFuture<Skin> loadUserData(String playerName);
 
-	void save(Skin skin, int seconds);
+    void save(Skin skin);
 
-	String[] loadSkinById(UUID uuid);
+    String[] loadSkinById(UUID uuid);
 
-	CompletableFuture<Skin> loadSkinById(UUID uuid, String skinName);
-
+    CompletableFuture<Skin> loadSkinById(UUID uuid, String skinName);
 }

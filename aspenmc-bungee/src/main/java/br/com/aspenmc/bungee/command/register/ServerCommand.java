@@ -1,5 +1,6 @@
 package br.com.aspenmc.bungee.command.register;
 
+import br.com.aspenmc.bungee.BungeeMain;
 import br.com.aspenmc.bungee.entity.BungeeMember;
 import br.com.aspenmc.server.ProxiedServer;
 import com.google.common.base.Joiner;
@@ -52,10 +53,8 @@ public class ServerCommand implements CommandHandler {
                 sender.sendMessage(
                         "§eSeu ping é de §b" + ((BungeeMember) sender).getProxiedPlayer().getPing() + "ms§e.");
             } else {
-                int ping = ProxyServer.getInstance().getPlayers().stream().mapToInt(ProxiedPlayer::getPing).sum() /
-                        Math.max(1, ProxyServer.getInstance().getOnlineCount());
-
-                sender.sendMessage("§aO ping médio do servidor é de " + ping + "ms.");
+                sender.sendMessage(
+                        "§aO ping médio do servidor é de " + BungeeMain.getInstance().getAveragePing() + "ms.");
                 sender.sendMessage("§aO servidor atualmente tem " + ProxyServer.getInstance().getOnlineCount() +
                         " jogadores online.");
             }
@@ -142,7 +141,7 @@ public class ServerCommand implements CommandHandler {
                                                        "%ip%", cmdArgs.getSenderAsMember().getCurrentServer()));
     }
 
-    @CommandFramework.Completer(name = "report", aliases = { "reportar", "r" })
+    @CommandFramework.Completer(name = "report", aliases = { "reportar", "r", "find", "go" })
     public List<String> reportCompleter(CommandArgs cmdArgs) {
         return CommonPlugin.getInstance().getMemberManager().getMembers().stream()
                            .map(member -> member.isUsingFake() ? member.getFakeName() : member.getName())
@@ -158,19 +157,11 @@ public class ServerCommand implements CommandHandler {
                            .collect(Collectors.toList());
     }
 
-    @CommandFramework.Completer(name = "connect", aliases = { "server" })
+    @CommandFramework.Completer(name = "connect", aliases = { "server", "glist" })
     public List<String> connectCompleter(CommandArgs cmdArgs) {
         return CommonPlugin.getInstance().getServerManager().getServers().stream().map(ProxiedServer::getServerId)
                            .map(String::toLowerCase)
                            .filter(serverId -> serverId.startsWith(cmdArgs.getArgs()[0].toLowerCase()))
                            .collect(Collectors.toList());
-    }
-
-    @CommandFramework.Completer(name = "lobby")
-    public List<String> lobbyCompleter(CommandArgs cmdArgs) {
-        return Stream.of(ServerType.values()).filter(ServerType::isLobby).map(ServerType::getName)
-                     .map(String::toUpperCase)
-                     .filter(serverType -> serverType.startsWith(cmdArgs.getArgs()[0].toUpperCase()))
-                     .collect(Collectors.toList());
     }
 }

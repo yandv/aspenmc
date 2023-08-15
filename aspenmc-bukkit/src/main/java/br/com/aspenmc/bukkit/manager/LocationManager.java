@@ -53,6 +53,10 @@ public class LocationManager {
     public Collection<String> getKeys() {
         return locationMap.keySet();
     }
+
+    public boolean hasLocation(String locationName) {
+        return locationMap.containsKey(locationName.toLowerCase());
+    }
 }
 
 

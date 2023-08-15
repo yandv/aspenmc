@@ -19,8 +19,6 @@ import br.com.aspenmc.utils.mojang.UUIDFetcher;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -56,6 +54,9 @@ public class CommonPlugin {
     private Skin defaultSkin;
 
     @Setter
+    private ClanManager clanManager = new ClanManager();
+
+    @Setter
     private LanguageManager languageManager = new LanguageManager();
 
     @Setter
@@ -69,6 +70,12 @@ public class CommonPlugin {
 
     @Setter
     private ServerManager serverManager = new ServerManager();
+
+    @Setter
+    private StatusManager statusManager = new StatusManager();
+
+    @Setter
+    private ClanData clanData;
 
     @Setter
     private GamerData gamerData;
@@ -87,6 +94,9 @@ public class CommonPlugin {
 
     @Setter
     private SkinData skinData;
+
+    @Setter
+    private StatusData statusData;
 
     private UUIDFetcher uuidFetcher = new UUIDFetcher();
 
@@ -117,28 +127,21 @@ public class CommonPlugin {
         mongoConnection.createConnection();
         redisConnection.createConnection();
 
+        setClanData(new MongoClanData(mongoConnection));
         setGamerData(new MongoGamerData());
         setMemberData(new MongoMemberData(mongoConnection));
         setPermissionData(new MongoPermissionData(mongoConnection));
-        setPunishData(new PunishDataImpl(mongoConnection));
+        setPunishData(new MongoPunishData(mongoConnection));
         setServerData(new RedisServerData());
         setSkinData(new RedisSkinData());
+        setStatusData(new MongoStatusData(mongoConnection));
 
         permissionData.retrieveAllGroups().forEach(group -> permissionManager.loadGroup(group));
         permissionData.retrieveAllTags().forEach(tag -> permissionManager.loadTag(tag));
 
-        defaultSkin = skinData.loadData("Sem pele").orElse(null);
-
-        if (defaultSkin == null) {
-            setDefaultSkin(new Skin("Sem pele", CommonConst.CONSOLE_ID,
-                    "ewogICJ0aW1lc3RhbXAiIDogMTY3NzI0NTI0OTE5MCwKICAicHJvZmlsZUlkIiA6ICI4NzQ3ODgyNjc2NzI0OTk1ODU1ODMwN2FiMWI3ZDRjZCIsCiAgInByb2ZpbGVOYW1lIiA6ICJUZXN0ZSIsCiAgInNpZ25hdHVyZVJlcXVpcmVkIiA6IHRydWUsCiAgInRleHR1cmVzIiA6IHsKICAgICJTS0lOIiA6IHsKICAgICAgInVybCIgOiAiaHR0cDovL3RleHR1cmVzLm1pbmVjcmFmdC5uZXQvdGV4dHVyZS8yYzFjYzE5YzYzZDM4MmI3ZTI5MzhkZWE4NGZmZmYzODYxMmJkM2IwNjM3NzY4NzkwZTZkNTJkNzEwNDZhNGIyIgogICAgfQogIH0KfQ==",
-                    "qBgm2nqCyotJW0obDPws0w0iFjlyAK1kEyc3bAPukNPEu6mhdXi2VtVhSeQoW80DlTCn8Svcxzu2/8PGxYbT5/DkvHfA" +
-                            "/yqgrgN6r3rSktC/AQMw6QxX/+h0r76ySO5VbcwPyhqekBcyu" +
-                            "+EnuvOJ8nwdUKdVdZaHN4BYiHBtaKCwkG6GuhfrsDnxC5sjHa1GxkY9w9Wb83Zwn1lW" +
-                            "+qFI8leeobYhPcmO9Y6a2B0u76yc55UoeHdxuuehtweeAKI3pKaCO0ckMBRMV4qhPbvWIFNJhNDTfjrR4JWwK4" +
-                            "+tmq" +
-                            "//3C470Cz4NQg0rNpe5yCBhxctn3yBJrs5M0fQKH559UdQ5wmdYufMtHy8HIa16jqn58UhJxN4P0A8KNwrL8qIOe67nCny+aATOWBo/IAywA4rITFsTAVCP5ViJyNOszEi4oj+/xbdUoDpqeLHJGJmef+PoP5oSvNfha/ZfTYXD+b4odN5SDema7xS/JLl774zDJCBPH47Y8fkY5tYdM/gk7lODMZHCRDCVErhXQqI4Bu9fY5z4Hnl8nUqQjKAn6UNjRA0xkxtL9SUPqD2l+OaUay9rJhcoyLNPr55v8P9qbHi1bg7zlcaXFMBcPiUdG8karSl8fhyfQ27AF94lF5L3kSH5yxa+ksOYYrXImRvDIsiFs45sqvFF0TnI8NQRYU="));
-        }
+        defaultSkin = skinData.loadData(CommonConst.DEFAULT_SKIN_NAME)
+                              .orElse(new Skin(CommonConst.DEFAULT_SKIN_NAME, CommonConst.CONSOLE_ID,
+                                      CommonConst.DEFAULT_SKIN_VALUE, CommonConst.SIGNATURE));
     }
 
     public void debug(String message) {
@@ -182,7 +185,7 @@ public class CommonPlugin {
 
     public void setDefaultSkin(Skin defaultSkin) {
         this.defaultSkin = defaultSkin;
-        skinData.save(defaultSkin, 999999);
+        skinData.save(defaultSkin);
     }
 
     public UUID getMojangId(String userName) {

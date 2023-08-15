@@ -9,10 +9,12 @@ import java.util.concurrent.CompletableFuture;
 
 public interface GamerData {
 
-    <T extends Gamer> CompletableFuture<T> loadGamer(UUID uniqueId, String gamerId, Class<T> gamerClass) ;
+    <E, T extends Gamer<E>> CompletableFuture<T> loadGamer(UUID uniqueId, String gamerId, Class<T> gamerClass) ;
 
     @SuppressWarnings("unchecked")
-    CompletableFuture<List<? extends Gamer>> loadGamer(UUID uniqueId, Map.Entry<String, Class<? extends Gamer>>... classes);
+    <E> CompletableFuture<List<? extends Gamer<E>>> loadGamer(UUID uniqueId, Map.Entry<String, Class<? extends Gamer<E>>>... classes);
 
-    void save(Gamer gamer, String[] fields);
+    <E, T extends Gamer<E>> CompletableFuture<List<T>> ranking(String fieldName, int page, int maxPerPage, String gamerId, Class<T> gamerClass);
+
+    void save(Gamer<?> gamer, String[] fields);
 }

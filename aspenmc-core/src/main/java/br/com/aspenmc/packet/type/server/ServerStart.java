@@ -10,7 +10,7 @@ public class ServerStart extends Server {
     private final ProxiedServer server;
 
     public ServerStart(ProxiedServer server) {
-        super(server.getServerId());
+        super(server.getServerId(), server.getServerType());
         this.server = server;
     }
 

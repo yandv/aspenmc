@@ -16,6 +16,7 @@ import br.com.aspenmc.packet.type.server.command.BungeeCommandRequest;
 import br.com.aspenmc.packet.type.server.command.BungeeCommandResponse;
 import br.com.aspenmc.packet.type.server.keepalive.KeepAliveRequest;
 import br.com.aspenmc.packet.type.server.keepalive.KeepAliveResponse;
+import br.com.aspenmc.utils.ProtocolVersion;
 import com.google.common.io.ByteStreams;
 import lombok.Getter;
 import br.com.aspenmc.CommonConst;
@@ -42,10 +43,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -178,7 +176,12 @@ public class BungeeMain extends Plugin implements CommonPlatform {
         plugin.getPacketManager().registerHandler(SkinChangeRequest.class, request -> {
             ProxiedPlayer player = ProxyServer.getInstance().getPlayer(request.getPlayerId());
 
-            if (player == null) return;
+            if (player == null) {
+                plugin.getPacketManager().sendPacket(
+                        new SkinChangeResponse(request.getPlayerId(), SkinChangeResponse.SkinResult.PLAYER_NOT_FOUND,
+                                "player-not-found").id(request.getId()).server(request.getSource()));
+                return;
+            }
 
             try {
                 PlayerAPI.changePlayerSkin(player.getPendingConnection(), request.getSkin());
@@ -291,5 +294,10 @@ public class BungeeMain extends Plugin implements CommonPlatform {
               .filter(member -> member.getLoginConfiguration().isLogged()).forEach(member -> member.sendMessage(
                       "§6Staff> " + sender.getDefaultTag().getRealPrefix() + sender.getName() + "§7: §f" +
                               ChatColor.translateAlternateColorCodes('&', message)));
+    }
+
+    public long getAveragePing() {
+        return ProxyServer.getInstance().getPlayers().stream().mapToInt(ProxiedPlayer::getPing).sum() /
+                Math.max(ProxyServer.getInstance().getOnlineCount(), 1);
     }
 }

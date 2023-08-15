@@ -35,7 +35,7 @@ public class MongoPermissionData implements PermissionData {
             collection.createIndex(new Document("id", 1), new IndexOptions().unique(true));
             collection.createIndex(new Document("groupName", 1), new IndexOptions().unique(true));
             collection.insertOne(Document.parse(CommonConst.GSON.toJson(
-                    new Group(0, "Membro", Sets.newHashSet("tag.membro"), "membro", true, false))));
+                    new Group(0, "Membro", Sets.newHashSet("tag.membro"), "membro", false, true, false))));
         });
 
         this.tagCollection = mongoConnection.createCollection("tags", collection -> {

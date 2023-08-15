@@ -11,7 +11,8 @@ import java.util.UUID;
 
 public class PlayerAPI {
 
-//    public static void changePlayerName(PendingConnection connection, String newName) throws NoSuchFieldException, IllegalAccessException {
+//    public static void changePlayerName(PendingConnection connection, String newName) throws NoSuchFieldException,
+//    IllegalAccessException {
 //        InitialHandler initialHandler = (InitialHandler) connection;
 //
 //        Field field = InitialHandler.class.getDeclaredField("name");
@@ -19,7 +20,8 @@ public class PlayerAPI {
 //        field.set(initialHandler, newName);
 //    }
 
-    public static void changePlayerId(PendingConnection connection, UUID uniqueId) throws NoSuchFieldException, IllegalAccessException {
+    public static void changePlayerId(PendingConnection connection, UUID uniqueId)
+            throws NoSuchFieldException, IllegalAccessException {
         InitialHandler initialHandler = (InitialHandler) connection;
 
         Field field = InitialHandler.class.getDeclaredField("uniqueId");
@@ -27,7 +29,8 @@ public class PlayerAPI {
         field.set(initialHandler, uniqueId);
     }
 
-    public static void changePlayerMode(PendingConnection connection, boolean newOnlineMode) throws NoSuchFieldException, IllegalAccessException {
+    public static void changePlayerMode(PendingConnection connection, boolean newOnlineMode)
+            throws NoSuchFieldException, IllegalAccessException {
         InitialHandler initialHandler = (InitialHandler) connection;
 
         Field field = InitialHandler.class.getDeclaredField("onlineMode");
@@ -35,7 +38,8 @@ public class PlayerAPI {
         field.set(initialHandler, newOnlineMode);
     }
 
-    public static void changePlayerSkin(PendingConnection connection, @NonNull Skin skin) throws NoSuchFieldException, IllegalAccessException {
+    public static void changePlayerSkin(PendingConnection connection, @NonNull Skin skin)
+            throws NoSuchFieldException, IllegalAccessException {
         InitialHandler initialHandler = (InitialHandler) connection;
         LoginResult loginProfile = initialHandler.getLoginProfile();
 
@@ -43,14 +47,38 @@ public class PlayerAPI {
 
         if (loginProfile == null) {
             LoginResult loginResult = new LoginResult(connection.getUniqueId().toString().replace("-", ""),
-                                                      connection.getName(), new LoginResult.Property[]{property});
+                    connection.getName(), new LoginResult.Property[] { property });
 
             Class<?> initialHandlerClass = connection.getClass();
             Field profileField = initialHandlerClass.getDeclaredField("loginProfile");
             profileField.setAccessible(true);
             profileField.set(connection, loginResult);
         } else {
-            loginProfile.setProperties(new LoginResult.Property[]{property});
+            loginProfile.setProperties(new LoginResult.Property[] { property });
         }
+    }
+
+    public static Skin getPlayerSkin(PendingConnection pendingConnection, Skin orElse) {
+        InitialHandler initialHandler = (InitialHandler) pendingConnection;
+        LoginResult loginProfile = initialHandler.getLoginProfile();
+
+        if (loginProfile == null) {
+            return orElse;
+        }
+
+        LoginResult.Property[] properties = loginProfile.getProperties();
+
+        if (properties == null) {
+            return orElse;
+        }
+
+        for (LoginResult.Property property : properties) {
+            if (property.getName().equals("textures")) {
+                return new Skin(pendingConnection.getName(), pendingConnection.getUniqueId(), property.getValue(),
+                        property.getSignature());
+            }
+        }
+
+        return orElse;
     }
 }

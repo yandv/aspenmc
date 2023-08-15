@@ -51,6 +51,7 @@ public class ProxiedServer {
         this.state = state;
         this.time = time;
         this.mapName = mapName;
+        this.startTime = System.currentTimeMillis();
     }
 
     public ProxiedServer(String serverAddress, int serverPort, String serverId, ServerType serverType, Set<UUID> players, int maxPlayers, boolean joinEnabled) {
