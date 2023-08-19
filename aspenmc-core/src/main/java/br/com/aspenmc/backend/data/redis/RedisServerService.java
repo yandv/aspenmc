@@ -2,7 +2,7 @@ package br.com.aspenmc.backend.data.redis;
 
 import br.com.aspenmc.CommonConst;
 import br.com.aspenmc.CommonPlugin;
-import br.com.aspenmc.backend.data.ServerData;
+import br.com.aspenmc.backend.data.ServerService;
 import br.com.aspenmc.packet.Packet;
 import br.com.aspenmc.packet.type.server.ServerStart;
 import br.com.aspenmc.packet.type.server.ServerStop;
@@ -15,7 +15,7 @@ import redis.clients.jedis.Pipeline;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class RedisServerData implements ServerData {
+public class RedisServerService implements ServerService {
 
     private static final String REDIS_SERVER_PREFIX = "aspenmc-server:";
 

@@ -22,7 +22,7 @@ public interface Gamer<T> {
     String getId();
 
     default void save(String... fields) {
-        CommonPlugin.getInstance().getGamerData().save(this, fields);
+        CommonPlugin.getInstance().getGamerService().save(this, fields);
     }
 
 }

@@ -6,7 +6,7 @@ import br.com.aspenmc.permission.Tag;
 import br.com.aspenmc.punish.Punish;
 import br.com.aspenmc.punish.PunishType;
 import br.com.aspenmc.utils.string.MessageBuilder;
-import br.com.aspenmc.utils.string.StringFormat;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -42,10 +42,15 @@ public class ChatListener implements Listener {
 
         if (member == null) return;
 
+        String message =
+                member.hasPermission("chat.color") ? ChatColor.translateAlternateColorCodes('&', event.getMessage()) :
+                        event.getMessage();
+
         MessageBuilder messageBuilder = new MessageBuilder(
-                member.getTag().map(Tag::getRealPrefix).orElse("§f") + player.getName() + " §8» §f" +
-                        event.getMessage());
+                member.getTag().map(Tag::getRealPrefix).orElse("§f") + player.getName() + " §8» §f" + message);
 
         event.getRecipients().forEach(recipient -> recipient.spigot().sendMessage(messageBuilder.create()));
+        CommonPlugin.getInstance().getConsoleSender().sendMessage(
+                member.getName() + (member.isUsingFake() ? "(" + player.getName() + ")" : "") + ": " + message);
     }
 }

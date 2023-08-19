@@ -9,7 +9,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-public interface StatusData {
+public interface StatusService {
 
     CompletableFuture<Collection<Status>> getStatusById(UUID uniqueId);
 
@@ -19,5 +19,5 @@ public interface StatusData {
 
     CompletableFuture<List<Status>> ranking(StatusType statusType, String fieldName, int page, int perPage);
 
-    void saveStatus(Status status, String id);
+    void saveStatus(Status status, String... fields);
 }

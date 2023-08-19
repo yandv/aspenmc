@@ -49,60 +49,29 @@ public class LanguageManager {
         }
     }
 
-    public String translateOrDefault(Language language, String translationId, String defaultMessage,
-            String... replaces) {
-        if (!translationMap.containsKey(language)) {
-            translationMap.put(language, new HashMap<>());
-        }
-
-        Map<String, String> languageMap = translationMap.get(language);
-
-        String translation;
-
-        if (languageMap.containsKey(translationId)) {
-            translation = languageMap.get(translationId);
-        } else {
-            setTranslation(language, translationId, defaultMessage);
-            translation = defaultMessage;
-        }
-
-        for (int i = 0; i < replaces.length; i += 2) {
-            translation = translation.replace(replaces[i], replaces[i + 1]);
-        }
-
-        return ChatColor.translateAlternateColorCodes('&', translation);
-    }
-
-    public String translateOrDefault(Language language, String translationId, String defaultMessage) {
-        if (!translationMap.containsKey(language)) {
-            translationMap.put(language, new HashMap<>());
-        }
-
-        Map<String, String> languageMap = translationMap.get(language);
-
-        String translation;
-
-        if (languageMap.containsKey(translationId)) {
-            translation = languageMap.get(translationId);
-        } else {
-            setTranslation(language, translationId, defaultMessage);
-            translation = defaultMessage;
-        }
-
-        return ChatColor.translateAlternateColorCodes('&', translation);
-    }
-
-
     public String translate(Language language, String translationId, String... replaces) {
-        return translateOrDefault(language, translationId, "{" + translationId + "}", replaces);
-    }
+        if (!translationMap.containsKey(language)) {
+            translationMap.put(language, new HashMap<>());
+        }
 
-    public String translate(Language language, String translationId) {
-        return translateOrDefault(language, translationId, "{" + translationId + "}");
-    }
+        Map<String, String> languageMap = translationMap.get(language);
 
-    public String translate(Language language, Translation translation, String... replaces) {
-        return translate(language, translation.getId(), replaces);
+        String translation;
+
+        if (languageMap.containsKey(translationId)) {
+            translation = languageMap.get(translationId);
+        } else {
+            setTranslation(language, translationId, "{" + translationId + "}");
+            translation = "{" + translationId + "}";
+        }
+
+        if (replaces.length % 2 == 0) {
+            for (int i = 0; i < replaces.length; i += 2) {
+                translation = translation.replace(replaces[i], replaces[i + 1]);
+            }
+        }
+
+        return ChatColor.translateAlternateColorCodes('&', translation);
     }
 
     public void setTranslation(Language language, String translationId, String translation) {

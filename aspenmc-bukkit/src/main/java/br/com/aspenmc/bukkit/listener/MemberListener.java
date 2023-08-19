@@ -3,6 +3,7 @@ package br.com.aspenmc.bukkit.listener;
 import br.com.aspenmc.CommonPlugin;
 import br.com.aspenmc.bukkit.BukkitCommon;
 import br.com.aspenmc.bukkit.entity.BukkitMember;
+import br.com.aspenmc.clan.Clan;
 import br.com.aspenmc.entity.Member;
 import br.com.aspenmc.entity.member.gamer.Gamer;
 import br.com.aspenmc.entity.member.status.Status;
@@ -28,15 +29,15 @@ public class MemberListener implements Listener {
         UUID uniqueId = event.getUniqueId();
 
         long start = System.currentTimeMillis();
-        CompletableFuture<BukkitMember> byId = CommonPlugin.getInstance().getMemberData()
+        CompletableFuture<BukkitMember> byId = CommonPlugin.getInstance().getMemberService()
                                                            .getMemberById(uniqueId, BukkitMember.class);
-        CompletableFuture<List<? extends Gamer<Player>>> gamers = CommonPlugin.getInstance().getGamerData()
+        CompletableFuture<List<? extends Gamer<Player>>> gamers = CommonPlugin.getInstance().getGamerService()
                                                                               .loadGamer(uniqueId,
                                                                                       BukkitCommon.getInstance()
                                                                                                   .getGamerList()
                                                                                                   .toArray(
                                                                                                           new Map.Entry[0]));
-        CompletableFuture<List<Status>> loadStatus = CommonPlugin.getInstance().getStatusData().getStatusById(uniqueId,
+        CompletableFuture<List<Status>> loadStatus = CommonPlugin.getInstance().getStatusService().getStatusById(uniqueId,
                 BukkitCommon.getInstance().getPreloadedStatus());
 
         CompletableFuture.allOf(byId, gamers, loadStatus);
@@ -67,6 +68,13 @@ public class MemberListener implements Listener {
                     member.getConstraintName() + ".");
         }
 
+        if (member.hasClan()) {
+            if (!CommonPlugin.getInstance().getClanManager().getClanById(member.getClanId()).isPresent()) {
+                CommonPlugin.getInstance().getClanManager().loadClan(
+                        CommonPlugin.getInstance().getClanService().getClanById(member.getClanId(), Clan.class).join());
+            }
+        }
+
         CommonPlugin.getInstance().getMemberManager().loadMember(member);
         CommonPlugin.getInstance().debug("The player " + member.getConstraintName() + " has been loaded (" +
                 (System.currentTimeMillis() - start) + "ms).");
@@ -85,15 +93,15 @@ public class MemberListener implements Listener {
         }
 
         member.setPlayer(player);
-        CommonPlugin.getInstance().getMemberManager().getGamers(player.getUniqueId(), Player.class).forEach(gamer -> {
-            gamer.loadEntity(player);
-        });
+        CommonPlugin.getInstance().getMemberManager().getGamers(player.getUniqueId(), Player.class)
+                    .forEach(gamer -> gamer.loadEntity(player));
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerLoginM(PlayerLoginEvent event) {
         if (event.getResult() != PlayerLoginEvent.Result.ALLOWED) {
             CommonPlugin.getInstance().getMemberManager().unloadMember(event.getPlayer().getUniqueId());
+            return;
         }
     }
 
@@ -101,7 +109,7 @@ public class MemberListener implements Listener {
     public void onPlayerJoin(PlayerJoinEvent event) {
         event.setJoinMessage(null);
         CommonPlugin.getInstance().getPluginPlatform().runAsync(
-                () -> CommonPlugin.getInstance().getServerData().joinPlayer(event.getPlayer().getUniqueId()));
+                () -> CommonPlugin.getInstance().getServerService().joinPlayer(event.getPlayer().getUniqueId()));
         CommonPlugin.getInstance().getMemberManager().getMemberById(event.getPlayer().getUniqueId()).ifPresent(
                 member -> member.joinServer(CommonPlugin.getInstance().getServerId(),
                         CommonPlugin.getInstance().getServerType()));
@@ -112,7 +120,7 @@ public class MemberListener implements Listener {
     public void onPlayerQuit(PlayerQuitEvent event) {
         event.setQuitMessage(null);
         CommonPlugin.getInstance().getPluginPlatform().runAsync(() -> {
-            CommonPlugin.getInstance().getServerData().leavePlayer(event.getPlayer().getUniqueId());
+            CommonPlugin.getInstance().getServerService().leavePlayer(event.getPlayer().getUniqueId());
             Member member = CommonPlugin.getInstance().getMemberManager().getMemberById(event.getPlayer().getUniqueId())
                                         .orElse(null);
 
@@ -123,6 +131,13 @@ public class MemberListener implements Listener {
             }
 
             CommonPlugin.getInstance().getMemberManager().unloadMember(event.getPlayer().getUniqueId());
+            CommonPlugin.getInstance().getStatusManager().unloadStatus(event.getPlayer().getUniqueId());
+
+            member.getClan().ifPresent(clan -> {
+                if (clan.getOnlineMembers().isEmpty()) {
+                    CommonPlugin.getInstance().getClanManager().unloadClan(clan.getClanId());
+                }
+            });
         });
     }
 }

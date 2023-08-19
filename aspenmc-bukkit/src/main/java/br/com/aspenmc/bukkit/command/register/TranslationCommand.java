@@ -1,19 +1,22 @@
 package br.com.aspenmc.bukkit.command.register;
 
-import com.google.common.base.Joiner;
 import br.com.aspenmc.CommonPlugin;
-import br.com.aspenmc.bukkit.event.player.language.PlayerLanguageChangedEvent;
 import br.com.aspenmc.bukkit.entity.BukkitMember;
+import br.com.aspenmc.bukkit.event.player.language.PlayerLanguageChangedEvent;
 import br.com.aspenmc.command.CommandArgs;
 import br.com.aspenmc.command.CommandFramework;
 import br.com.aspenmc.command.CommandHandler;
 import br.com.aspenmc.entity.Sender;
 import br.com.aspenmc.language.Language;
+import br.com.aspenmc.utils.string.MessageBuilder;
+import com.google.common.base.Joiner;
+import net.md_5.bungee.api.chat.ClickEvent;
 import org.bukkit.Bukkit;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class TranslationCommand implements CommandHandler {
@@ -37,8 +40,7 @@ public class TranslationCommand implements CommandHandler {
         Language language = Language.getByName(args[0]);
 
         if (language == null) {
-            sender.sendMessage(
-                    sender.getLanguage().translate("command.language.language-not-found", "%language%", args[0]));
+            sender.sendMessage(sender.getLanguage().t("command.language.language-not-found", "%language%", args[0]));
             return;
         }
 
@@ -53,16 +55,40 @@ public class TranslationCommand implements CommandHandler {
         String translationId = args[1];
 
         if (args.length == 2) {
-            sender.sendMessage("§aLingua " + language.getLanguageName() + "§f:");
-            sender.sendMessage("  §f" + translationId + ": §7" + language.translate(translationId));
+            sender.sendMessage("§aLíngua " + language.getLanguageName() + "§f:");
+            MessageBuilder messageBuilder = new MessageBuilder("  §fSem tradução: §7");
+
+            if (args[1].equalsIgnoreCase("faltantes") || args[1].equalsIgnoreCase("no-translated")) {
+
+                int max = 20;
+
+                for (Map.Entry<String, String> entry : CommonPlugin.getInstance().getLanguageManager()
+                                                                   .getTranslations(language).entrySet()) {
+                    if (entry.getValue().startsWith("{") && entry.getValue().endsWith("}")) {
+                        messageBuilder.extra(new MessageBuilder("§f" + entry.getKey() + "§7, ")
+                                .setClickEvent(ClickEvent.Action.SUGGEST_COMMAND,
+                                        "/translate " + language.name() + " " + entry.getKey() + " ")
+                                .setHoverEvent("§eClique para editar."));
+                    }
+
+                    if (max-- <= 0) {
+                        break;
+                    }
+                }
+
+                sender.sendMessage(messageBuilder.create());
+            } else {
+                sender.sendMessage("  §f" + translationId + ": §7" + language.t(translationId));
+            }
             return;
         }
 
-        String translate = Joiner.on(' ').join(Arrays.copyOfRange(args, 2, args.length));
+        String translate = Joiner.on(' ').join(Arrays.copyOfRange(args, 2, args.length)).replace("\\n", "\n");
 
         CommonPlugin.getInstance().getLanguageManager().setTranslation(language, translationId, translate);
-        sender.sendMessage(sender.getLanguage().translate("command.language.translation-set", "%language%",
-                language.getLanguageName(), "%translationId%", translationId, "%translation%", translate));
+        sender.sendMessage(sender.getLanguage()
+                                 .t("command.language.translation-set", "%language%", language.getLanguageName(),
+                                         "%translationId%", translationId, "%translation%", translate));
 
         CommonPlugin.getInstance().getMemberManager().getMembers().stream()
                     .filter(member -> member.getLanguage() == language).filter(member -> member instanceof BukkitMember)

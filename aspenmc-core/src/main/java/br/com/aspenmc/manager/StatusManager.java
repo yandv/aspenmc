@@ -1,8 +1,10 @@
 package br.com.aspenmc.manager;
 
 import br.com.aspenmc.CommonPlugin;
+import br.com.aspenmc.entity.member.status.League;
 import br.com.aspenmc.entity.member.status.Status;
 import br.com.aspenmc.entity.member.status.StatusType;
+import lombok.Setter;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,6 +13,9 @@ import java.util.UUID;
 public class StatusManager {
 
     private Map<StatusType, Map<UUID, Status>> statusMap;
+
+    @Setter
+    private LeagueChange leagueChangeObserver;
 
     public StatusManager() {
         this.statusMap = new HashMap<>();
@@ -38,8 +43,9 @@ public class StatusManager {
         }
 
         if (!statusMap.get(statusType).containsKey(uniqueId)) {
-            return statusMap.get(statusType).put(uniqueId,
-                    CommonPlugin.getInstance().getStatusData().getStatusById(uniqueId, statusType).join());
+            Status status = CommonPlugin.getInstance().getStatusService().getStatusById(uniqueId, statusType).join();
+            statusMap.get(statusType).put(uniqueId, status);
+            return status;
         }
 
         return statusMap.get(statusType).get(uniqueId);
@@ -59,5 +65,20 @@ public class StatusManager {
         for (StatusType statusType : statusMap.keySet()) {
             unloadStatus(uniqueId, statusType);
         }
+    }
+
+    public boolean hasLoadedStatus(UUID uniqueId, StatusType statusType) {
+        return statusMap.containsKey(statusType) && statusMap.get(statusType).containsKey(uniqueId);
+    }
+
+    public void onLeagueChange(Status status, League oldLeague, League newLeague) {
+        if (leagueChangeObserver != null) {
+            leagueChangeObserver.onLeagueChange(status, oldLeague, newLeague);
+        }
+    }
+
+    public interface LeagueChange {
+
+        void onLeagueChange(Status status, League oldLeague, League newLeague);
     }
 }

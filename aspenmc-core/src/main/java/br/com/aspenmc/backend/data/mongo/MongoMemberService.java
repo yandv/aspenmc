@@ -1,37 +1,40 @@
 package br.com.aspenmc.backend.data.mongo;
 
+import br.com.aspenmc.CommonConst;
+import br.com.aspenmc.CommonPlugin;
+import br.com.aspenmc.backend.data.MemberService;
 import br.com.aspenmc.backend.type.MongoConnection;
+import br.com.aspenmc.entity.Member;
 import br.com.aspenmc.packet.type.member.MemberFieldUpdate;
+import br.com.aspenmc.utils.json.JsonUtils;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.IndexOptions;
-import br.com.aspenmc.CommonConst;
-import br.com.aspenmc.CommonPlugin;
-import br.com.aspenmc.backend.data.MemberData;
-import br.com.aspenmc.entity.Member;
-import br.com.aspenmc.utils.json.JsonUtils;
+import com.mongodb.client.model.Updates;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import redis.clients.jedis.Jedis;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-public class MongoMemberData implements MemberData {
+public class MongoMemberService implements MemberService {
 
     private final MongoCollection<Document> memberCollection;
 
-    public MongoMemberData(MongoConnection mongoConnection) {
+    public MongoMemberService(MongoConnection mongoConnection) {
         this.memberCollection = mongoConnection.createCollection("members", collection -> {
             collection.createIndex(new Document("uniqueId", 1), new IndexOptions().unique(true));
             collection.createIndex(new Document("name", 1), new IndexOptions().unique(true));
         });
     }
-
 
     @Override
     public <T extends Member> CompletableFuture<T> getMemberById(UUID playerId, Class<T> clazz) {
@@ -111,23 +114,24 @@ public class MongoMemberData implements MemberData {
     public void updateMember(Member member, String... fields) {
         CompletableFuture.runAsync(() -> {
             JsonObject tree = JsonUtils.jsonTree(member);
+
+            List<Bson> updatePredicates = new ArrayList<>();
             JsonElement[] values = new JsonElement[fields.length];
 
             for (int i = 0; i < fields.length; i++) {
                 String fieldName = fields[i];
 
                 if (tree.has(fieldName)) {
-                    memberCollection.updateOne(Filters.eq("uniqueId", member.getUniqueId().toString()),
-                            new Document("$set",
-                                    new Document(fieldName, JsonUtils.elementToBson(tree.get(fieldName)))));
+                    updatePredicates.add(Updates.set(fieldName, JsonUtils.elementToBson(tree.get(fieldName))));
                     values[i] = tree.get(fieldName);
                 } else {
-                    memberCollection.updateOne(Filters.eq("uniqueId", member.getUniqueId().toString()),
-                            new Document("$unset", new Document(fieldName, "")));
+                    updatePredicates.add(Updates.unset(fieldName));
                     values[i] = JsonNull.INSTANCE;
                 }
             }
 
+            memberCollection.updateOne(Filters.eq("uniqueId", member.getUniqueId().toString()),
+                    Updates.combine(updatePredicates));
             CommonPlugin.getInstance().getPacketManager()
                         .sendPacket(new MemberFieldUpdate(member.getUniqueId(), fields, values));
         }, CommonConst.PRINCIPAL_EXECUTOR);

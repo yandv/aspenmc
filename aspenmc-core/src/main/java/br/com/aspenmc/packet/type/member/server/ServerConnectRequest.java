@@ -83,7 +83,7 @@ public class ServerConnectRequest extends Packet {
     }
 
     private void callback(String serverId, ServerConnectResponse.ResponseType responseType) {
-        CommonPlugin.getInstance().getServerData().sendPacket(
+        CommonPlugin.getInstance().getServerService().sendPacket(
                 new ServerConnectResponse(playerId, serverId, responseType).id(getId()).server(getSource()));
     }
 

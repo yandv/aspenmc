@@ -32,6 +32,7 @@ public abstract class Member implements Sender {
     private Map<String, GroupInfo> groupMap;
     private Map<String, Long> permissions;
     private String tag;
+
     private UUID clanId;
 
     private final LoginConfiguration loginConfiguration;
@@ -318,7 +319,7 @@ public abstract class Member implements Sender {
         setSkin(CommonPlugin.getInstance().getDefaultSkin());
 
         if (!isUsingDefaultSkin()) {
-            CommonPlugin.getInstance().getSkinData().loadUserData(getPlayerSkin()).whenComplete((skin, throwable) -> {
+            CommonPlugin.getInstance().getSkinService().loadUserData(getPlayerSkin()).whenComplete((skin, throwable) -> {
                 if (skin != null) {
                     setSkin(skin);
                 }
@@ -372,7 +373,7 @@ public abstract class Member implements Sender {
     }
 
     public void save(String... fields) {
-        CommonPlugin.getInstance().getMemberData().updateMember(this, fields);
+        CommonPlugin.getInstance().getMemberService().updateMember(this, fields);
     }
 
     @Override

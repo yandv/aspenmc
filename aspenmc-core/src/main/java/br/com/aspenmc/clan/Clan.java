@@ -64,10 +64,10 @@ public class Clan {
                         .filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
     }
 
-    public void sendMessage(String translation, String defaultMessage, String... replaces) {
+    public void sendMessage(String translation, String... replaces) {
         memberMap.keySet().stream().map(CommonPlugin.getInstance().getMemberManager()::getMemberById)
                  .filter(Optional::isPresent).map(Optional::get)
-                 .forEach(member -> member.sendMessage(member.t(translation, defaultMessage, replaces)));
+                 .forEach(member -> member.sendMessage(member.t(translation, replaces)));
     }
 
     public void sendMessage(String message) {
@@ -94,8 +94,8 @@ public class Clan {
 
     public void disband() {
         sendMessage("clan-system.disband", "&cO clan foi desfeito.");
-        CommonPlugin.getInstance().getMemberData().updateMany("clanId", null, memberMap.keySet().toArray(new UUID[0]));
-        CommonPlugin.getInstance().getClanData().deleteClan(this);
+        CommonPlugin.getInstance().getMemberService().updateMany("clanId", null, memberMap.keySet().toArray(new UUID[0]));
+        CommonPlugin.getInstance().getClanService().deleteClan(this);
         CommonPlugin.getInstance().getClanManager().unloadClan(clanId);
     }
 
@@ -119,7 +119,7 @@ public class Clan {
     }
 
     public void save(String... fields) {
-        CommonPlugin.getInstance().getClanData().updateClan(this, fields);
+        CommonPlugin.getInstance().getClanService().updateClan(this, fields);
     }
 
     public boolean update(Member member) {

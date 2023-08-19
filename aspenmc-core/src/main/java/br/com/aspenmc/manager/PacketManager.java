@@ -11,8 +11,6 @@ import br.com.aspenmc.utils.ClassGetter;
 import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -143,11 +141,11 @@ public class PacketManager {
 
     public <T extends Packet> void sendPacketAsync(T packet) {
         CommonPlugin.getInstance().getPluginPlatform()
-                    .runAsync(() -> CommonPlugin.getInstance().getServerData().sendPacket(packet));
+                    .runAsync(() -> CommonPlugin.getInstance().getServerService().sendPacket(packet));
     }
 
     public <T extends Packet> T sendPacket(T packet) {
-        return CommonPlugin.getInstance().getServerData().sendPacket(packet);
+        return CommonPlugin.getInstance().getServerService().sendPacket(packet);
     }
 
     @AllArgsConstructor

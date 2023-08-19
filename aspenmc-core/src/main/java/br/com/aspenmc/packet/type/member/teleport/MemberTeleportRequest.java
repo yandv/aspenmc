@@ -41,7 +41,7 @@ public class MemberTeleportRequest extends Packet {
 
             if (nameById != null) {
                 member.sendServer(CommonPlugin.getInstance().getServerId());
-                CommonPlugin.getInstance().getServerData().sendPacket(
+                CommonPlugin.getInstance().getServerService().sendPacket(
                         new MemberTeleportResponse(uniqueId, targetId, nameById,
                                                    CommonPlugin.getInstance().getServerId(), true).server(getSource()));
             }
@@ -50,7 +50,7 @@ public class MemberTeleportRequest extends Packet {
 
             if (idByName != null) {
                 member.sendServer(CommonPlugin.getInstance().getServerId());
-                CommonPlugin.getInstance().getServerData().sendPacket(
+                CommonPlugin.getInstance().getServerService().sendPacket(
                         new MemberTeleportResponse(uniqueId, idByName, targetName,
                                                    CommonPlugin.getInstance().getServerId(), true).server(getSource()));
             }

@@ -7,7 +7,6 @@ import br.com.aspenmc.bukkit.BukkitCommon;
 import br.com.aspenmc.bukkit.entity.BukkitMember;
 import br.com.aspenmc.bukkit.event.server.LocationChangeEvent;
 import br.com.aspenmc.bukkit.menu.staff.YourPreferencesInventory;
-import br.com.aspenmc.bukkit.menu.staff.account.UserInventory;
 import br.com.aspenmc.bukkit.menu.staff.account.UserPunishHistoryInventory;
 import br.com.aspenmc.command.CommandArgs;
 import br.com.aspenmc.command.CommandFramework;
@@ -34,33 +33,6 @@ import java.util.stream.Collectors;
 
 public class ModeratorCommand implements CommandHandler {
 
-    @CommandFramework.Command(name = "profile", aliases = { "perfil" },
-            permission = CommonConst.SERVER_FULL_PERMISSION)
-    public void accountCommand(CommandArgs cmdArgs) {
-        Sender sender = cmdArgs.getSender();
-        String[] args = cmdArgs.getArgs();
-
-        if (args.length == 0) {
-            sender.sendMessage(sender.t("command.account.usage",
-                    " §a» §fUse §a/%label% <player>§f para ver informações sobre um jogador.", "%label%",
-                    cmdArgs.getLabel()));
-            return;
-        }
-
-        Member member = CommonPlugin.getInstance().getMemberManager().getOrLoadByName(args[0]).orElse(null);
-
-        if (member == null) {
-            sender.sendMessage(sender.translate("account-not-found", "%player%", args[0]));
-            return;
-        }
-
-        if (sender.isPlayer()) {
-            new UserInventory(cmdArgs.getSenderAsMember(BukkitMember.class).getPlayer(), member);
-        } else {
-            sender.sendMessage("em breve... nos cinemas");
-        }
-    }
-
     @CommandFramework.Command(name = "punishinfo", aliases = { "pinfo" },
             permission = CommonConst.SERVER_FULL_PERMISSION)
     public void punishInfoCommand(CommandArgs cmdArgs) {
@@ -77,7 +49,7 @@ public class ModeratorCommand implements CommandHandler {
         Member member = CommonPlugin.getInstance().getMemberManager().getOrLoadByName(args[0]).orElse(null);
 
         if (member == null) {
-            sender.sendMessage(sender.translate("account-not-found", "%player%", args[0]));
+            sender.sendMessage(sender.t("account-not-found", "%player%", args[0]));
             return;
         }
 
@@ -100,8 +72,8 @@ public class ModeratorCommand implements CommandHandler {
         }
     }
 
-    @CommandFramework.Command(name = "spreferences", aliases = { "staffpreferences", "sprefs", "spref" }, console = false,
-            permission = BukkitConst.PERMISION_ADMIN_MODE)
+    @CommandFramework.Command(name = "spreferences", aliases = { "staffpreferences", "sprefs", "spref" },
+            console = false, permission = BukkitConst.PERMISION_ADMIN_MODE)
     public void staffPreferencesCommand(CommandArgs cmdArgs) {
         new YourPreferencesInventory(cmdArgs.getSenderAsMember(BukkitMember.class).getPlayer());
     }
@@ -462,7 +434,7 @@ public class ModeratorCommand implements CommandHandler {
             if (target == null) {
                 if (sender.isPlayer()) {
                     CommonPlugin.getInstance().getPacketManager().waitPacket(MemberTeleportResponse.class,
-                            CommonPlugin.getInstance().getServerData()
+                            CommonPlugin.getInstance().getServerService()
                                         .sendPacket(new MemberTeleportRequest(sender.getUniqueId(), args[0])), 200,
                             packet -> {
                                 if (packet == null) {

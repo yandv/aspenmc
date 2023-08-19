@@ -1,5 +1,6 @@
 package br.com.aspenmc.entity.member.configuration;
 
+import br.com.aspenmc.clan.ClanTag;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,8 +23,33 @@ public class PreferencesConfiguration {
 
     private boolean clanInvitesEnabled = true;
 
+    private boolean clanDisplayTagEnabled;
+    private ClanTag clanTag;
+
     @Getter(AccessLevel.NONE)
     private transient Member member;
+
+    public ClanTag getClanTag() {
+        if (clanTag == null) {
+            return ClanTag.NONE;
+        }
+
+        return clanTag;
+    }
+
+    public void setClanDisplayTagEnabled(boolean clanDisplayTagEnabled) {
+        if (this.clanDisplayTagEnabled == clanDisplayTagEnabled) return;
+
+        this.clanDisplayTagEnabled = clanDisplayTagEnabled;
+        save();
+    }
+
+    public void setClanTag(ClanTag clanTag) {
+        if (this.clanTag == clanTag) return;
+
+        this.clanTag = clanTag;
+        save();
+    }
 
     public void setAdminOnLogin(short adminOnLogin) {
         if (this.adminOnLogin == adminOnLogin) return;

@@ -1,30 +1,27 @@
 package br.com.aspenmc.bukkit.manager;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-
 import br.com.aspenmc.bukkit.BukkitCommon;
 import br.com.aspenmc.bukkit.event.player.cooldown.CooldownFinishEvent;
 import br.com.aspenmc.bukkit.event.player.cooldown.CooldownStartEvent;
 import br.com.aspenmc.bukkit.event.player.cooldown.CooldownStopEvent;
 import br.com.aspenmc.bukkit.event.server.ServerTickEvent;
 import br.com.aspenmc.bukkit.utils.PlayerAPI;
+import br.com.aspenmc.bukkit.utils.ProgressBar;
 import br.com.aspenmc.bukkit.utils.cooldown.Cooldown;
 import br.com.aspenmc.bukkit.utils.cooldown.ItemCooldown;
 import br.com.aspenmc.utils.string.StringFormat;
 import br.com.aspenmc.utils.string.TimeFormat;
-import net.dv8tion.jda.api.events.UpdateEvent;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
+
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Store and display like actionbar for players all Cooldown Based on
@@ -34,8 +31,6 @@ import org.bukkit.inventory.ItemStack;
  */
 
 public class CooldownManager implements Listener {
-
-    private static final char CHAR = '|';
 
     private Map<UUID, List<Cooldown>> map;
     private Listener listener;
@@ -272,16 +267,9 @@ public class CooldownManager implements Listener {
         }
 
         private void display(Player player, Cooldown cooldown) {
-            StringBuilder bar = new StringBuilder();
-            double percentage = cooldown.getPercentage();
-            double count = 20 - Math.max(percentage > 0D ? 1 : 0, percentage / 5);
-
-            for (int a = 0; a < count; a++)
-                bar.append("§a").append(CHAR);
-            for (int a = 0; a < 20 - count; a++)
-                bar.append("§c").append(CHAR);
-
-            PlayerAPI.actionbar(player, "§f" + cooldown.getName() + " " + bar.toString() + " §f" +
+            PlayerAPI.actionbar(player, "§f" + cooldown.getName() + " " +
+                    ProgressBar.getProgressBar(cooldown.getRemaining(), cooldown.getDuration(), 20, '|',
+                            ChatColor.GREEN, ChatColor.RED) + " §f" +
                     StringFormat.formatTime((int) cooldown.getRemaining(), TimeFormat.NORMAL));
         }
     }

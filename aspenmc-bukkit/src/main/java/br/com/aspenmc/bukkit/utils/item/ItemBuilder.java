@@ -274,10 +274,14 @@ public class ItemBuilder {
     }
 
     public ItemBuilder glow() {
-        glow = true;
+        this.glow = true;
         return this;
     }
 
+    public ItemBuilder glow(boolean glow) {
+        this.glow = glow;
+        return this;
+    }
     public ItemBuilder color(Color color) {
         this.useMeta = true;
         this.color = color;

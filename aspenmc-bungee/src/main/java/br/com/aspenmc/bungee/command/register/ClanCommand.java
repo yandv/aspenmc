@@ -27,11 +27,11 @@ public class ClanCommand implements CommandHandler {
         Clan clan = sender.getClan().orElse(null);
 
         if (clan == null) {
-            sender.sendMessage(sender.t("clan-system.dont-have-clan", "§cVocê não está em um clan."));
+            sender.sendMessage(sender.t("clan-system.dont-have-clan"));
             return;
         }
 
-        sender.sendMessage("§a" + clan.getClanName() + " (" + clan.getClanAbbreviation() + ")");
+        sender.sendMessage("§aClan " + clan.getClanName() + " (" + clan.getClanAbbreviation() + ")");
         sender.sendMessage("  §fLíder: §7" + clan.getOwner().getLastName());
         sender.sendMessage("  §fMembros: §7" + clan.getMemberCount() + "/" + clan.getMaxPlayers());
         sender.sendMessage("  §fParticipantes: §7" + clan.getMemberMap().values().stream().map(clanMember -> {
@@ -78,15 +78,20 @@ public class ClanCommand implements CommandHandler {
 
             String clanAbbreviation = args[1];
 
-            if (clanAbbreviation.length() > 6) {
-                sender.sendMessage("§cA tag do clan não pode ter mais de 6 caracteres.");
+            if (clanAbbreviation.length() <= 2 || clanAbbreviation.length() > 6) {
+                sender.sendMessage("§cA tag do clan deve ter entre 2 e 6 caracteres.");
                 break;
             }
 
             String clanName = Joiner.on(' ').join(Arrays.copyOfRange(args, 2, args.length));
 
-            CompletableFuture<UUID> clanId = CommonPlugin.getInstance().getClanData().getClanId();
-            CompletableFuture<Clan> clanByName = CommonPlugin.getInstance().getClanData()
+            if (clanName.length() <= 2 || clanName.length() > 16) {
+                sender.sendMessage("§cO nome do clan deve ter entre 2 e 16 caracteres.");
+                break;
+            }
+
+            CompletableFuture<UUID> clanId = CommonPlugin.getInstance().getClanService().getClanId();
+            CompletableFuture<Clan> clanByName = CommonPlugin.getInstance().getClanService()
                                                              .getClanByName(clanName, clanAbbreviation, Clan.class);
 
             CompletableFuture.allOf(clanId, clanByName).whenComplete((unused, throwable) -> {
@@ -107,7 +112,7 @@ public class ClanCommand implements CommandHandler {
                     return;
                 }
 
-                Clan clan = CommonPlugin.getInstance().getClanData()
+                Clan clan = CommonPlugin.getInstance().getClanService()
                                         .createClan(new Clan(id, clanName, clanAbbreviation, sender));
 
                 sender.setClan(clan);
@@ -125,7 +130,7 @@ public class ClanCommand implements CommandHandler {
             Clan clan = sender.getClan().orElse(null);
 
             if (clan == null) {
-                sender.sendMessage(sender.t("clan-system.dont-have-clan", "§cVocê não está em um clan."));
+                sender.sendMessage(sender.t("clan-system.dont-have-clan"));
                 break;
             }
 
@@ -149,7 +154,7 @@ public class ClanCommand implements CommandHandler {
             Clan clan = sender.getClan().orElse(null);
 
             if (clan == null) {
-                sender.sendMessage(sender.t("clan-system.dont-have-clan", "§cVocê não está em um clan."));
+                sender.sendMessage(sender.t("clan-system.dont-have-clan"));
                 break;
             }
 
@@ -168,10 +173,8 @@ public class ClanCommand implements CommandHandler {
             }
 
             clanMember.setRole(ClanRole.values()[clanMember.getRole().ordinal() + 1]);
-            sender.sendMessage(
-                    sender.t("command.clan.promote-success", "§aO jogador %player% foi promovido para %role%.",
-                            "%player%", args[1], "%role%",
-                            sender.t("clan-system.role." + clanMember.getRole().name().toLowerCase())));
+            sender.sendMessage(sender.t("command.clan.promote-success", "%player%", args[1], "%role%",
+                    sender.t("clan-system.role." + clanMember.getRole().name().toLowerCase())));
             break;
         }
         case "rebaixar":
@@ -185,7 +188,7 @@ public class ClanCommand implements CommandHandler {
             Clan clan = sender.getClan().orElse(null);
 
             if (clan == null) {
-                sender.sendMessage(sender.t("clan-system.dont-have-clan", "§cVocê não está em um clan."));
+                sender.sendMessage(sender.t("clan-system.dont-have-clan"));
                 break;
             }
 
@@ -198,17 +201,13 @@ public class ClanCommand implements CommandHandler {
             }
 
             if (clanMember.getRole().ordinal() == ClanRole.MEMBER.ordinal()) {
-                sender.sendMessage(
-                        sender.t("command.clan.demote-already-member", "§cO jogador %player% já é um membro do clan.",
-                                "%player%", args[1]));
+                sender.sendMessage(sender.t("command.clan.demote-already-member", "%player%", args[1]));
                 return;
             }
 
             clanMember.setRole(ClanRole.MEMBER);
-            sender.sendMessage(
-                    sender.t("command.clan.demote-success", "§aO jogador %player% foi rebaixado para %role%.",
-                            "%player%", args[1], "%role%",
-                            sender.t("clan-system.role." + clanMember.getRole().name().toLowerCase())));
+            sender.sendMessage(sender.t("command.clan.demote-success", "%player%", args[1], "%role%",
+                    sender.t("clan-system.role." + clanMember.getRole().name().toLowerCase())));
             break;
         }
         case "expulsar": {
@@ -313,7 +312,7 @@ public class ClanCommand implements CommandHandler {
             Member member = CommonPlugin.getInstance().getMemberManager().getMemberByName(args[arg]).orElse(null);
 
             if (member == null) {
-                sender.sendMessage(sender.translate("player-not-found", "%player%", args[arg]));
+                sender.sendMessage(sender.t("player-not-found", "%player%", args[arg]));
                 break;
             }
 
@@ -365,13 +364,12 @@ public class ClanCommand implements CommandHandler {
                 }
 
                 if (realClan.getMemberCount() >= realClan.getMaxPlayers()) {
-                    sender.sendMessage(sender.t("command.clan.invite-full", "§cO clan está cheio."));
+                    sender.sendMessage(sender.t("command.clan.invite-full"));
                     return;
                 }
 
                 if (realClan.isClanMember(member.getUniqueId())) {
-                    sender.sendMessage(sender.t("command.clan.invite-already-member",
-                            "§cO jogador %player% já é um membro do clan.", "%player%", member.getName()));
+                    sender.sendMessage(sender.t("command.clan.invite-already-member", "%player%", member.getName()));
                     return;
                 }
 
@@ -379,12 +377,8 @@ public class ClanCommand implements CommandHandler {
                 member.setClan(realClan);
             });
 
-            sender.sendMessage(
-                    sender.t("command.clan.invite-success", "§aO jogador %player% foi convidado para o seu clan.",
-                            "%player%", args[arg]));
-            member.sendMessage(
-                    member.t("command.clan.invite-received", "§aVocê foi convidado para o clan %clan%.", "%clan%",
-                            clan.getClanName()));
+            sender.sendMessage(sender.t("command.clan.invite-success", "%player%", args[arg]));
+            member.sendMessage(member.t("command.clan.invite-received", "%clanName%", clan.getClanName()));
         }
         }
     }

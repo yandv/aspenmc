@@ -1,13 +1,11 @@
 package br.com.aspenmc.backend.data;
 
 import br.com.aspenmc.clan.Clan;
-import br.com.aspenmc.entity.Member;
 
-import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-public interface ClanData {
+public interface ClanService {
 
 
     <T extends Clan> CompletableFuture<T> getClanById(UUID clanId, Class<T> clazz);

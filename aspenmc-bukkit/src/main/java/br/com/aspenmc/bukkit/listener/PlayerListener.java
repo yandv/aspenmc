@@ -3,10 +3,13 @@ package br.com.aspenmc.bukkit.listener;
 import br.com.aspenmc.BukkitConst;
 import br.com.aspenmc.CommonPlugin;
 import br.com.aspenmc.bukkit.BukkitCommon;
+import br.com.aspenmc.bukkit.event.player.PlayerChangeLeagueEvent;
 import br.com.aspenmc.bukkit.event.player.PlayerRealRespawnEvent;
 import br.com.aspenmc.bukkit.utils.scoreboard.ScoreHelper;
+import br.com.aspenmc.entity.member.status.League;
 import org.bukkit.Achievement;
 import org.bukkit.Bukkit;
+import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.ExperienceOrb;
@@ -36,6 +39,28 @@ public class PlayerListener implements Listener {
     }
 
     @EventHandler
+    public void onPlayerChangeLeague(PlayerChangeLeagueEvent event) {
+        if (event.getPlayer() != null && event.getNewLeague().ordinal() > event.getOldLeague().ordinal()) {
+            if (event.getNewLeague() == League.values()[League.values().length - 1]) {
+                Bukkit.broadcastMessage(" ");
+                Bukkit.broadcastMessage("§e" + event.getPlayer().getName() + "§f subiu para o rank " +
+                        League.values()[League.values().length - 1].getColor() +
+                        League.values()[League.values().length - 1].getName() + "§f!");
+                Bukkit.broadcastMessage(" ");
+
+                Bukkit.getOnlinePlayers()
+                      .forEach(player -> player.playSound(player.getLocation(), Sound.ENDERDRAGON_GROWL, 1f, 0.1f));
+            }
+
+            event.getBukkitMember().sendMessage("§a§l> §fVocê subiu para o rank §a" + event.getNewLeague().getColor() +
+                    event.getNewLeague().getSymbol() + " " + event.getNewLeague().getName());
+        } else if (event.getNewLeague().ordinal() < event.getOldLeague().ordinal()) {
+            event.getBukkitMember().sendMessage("§c§l> §fVocê desceu para o rank §c" + event.getNewLeague().getColor() +
+                    event.getNewLeague().getSymbol() + " " + event.getNewLeague().getName());
+        }
+    }
+
+    @EventHandler
     public void onPlayerDeath(PlayerDeathEvent event) {
         Player player = event.getEntity();
         Entity killer = null;
@@ -51,11 +76,12 @@ public class PlayerListener implements Listener {
         final Entity finalKiller = killer;
 
         CommonPlugin.getInstance().getPluginPlatform().runLater(() -> {
+            player.spigot().respawn();
+
             PlayerRealRespawnEvent playerRealRespawnEvent = new PlayerRealRespawnEvent(player, finalKiller);
             Bukkit.getPluginManager().callEvent(playerRealRespawnEvent);
 
             player.teleport(playerRealRespawnEvent.getRespawnLocation());
-            player.spigot().respawn();
 
             if (playerRealRespawnEvent.isDropXp()) {
                 ExperienceOrb experienceOrb = playerRealRespawnEvent.getDropLocation().getWorld()

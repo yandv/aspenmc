@@ -16,7 +16,7 @@ import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.IndexOptions;
 import br.com.aspenmc.CommonConst;
 import br.com.aspenmc.CommonPlugin;
-import br.com.aspenmc.backend.data.PermissionData;
+import br.com.aspenmc.backend.data.PermissionService;
 import br.com.aspenmc.permission.Group;
 import br.com.aspenmc.permission.Tag;
 import br.com.aspenmc.utils.json.JsonUtils;
@@ -25,12 +25,12 @@ import org.bson.Document;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class MongoPermissionData implements PermissionData {
+public class MongoPermissionService implements PermissionService {
 
     private final MongoCollection<Document> groupCollection;
     private final MongoCollection<Document> tagCollection;
 
-    public MongoPermissionData(MongoConnection mongoConnection) {
+    public MongoPermissionService(MongoConnection mongoConnection) {
         this.groupCollection = mongoConnection.createCollection("groups", collection -> {
             collection.createIndex(new Document("id", 1), new IndexOptions().unique(true));
             collection.createIndex(new Document("groupName", 1), new IndexOptions().unique(true));

@@ -6,7 +6,7 @@ import br.com.aspenmc.permission.Tag;
 import java.util.List;
 import java.util.Optional;
 
-public interface PermissionData {
+public interface PermissionService {
 
     /**
      * Creates a group in the database

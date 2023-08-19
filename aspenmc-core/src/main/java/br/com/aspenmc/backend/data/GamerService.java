@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-public interface GamerData {
+public interface GamerService {
 
     <E, T extends Gamer<E>> CompletableFuture<T> loadGamer(UUID uniqueId, String gamerId, Class<T> gamerClass) ;
 

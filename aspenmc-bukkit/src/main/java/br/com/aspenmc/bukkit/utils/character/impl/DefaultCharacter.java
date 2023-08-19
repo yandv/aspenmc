@@ -9,9 +9,7 @@ import br.com.aspenmc.entity.member.Skin;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
-import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.Setter;
 import net.minecraft.server.v1_8_R3.*;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -63,7 +61,7 @@ public class DefaultCharacter implements Character {
     }
 
     public DefaultCharacter(Location location, TouchHandler<Character> touchHandler, String name, Hologram hologram) {
-        this(location, false, touchHandler, CommonPlugin.getInstance().getSkinData().loadData(name)
+        this(location, false, touchHandler, CommonPlugin.getInstance().getSkinService().loadData(name)
                                                         .orElse(CommonPlugin.getInstance().getDefaultSkin()), hologram);
     }
 

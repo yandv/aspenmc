@@ -40,7 +40,8 @@ public class ProxiedServer {
     @Setter
     private long startTime;
 
-    public ProxiedServer(String serverAddress, int serverPort, String serverId, ServerType serverType, Set<UUID> players, int maxPlayers, boolean joinEnabled, GameState state, int time, String mapName) {
+    public ProxiedServer(String serverAddress, int serverPort, String serverId, ServerType serverType,
+            Set<UUID> players, int maxPlayers, boolean joinEnabled, GameState state, int time, String mapName) {
         this.serverAddress = serverAddress;
         this.serverPort = serverPort;
         this.serverId = serverId.toLowerCase();
@@ -54,9 +55,10 @@ public class ProxiedServer {
         this.startTime = System.currentTimeMillis();
     }
 
-    public ProxiedServer(String serverAddress, int serverPort, String serverId, ServerType serverType, Set<UUID> players, int maxPlayers, boolean joinEnabled) {
+    public ProxiedServer(String serverAddress, int serverPort, String serverId, ServerType serverType,
+            Set<UUID> players, int maxPlayers, boolean joinEnabled) {
         this(serverAddress, serverPort, serverId, serverType, players, maxPlayers, joinEnabled, GameState.UNKNOWN, 0,
-             "Unknown");
+                "Unknown");
     }
 
     public void setOnlinePlayers(Set<UUID> onlinePlayers) {
@@ -107,15 +109,11 @@ public class ProxiedServer {
 
         UNKNOWN,
 
-        WAITING(true),
-        PREGAME(true),
-        STARTING(true),
+        WAITING(true), PREGAME(true), STARTING(true),
 
-        INVENCIBILITY(true),
-        GAMETIME,
+        INVENCIBILITY(true), GAMETIME,
 
-        DEATHMATCH(true),
-        WINNING;
+        DEATHMATCH(true), WINNING;
 
         private boolean decrement;
 

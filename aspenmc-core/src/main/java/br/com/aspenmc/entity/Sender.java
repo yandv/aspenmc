@@ -107,17 +107,8 @@ public interface Sender {
 
     boolean hasPermission(String permission);
 
-    default String t(String translateId, String defaultMessage, String... replaces) {
-        return getLanguage().t(translateId, defaultMessage, replaces);
+    default String t(String translateId,String... replaces) {
+        return getLanguage().t(translateId, replaces);
     }
-
-    default String t(String translateId) {
-        return getLanguage().translate(translateId);
-    }
-
-    default String translate(String translateId, String... replaces) {
-        return getLanguage().translate(translateId, replaces);
-    }
-
     Group getServerGroup();
 }

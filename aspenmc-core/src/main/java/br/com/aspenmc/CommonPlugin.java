@@ -3,8 +3,8 @@ package br.com.aspenmc;
 import br.com.aspenmc.backend.Credentials;
 import br.com.aspenmc.backend.data.*;
 import br.com.aspenmc.backend.data.mongo.*;
-import br.com.aspenmc.backend.data.redis.RedisServerData;
-import br.com.aspenmc.backend.data.redis.RedisSkinData;
+import br.com.aspenmc.backend.data.redis.RedisServerService;
+import br.com.aspenmc.backend.data.redis.RedisSkinService;
 import br.com.aspenmc.backend.type.MongoConnection;
 import br.com.aspenmc.backend.type.RedisConnection;
 import br.com.aspenmc.entity.Sender;
@@ -75,28 +75,28 @@ public class CommonPlugin {
     private StatusManager statusManager = new StatusManager();
 
     @Setter
-    private ClanData clanData;
+    private ClanService clanService;
 
     @Setter
-    private GamerData gamerData;
+    private GamerService gamerService;
 
     @Setter
-    private PermissionData permissionData;
+    private PermissionService permissionService;
 
     @Setter
-    private PunishData punishData;
+    private PunishService punishService;
 
     @Setter
-    private MemberData memberData;
+    private MemberService memberService;
 
     @Setter
-    private ServerData serverData;
+    private ServerService serverService;
 
     @Setter
-    private SkinData skinData;
+    private SkinService skinService;
 
     @Setter
-    private StatusData statusData;
+    private StatusService statusService;
 
     private UUIDFetcher uuidFetcher = new UUIDFetcher();
 
@@ -127,21 +127,21 @@ public class CommonPlugin {
         mongoConnection.createConnection();
         redisConnection.createConnection();
 
-        setClanData(new MongoClanData(mongoConnection));
-        setGamerData(new MongoGamerData());
-        setMemberData(new MongoMemberData(mongoConnection));
-        setPermissionData(new MongoPermissionData(mongoConnection));
-        setPunishData(new MongoPunishData(mongoConnection));
-        setServerData(new RedisServerData());
-        setSkinData(new RedisSkinData());
-        setStatusData(new MongoStatusData(mongoConnection));
+        setClanService(new MongoClanService(mongoConnection));
+        setGamerService(new MongoGamerService());
+        setMemberService(new MongoMemberService(mongoConnection));
+        setPermissionService(new MongoPermissionService(mongoConnection));
+        setPunishService(new MongoPunishService(mongoConnection));
+        setServerService(new RedisServerService());
+        setSkinService(new RedisSkinService());
+        setStatusService(new MongoStatusService(mongoConnection));
 
-        permissionData.retrieveAllGroups().forEach(group -> permissionManager.loadGroup(group));
-        permissionData.retrieveAllTags().forEach(tag -> permissionManager.loadTag(tag));
+        permissionService.retrieveAllGroups().forEach(group -> permissionManager.loadGroup(group));
+        permissionService.retrieveAllTags().forEach(tag -> permissionManager.loadTag(tag));
 
-        defaultSkin = skinData.loadData(CommonConst.DEFAULT_SKIN_NAME)
-                              .orElse(new Skin(CommonConst.DEFAULT_SKIN_NAME, CommonConst.CONSOLE_ID,
-                                      CommonConst.DEFAULT_SKIN_VALUE, CommonConst.SIGNATURE));
+        defaultSkin = skinService.loadData(CommonConst.DEFAULT_SKIN_NAME)
+                                 .orElse(new Skin(CommonConst.DEFAULT_SKIN_NAME, CommonConst.CONSOLE_ID,
+                                         CommonConst.DEFAULT_SKIN_VALUE, CommonConst.SIGNATURE));
     }
 
     public void debug(String message) {
@@ -149,8 +149,8 @@ public class CommonPlugin {
     }
 
     public void loadServers() {
-        for (Map.Entry<String, ProxiedServer> entry : getServerData().retrieveServerByType(ServerType.values())
-                                                                     .entrySet()) {
+        for (Map.Entry<String, ProxiedServer> entry : getServerService().retrieveServerByType(ServerType.values())
+                                                                        .entrySet()) {
             tryAddServer(entry.getValue(), 1);
         }
     }
@@ -170,7 +170,7 @@ public class CommonPlugin {
                     if (attemp + 1 > 3) {
                         logger.log(Level.WARNING, "The server " + server.getServerId() +
                                 " didn't respond to the keep alive request, stopping the connection...");
-                        serverData.stopServer(server.getServerId(), server.getServerType());
+                        serverService.stopServer(server.getServerId(), server.getServerType());
                         return;
                     }
 
@@ -185,7 +185,7 @@ public class CommonPlugin {
 
     public void setDefaultSkin(Skin defaultSkin) {
         this.defaultSkin = defaultSkin;
-        skinData.save(defaultSkin);
+        skinService.save(defaultSkin);
     }
 
     public UUID getMojangId(String userName) {

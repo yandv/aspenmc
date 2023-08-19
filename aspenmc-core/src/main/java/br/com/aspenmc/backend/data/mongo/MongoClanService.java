@@ -1,23 +1,21 @@
 package br.com.aspenmc.backend.data.mongo;
 
 import br.com.aspenmc.CommonConst;
-import br.com.aspenmc.backend.data.ClanData;
+import br.com.aspenmc.backend.data.ClanService;
 import br.com.aspenmc.backend.type.MongoConnection;
 import br.com.aspenmc.clan.Clan;
-import br.com.aspenmc.entity.Member;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
-import com.mongodb.client.model.IndexOptions;
 import org.bson.Document;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-public class MongoClanData implements ClanData {
+public class MongoClanService implements ClanService {
 
     private final MongoCollection<Document> clanCollection;
 
-    public MongoClanData(MongoConnection mongoConnection) {
+    public MongoClanService(MongoConnection mongoConnection) {
         this.clanCollection = mongoConnection.createCollection("clan");
     }
 

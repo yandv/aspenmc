@@ -1,8 +1,7 @@
 package br.com.aspenmc.bungee.command.register;
 
-import br.com.aspenmc.bungee.entity.BungeeMember;
-import com.google.common.base.Joiner;
 import br.com.aspenmc.CommonPlugin;
+import br.com.aspenmc.bungee.entity.BungeeMember;
 import br.com.aspenmc.command.CommandArgs;
 import br.com.aspenmc.command.CommandFramework;
 import br.com.aspenmc.command.CommandHandler;
@@ -11,6 +10,7 @@ import br.com.aspenmc.entity.Sender;
 import br.com.aspenmc.punish.Punish;
 import br.com.aspenmc.punish.PunishType;
 import br.com.aspenmc.utils.string.StringFormat;
+import com.google.common.base.Joiner;
 
 import java.util.Arrays;
 
@@ -42,12 +42,12 @@ public class PunishCommand implements CommandHandler {
             return;
         }
 
-        Punish punish = CommonPlugin.getInstance().getPunishData()
+        Punish punish = CommonPlugin.getInstance().getPunishService()
                                     .createPunish(member, sender, PunishType.BAN, reason, -1L).join();
 
         if (punish == null) {
             sender.sendMessage("§cNão foi possível banir o jogador %player%, tente novamente.", "%player%",
-                               member.getName());
+                    member.getName());
             return;
         }
 
@@ -59,7 +59,7 @@ public class PunishCommand implements CommandHandler {
 
         member.getPunishConfiguration().punish(punish);
         sender.sendMessage("§aO jogador %player% foi banido com sucesso pelo motivo %reason%.", "%player%",
-                           member.getName(), "%reason%", reason);
+                member.getName(), "%reason%", reason);
     }
 
     @CommandFramework.Command(name = "tempban", permission = "command.tempban", runAsync = true)
@@ -90,12 +90,12 @@ public class PunishCommand implements CommandHandler {
             return;
         }
 
-        Punish punish = CommonPlugin.getInstance().getPunishData()
+        Punish punish = CommonPlugin.getInstance().getPunishService()
                                     .createPunish(member, sender, PunishType.BAN, reason, time).join();
 
         if (punish == null) {
             sender.sendMessageFormatted("§cNão foi possível banir o jogador %player%, tente novamente.", "%player%",
-                                        member.getName());
+                    member.getName());
             return;
         }
 
@@ -107,7 +107,7 @@ public class PunishCommand implements CommandHandler {
 
         member.getPunishConfiguration().punish(punish);
         sender.sendMessageFormatted("§aO jogador %player% foi banido com sucesso pelo motivo %reason%.", "%player%",
-                                    member.getName(), "%reason%", reason);
+                member.getName(), "%reason%", reason);
     }
 
     @CommandFramework.Command(name = "unban", permission = "command.unban", runAsync = true)
@@ -135,7 +135,7 @@ public class PunishCommand implements CommandHandler {
             return;
         }
 
-        member.getPunishConfiguration().revoke(PunishType.BAN, sender.getUniqueId(), reason);
+        member.getPunishConfiguration().revoke(PunishType.BAN, sender.getUniqueId(), sender.getName(), reason);
         sender.sendMessageFormatted("§aO jogador %player% foi desbanido com sucesso.", "%player%", member.getName());
     }
 
@@ -165,12 +165,12 @@ public class PunishCommand implements CommandHandler {
             return;
         }
 
-        Punish punish = CommonPlugin.getInstance().getPunishData()
+        Punish punish = CommonPlugin.getInstance().getPunishService()
                                     .createPunish(member, sender, PunishType.MUTE, reason, -1L).join();
 
         if (punish == null) {
             sender.sendMessageFormatted("§cNão foi possível mutar o jogador %player%, tente novamente.", "%player%",
-                                        member.getName());
+                    member.getName());
             return;
         }
 
@@ -178,7 +178,7 @@ public class PunishCommand implements CommandHandler {
         member.sendMessageFormatted(punish.getPunishMessage(member.getLanguage()));
         ;
         sender.sendMessageFormatted("§aO jogador %player% foi mutado com sucesso pelo motivo %reason%.", "%player%",
-                                    member.getName(), "%reason%", reason);
+                member.getName(), "%reason%", reason);
     }
 
     @CommandFramework.Command(name = "tempmute", permission = "command.tempmute", runAsync = true)
@@ -209,19 +209,19 @@ public class PunishCommand implements CommandHandler {
             return;
         }
 
-        Punish punish = CommonPlugin.getInstance().getPunishData()
+        Punish punish = CommonPlugin.getInstance().getPunishService()
                                     .createPunish(member, sender, PunishType.MUTE, reason, time).join();
 
         if (punish == null) {
             sender.sendMessageFormatted("§cNão foi possível mutar o jogador %player%, tente novamente.", "%player%",
-                                        member.getName());
+                    member.getName());
             return;
         }
 
         member.getPunishConfiguration().punish(punish);
         member.sendMessageFormatted(punish.getPunishMessage(member.getLanguage()));
         sender.sendMessageFormatted("§aO jogador %player% foi mutado com sucesso pelo motivo %reason%.", "%player%",
-                                    member.getName(), "%reason%", reason);
+                member.getName(), "%reason%", reason);
     }
 
     @CommandFramework.Command(name = "unmute", permission = "command.unmute", runAsync = true)
@@ -249,7 +249,7 @@ public class PunishCommand implements CommandHandler {
             return;
         }
 
-        member.getPunishConfiguration().revoke(PunishType.BAN, sender.getUniqueId(), reason);
+        member.getPunishConfiguration().revoke(PunishType.MUTE, sender.getUniqueId(), sender.getName(), reason);
         sender.sendMessageFormatted("§aO jogador %player% foi desmutado com sucesso.", "%player%", member.getName());
     }
 }

@@ -29,17 +29,17 @@ public class Tag {
 
     public void addAliases(String... aliases) {
         this.aliases.addAll(Arrays.asList(aliases));
-        CommonPlugin.getInstance().getPermissionData().updateTag(this, "aliases");
+        CommonPlugin.getInstance().getPermissionService().updateTag(this, "aliases");
     }
 
     public void removeAliases(String... aliases) {
         Arrays.asList(aliases).forEach(this.aliases::remove);
-        CommonPlugin.getInstance().getPermissionData().updateTag(this, "aliases");
+        CommonPlugin.getInstance().getPermissionService().updateTag(this, "aliases");
     }
 
     public void setTagPrefix(String tagPrefix) {
         this.tagPrefix = tagPrefix;
-        CommonPlugin.getInstance().getPermissionData().updateTag(this, "tagPrefix");
+        CommonPlugin.getInstance().getPermissionService().updateTag(this, "tagPrefix");
     }
 
     public String getReductionName() {

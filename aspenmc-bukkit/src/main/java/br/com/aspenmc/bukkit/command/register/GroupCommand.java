@@ -9,14 +9,12 @@ import br.com.aspenmc.command.CommandHandler;
 import br.com.aspenmc.entity.Member;
 import br.com.aspenmc.entity.Sender;
 import br.com.aspenmc.packet.type.member.MemberGroupChange;
-import br.com.aspenmc.packet.type.server.group.GroupFieldUpdate;
 import br.com.aspenmc.permission.Group;
 import br.com.aspenmc.permission.GroupInfo;
 import br.com.aspenmc.permission.Tag;
 import br.com.aspenmc.utils.string.MessageBuilder;
 import br.com.aspenmc.utils.string.StringFormat;
 import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableList;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.entity.Player;
@@ -151,7 +149,7 @@ public class GroupCommand implements CommandHandler {
 
             sender.sendMessage("§aO grupo \"" + group.getGroupName() + "\" foi deletado com sucesso.");
             CommonPlugin.getInstance().getPermissionManager().unloadGroup(group.getGroupName());
-            CommonPlugin.getInstance().getPermissionData().deleteGroup(group);
+            CommonPlugin.getInstance().getPermissionService().deleteGroup(group);
             break;
         }
         case "criar":
@@ -193,7 +191,7 @@ public class GroupCommand implements CommandHandler {
 
             sender.sendMessage("§aO grupo \"" + groupName + "\" foi criado com sucesso.");
             CommonPlugin.getInstance().getPermissionManager().loadGroup(group);
-            CommonPlugin.getInstance().getPermissionData().createGroup(group);
+            CommonPlugin.getInstance().getPermissionService().createGroup(group);
             break;
         }
         case "settag": {
@@ -402,7 +400,7 @@ public class GroupCommand implements CommandHandler {
                         "§aO grupo do jogador " + member.getName() + " foi alterado para " + group.getGroupName() +
                                 ".");
                 member.sendMessage("§aVocê recebeu o grupo " + group.getGroupName() + ".");
-                CommonPlugin.getInstance().getPluginPlatform().runAsync(() -> CommonPlugin.getInstance().getServerData()
+                CommonPlugin.getInstance().getPluginPlatform().runAsync(() -> CommonPlugin.getInstance().getServerService()
                                                                                           .sendPacket(
                                                                                                   new MemberGroupChange(
                                                                                                           member.getUniqueId(),
@@ -438,7 +436,7 @@ public class GroupCommand implements CommandHandler {
                                 ".");
                 member.sendMessage("§aVocê recebeu o grupo " + group.getGroupName() + " com duração de " +
                         StringFormat.formatTime((expiresAt - System.currentTimeMillis()) / 1000) + "");
-                CommonPlugin.getInstance().getPluginPlatform().runAsync(() -> CommonPlugin.getInstance().getServerData()
+                CommonPlugin.getInstance().getPluginPlatform().runAsync(() -> CommonPlugin.getInstance().getServerService()
                                                                                           .sendPacket(
                                                                                                   new MemberGroupChange(
                                                                                                           member.getUniqueId(),
@@ -483,7 +481,7 @@ public class GroupCommand implements CommandHandler {
                         "§aO grupo do jogador " + member.getName() + " foi alterado para " + group.getGroupName() +
                                 ".");
                 member.sendMessage("§cO seu grupo " + group.getGroupName() + " foi removido.");
-                CommonPlugin.getInstance().getPluginPlatform().runAsync(() -> CommonPlugin.getInstance().getServerData()
+                CommonPlugin.getInstance().getPluginPlatform().runAsync(() -> CommonPlugin.getInstance().getServerService()
                                                                                           .sendPacket(
                                                                                                   new MemberGroupChange(
                                                                                                           member.getUniqueId(),
@@ -514,21 +512,18 @@ public class GroupCommand implements CommandHandler {
                                                 .collect(Collectors.toList());
 
                 if (tagList.isEmpty()) {
-                    sender.sendMessage(
-                            sender.t("command.tag.no-tags", "§cNenhum tag disponível no momento para você."));
+                    sender.sendMessage(sender.t("command.tag.no-tags"));
                     return;
                 }
 
-                MessageBuilder messageBuilder = new MessageBuilder(
-                        member.t("command.tag.list-prefix", "§aTags disponíveis: "));
+                MessageBuilder messageBuilder = new MessageBuilder(member.t("command.tag.list-prefix"));
 
                 for (int i = 0; i < tagList.size(); i++) {
                     Tag tag = tagList.get(i);
 
-                    messageBuilder.extra(new MessageBuilder(tag.getColoredName()).setHoverEvent(
-                            member.t("command.tag.example",
-                                    "§eExemplo: %tagPrefix% %player%\n\n§eClique para selecionar.", "%tagPrefix%",
-                                    tag.getTagPrefix())).setClickEvent("/tag " + tag.getTagName()));
+                    messageBuilder.extra(new MessageBuilder(tag.getColoredName())
+                            .setHoverEvent(member.t("command.tag.example", "%tagPrefix%", tag.getTagPrefix()))
+                            .setClickEvent("/tag " + tag.getTagName()));
 
                     if (i == tagList.size() - 1) {
                         messageBuilder.extra("§f.");
@@ -626,7 +621,7 @@ public class GroupCommand implements CommandHandler {
             sender.sendMessage("§aA tag §e\"" + tag.getTagName() + "\"§a com o prefixo §e\"" + tag.getTagPrefix() +
                     "§e\" e id §e\"" + tag.getId() + "\"§a foi criada.");
             CommonPlugin.getInstance().getPermissionManager().loadTag(tag);
-            CommonPlugin.getInstance().getPermissionData().createTag(tag);
+            CommonPlugin.getInstance().getPermissionService().createTag(tag);
             break;
         }
         case "delete": {
@@ -649,7 +644,7 @@ public class GroupCommand implements CommandHandler {
 
             sender.sendMessage("§aA tag §e\"" + tag.getTagName() + "\"§a foi deletada.");
             CommonPlugin.getInstance().getPermissionManager().unloadTag(tag.getTagName());
-            CommonPlugin.getInstance().getPermissionData().deleteTag(tag);
+            CommonPlugin.getInstance().getPermissionService().deleteTag(tag);
             break;
         }
         case "setprefix": {

@@ -53,7 +53,7 @@ public class UserInventory extends MenuInventory {
         });
 
         if (accounts == -1) {
-            CommonPlugin.getInstance().getMemberData()
+            CommonPlugin.getInstance().getMemberService()
                         .getMembers(Filters.eq("ipAddress", target.getIpAddress()), MemberVoid.class)
                         .whenComplete((members, throwable) -> {
                             if (throwable != null) {

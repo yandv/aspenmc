@@ -5,7 +5,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 import br.com.aspenmc.CommonConst;
 import br.com.aspenmc.CommonPlugin;
-import br.com.aspenmc.backend.data.GamerData;
+import br.com.aspenmc.backend.data.GamerService;
 import br.com.aspenmc.entity.Member;
 import br.com.aspenmc.entity.member.gamer.Gamer;
 import br.com.aspenmc.utils.json.JsonUtils;
@@ -21,7 +21,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class MongoGamerData implements GamerData {
+public class MongoGamerService implements GamerService {
 
     @Override
     public final <E, T extends Gamer<E>> CompletableFuture<T> loadGamer(UUID uniqueId, String gamerId,

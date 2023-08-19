@@ -11,10 +11,10 @@ import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.wrappers.EnumWrappers.EntityUseAction;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.*;
-import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
 
 public class CharacterListener implements Listener {
 
@@ -66,6 +66,9 @@ public class CharacterListener implements Listener {
                     character.hide(event.getPlayer());
                 } else if (character.getLocation().distance(event.getTo()) > MAX_DISTANCE) {
                     character.hide(event.getPlayer());
+                } else {
+                    character.hide(event.getPlayer());
+                    character.show(event.getPlayer());
                 }
             } else {
                 if (character.getLocation().getWorld().equals(event.getTo().getWorld()) &&
@@ -75,7 +78,6 @@ public class CharacterListener implements Listener {
             }
         });
     }
-
 
     @EventHandler
     public void onPlayerMoveUpdate(PlayerMoveUpdateEvent event) {

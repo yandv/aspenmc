@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import br.com.aspenmc.CommonPlugin;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -32,38 +31,38 @@ public class Group {
             this.tag = tag.getTagName().toLowerCase();
         }
 
-        CommonPlugin.getInstance().getPermissionData().updateGroup(this, "tag");
+        CommonPlugin.getInstance().getPermissionService().updateGroup(this, "tag");
     }
 
     public void setDefaultGroup(boolean defaultGroup) {
         if (this.defaultGroup == defaultGroup) return;
 
         this.defaultGroup = defaultGroup;
-        CommonPlugin.getInstance().getPermissionData().updateGroup(this, "defaultGroup");
+        CommonPlugin.getInstance().getPermissionService().updateGroup(this, "defaultGroup");
     }
 
     public void setPaidGroup(boolean paidGroup) {
         if (this.paidGroup == paidGroup) return;
 
         this.paidGroup = paidGroup;
-        CommonPlugin.getInstance().getPermissionData().updateGroup(this, "paidGroup");
+        CommonPlugin.getInstance().getPermissionService().updateGroup(this, "paidGroup");
     }
 
     public void setStaff(boolean staff) {
         if (this.staff == staff) return;
 
         this.staff = staff;
-        CommonPlugin.getInstance().getPermissionData().updateGroup(this, "staff");
+        CommonPlugin.getInstance().getPermissionService().updateGroup(this, "staff");
     }
 
     public void addPermission(String permission) {
         permissions.add(permission.toLowerCase());
-        CommonPlugin.getInstance().getPermissionData().updateGroup(this, "permissions");
+        CommonPlugin.getInstance().getPermissionService().updateGroup(this, "permissions");
     }
 
     public void removePermission(String permission) {
         permissions.remove(permission.toLowerCase());
-        CommonPlugin.getInstance().getPermissionData().updateGroup(this, "permissions");
+        CommonPlugin.getInstance().getPermissionService().updateGroup(this, "permissions");
     }
 
     public boolean hasPermission(String permission) {

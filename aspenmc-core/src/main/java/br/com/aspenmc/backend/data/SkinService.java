@@ -6,7 +6,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-public interface SkinData {
+public interface SkinService {
 
 
     Optional<Skin> loadData(String playerName);

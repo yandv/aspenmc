@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-public interface PunishData {
+public interface PunishService {
 
     CompletableFuture<Punish> createPunish(Member target, Sender sender, PunishType punishType, String reason, long expiresAt);
 

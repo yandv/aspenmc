@@ -4,14 +4,16 @@ import br.com.aspenmc.BukkitConst;
 import br.com.aspenmc.CommonConst;
 import br.com.aspenmc.CommonPlugin;
 import br.com.aspenmc.bukkit.BukkitCommon;
-import br.com.aspenmc.utils.ProtocolVersion;
 import br.com.aspenmc.command.CommandArgs;
 import br.com.aspenmc.command.CommandFramework;
 import br.com.aspenmc.command.CommandHandler;
 import br.com.aspenmc.entity.Sender;
 import br.com.aspenmc.entity.member.Skin;
 import br.com.aspenmc.server.ServerType;
+import br.com.aspenmc.utils.ProtocolVersion;
+import br.com.aspenmc.utils.string.MessageBuilder;
 import br.com.aspenmc.utils.string.StringFormat;
+import com.google.common.base.Joiner;
 import net.md_5.bungee.api.ChatColor;
 import net.minecraft.server.v1_8_R3.MinecraftServer;
 import org.bukkit.Bukkit;
@@ -36,7 +38,7 @@ public class ServerCommand implements CommandHandler {
             return;
         }
 
-        Skin skin = CommonPlugin.getInstance().getSkinData().loadData(args[0]).orElse(null);
+        Skin skin = CommonPlugin.getInstance().getSkinService().loadData(args[0]).orElse(null);
 
         if (skin == null) {
             sender.sendMessage(
@@ -71,6 +73,19 @@ public class ServerCommand implements CommandHandler {
         }
 
         switch (args[0].toLowerCase()) {
+        case "debug": {
+            CommonPlugin.getInstance().getServerManager().getServers().forEach(server -> {
+                sender.sendMessage("§aServidor " + server.getServerId() + " (" + server.getServerType() + ")");
+                sender.sendMessage(
+                        new MessageBuilder("  §fPlayers: " + server.getOnlinePlayers() + "/" + server.getMaxPlayers())
+                                .setHoverEvent(Joiner.on(' ').join(server.getPlayers().stream().map(UUID::toString)
+                                                                         .collect(Collectors.toList()))).create());
+                sender.sendMessage("  §fTempo: " + StringFormat.formatTime(server.getTime()));
+                sender.sendMessage("  §fMapa: " + server.getMapName());
+                sender.sendMessage("  §fEstágio: " + server.getState());
+            });
+            break;
+        }
         case "setserverid": {
             if (!sender.hasPermission("command.sender.setserverid")) {
                 sender.sendMessage("§cVocê não tem permissão para executar este comando.");
@@ -85,7 +100,7 @@ public class ServerCommand implements CommandHandler {
 
             String serverId = args[1];
 
-            CommonPlugin.getInstance().getServerData().stopServer();
+            CommonPlugin.getInstance().getServerService().stopServer();
             CommonPlugin.getInstance().setServerId(serverId);
             BukkitCommon.getInstance().getConfig().set("serverId", serverId);
             BukkitCommon.getInstance().saveConfig();
@@ -112,7 +127,7 @@ public class ServerCommand implements CommandHandler {
                 return;
             }
 
-            CommonPlugin.getInstance().getServerData().stopServer();
+            CommonPlugin.getInstance().getServerService().stopServer();
             CommonPlugin.getInstance().setServerType(serverType);
             BukkitCommon.getInstance().getConfig().set("serverType", serverType.name());
             BukkitCommon.getInstance().saveConfig();
@@ -126,7 +141,7 @@ public class ServerCommand implements CommandHandler {
             break;
         }
         case "stop": {
-            CommonPlugin.getInstance().getServerData().stopServer();
+            CommonPlugin.getInstance().getServerService().stopServer();
             sender.sendMessage("§aO servidor foi encerrado com sucesso.");
             break;
         }
@@ -134,9 +149,9 @@ public class ServerCommand implements CommandHandler {
     }
 
     private void startServer() {
-        CommonPlugin.getInstance().getServerData().startServer(Bukkit.getMaxPlayers());
+        CommonPlugin.getInstance().getServerService().startServer(Bukkit.getMaxPlayers());
         Bukkit.getOnlinePlayers()
-              .forEach(player -> CommonPlugin.getInstance().getServerData().joinPlayer(player.getUniqueId()));
+              .forEach(player -> CommonPlugin.getInstance().getServerService().joinPlayer(player.getUniqueId()));
     }
 
     @CommandFramework.Command(name = "tps", aliases = { "ticks" }, permission = "command.tps")

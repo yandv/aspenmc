@@ -32,50 +32,13 @@ public class Language {
      * Retrieve the translation by the id and replace the placeholders
      * If the translation is not found, the default message will be returned
      *
-     * @param translateId    id of the translation
-     * @param defaultMessage default message if the translation is not found
-     * @param replaces       placeholders
-     * @return the translation
-     */
-
-    public String t(String translateId, String defaultMessage, String... replaces) {
-        return CommonPlugin.getInstance().getLanguageManager()
-                           .translateOrDefault(this, translateId, defaultMessage, replaces);
-    }
-
-    /**
-     * Retrieve the translation by the id and replace the placeholders
-     *
      * @param translateId id of the translation
      * @param replaces    placeholders
      * @return the translation
      */
 
-    public String translate(String translateId, String... replaces) {
+    public String t(String translateId, String... replaces) {
         return CommonPlugin.getInstance().getLanguageManager().translate(this, translateId, replaces);
-    }
-
-    /**
-     * Retrieve the translation by the id and replace the placeholders
-     *
-     * @param translateId id of the translation
-     * @return the translation
-     */
-
-    public String translate(String translateId) {
-        return CommonPlugin.getInstance().getLanguageManager().translate(this, translateId);
-    }
-
-    /**
-     * Retrieve the translation by the id and replace the placeholders
-     *
-     * @param translation translation
-     * @param replaces    placeholders
-     * @return the translation
-     */
-
-    public String translate(Translation translation, String... replaces) {
-        return CommonPlugin.getInstance().getLanguageManager().translate(this, translation.getId(), replaces);
     }
 
     /**

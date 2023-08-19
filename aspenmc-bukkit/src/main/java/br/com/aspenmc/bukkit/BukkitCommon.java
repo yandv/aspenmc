@@ -6,6 +6,7 @@ import br.com.aspenmc.CommonPlugin;
 import br.com.aspenmc.backend.type.RedisConnection;
 import br.com.aspenmc.bukkit.command.BukkitCommandFramework;
 import br.com.aspenmc.bukkit.entity.BukkitMember;
+import br.com.aspenmc.bukkit.event.player.PlayerChangeLeagueEvent;
 import br.com.aspenmc.bukkit.event.player.group.PlayerChangedGroupEvent;
 import br.com.aspenmc.bukkit.event.server.GameStateChangeEvent;
 import br.com.aspenmc.bukkit.event.server.ServerUpdateEvent;
@@ -99,7 +100,7 @@ public abstract class BukkitCommon extends JavaPlugin implements CommonPlatform 
                                          .orElse(ServerType.LOBBY));
 
             plugin.startConnection();
-            plugin.getServerData().startServer(Bukkit.getMaxPlayers());
+            plugin.getServerService().startServer(Bukkit.getMaxPlayers());
 
             new LimiterInjector();
             new MessageInjector();
@@ -175,7 +176,7 @@ public abstract class BukkitCommon extends JavaPlugin implements CommonPlatform 
     @Override
     public void onDisable() {
         try {
-            plugin.getServerData().stopServer();
+            plugin.getServerService().stopServer();
             plugin.debug("Stopped the server " + plugin.getServerId() + " (" + plugin.getServerType().name() + ").");
 
             super.onDisable();
@@ -260,13 +261,13 @@ public abstract class BukkitCommon extends JavaPlugin implements CommonPlatform 
 
     public void sendPlayerToServer(Player player, String... serversIds) {
         plugin.getPacketManager().waitPacket(ServerConnectResponse.class,
-                plugin.getServerData().sendPacket(new ServerConnectRequest(player.getUniqueId(), serversIds)),
+                plugin.getServerService().sendPacket(new ServerConnectRequest(player.getUniqueId(), serversIds)),
                 packet -> handleServerConnectResponse(player, packet));
     }
 
     public void sendPlayerToServer(Player player, ServerType... types) {
         plugin.getPacketManager().waitPacket(ServerConnectResponse.class,
-                plugin.getServerData().sendPacket(new ServerConnectRequest(player.getUniqueId(), types)),
+                plugin.getServerService().sendPacket(new ServerConnectRequest(player.getUniqueId(), types)),
                 packet -> handleServerConnectResponse(player, packet));
     }
 
@@ -314,9 +315,11 @@ public abstract class BukkitCommon extends JavaPlugin implements CommonPlatform 
 
         plugin.getPacketManager().registerHandler(BungeeCommandResponse.class, packet -> {
             for (BungeeCommandResponse.NormalCommand command : packet.getCommands()) {
-                BukkitCommandFramework.INSTANCE.getKnownCommands().put(command.getName(),
-                        BukkitCommandFramework.INSTANCE.createCommand(command.getName(), command.getName(),
-                                command.getPermission()));
+                if (!command.getName().contains("\\.")) {
+                    BukkitCommandFramework.INSTANCE.getKnownCommands().put(command.getName(),
+                            BukkitCommandFramework.INSTANCE.createCommand(command.getName(), command.getName(),
+                                    command.getPermission()));
+                }
 
                 for (String alias : command.getAliases()) {
                     if (alias.contains("\\.")) continue;
@@ -347,6 +350,17 @@ public abstract class BukkitCommon extends JavaPlugin implements CommonPlatform 
         Bukkit.getPluginManager().registerEvents(new SoupListener(), this);
         Bukkit.getPluginManager().registerEvents(new TagListener(), this);
         Bukkit.getPluginManager().registerEvents(new VanishListener(), this);
+
+        plugin.getStatusManager().setLeagueChangeObserver((status, oldLeague, newLeague) -> {
+            BukkitMember member = plugin.getMemberManager().getMemberById(status.getUniqueId(), BukkitMember.class)
+                                        .orElse(null);
+
+            if (member == null) return;
+
+            Bukkit.getPluginManager()
+                  .callEvent(new PlayerChangeLeagueEvent(member.getPlayer(), member, status, oldLeague, newLeague));
+            member.setTag(member.getTag().orElse(null));
+        });
     }
 
     public void registerCommands() {

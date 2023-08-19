@@ -6,6 +6,7 @@ import br.com.aspenmc.bukkit.utils.menu.MenuInventory;
 import br.com.aspenmc.bukkit.utils.menu.MenuItem;
 import br.com.aspenmc.bukkit.utils.menu.click.MenuClickHandler;
 import br.com.aspenmc.entity.Member;
+import br.com.aspenmc.language.Language;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
@@ -14,8 +15,8 @@ import java.util.function.Supplier;
 
 public class YourPreferencesInventory extends MenuInventory {
 
-    public YourPreferencesInventory(Player player) {
-        super("§7Suas preferências", 4);
+    public YourPreferencesInventory(Player player, MenuInventory backInventory) {
+        super(Language.getLanguage(player.getUniqueId()).t("menu.your-preferences.title"), 4);
 
         Member member = CommonPlugin.getInstance().getMemberManager().getMemberById(player.getUniqueId()).orElse(null);
 
@@ -33,11 +34,25 @@ public class YourPreferencesInventory extends MenuInventory {
                           .setChatEnabled(!member.getPreferencesConfiguration().isChatEnabled());
                 });
 
-        createMenuItem("Convite para clans", "§7Receber ou não convites para entrar em clans.",
-                Material.PAPER, 12, member.getPreferencesConfiguration()::isClanInvitesEnabled, v -> {
+        createMenuItem("Convite para clans", "§7Receber ou não convites para entrar em clans.", Material.PAPER, 12,
+                member.getPreferencesConfiguration()::isClanInvitesEnabled, v -> {
                     member.getPreferencesConfiguration()
                           .setClanInvitesEnabled(!member.getPreferencesConfiguration().isClanInvitesEnabled());
                 });
+
+        createMenuItem("Mostrar tag do clan",
+                "§7Mostrar a tag do clan no tab para todos os jogadores na sua sala verem.", Material.PAPER, 13,
+                member.getPreferencesConfiguration()::isClanDisplayTagEnabled, v -> {
+                    member.getPreferencesConfiguration()
+                          .setClanDisplayTagEnabled(!member.getPreferencesConfiguration().isClanDisplayTagEnabled());
+                });
+
+
+        if (backInventory != null) {
+            setItem(30, new ItemBuilder().name("§aRetorna para " + backInventory.getTitle())
+                                         .formatLore("§7Clique para voltar.").type(Material.ARROW).build(),
+                    clickArgs -> backInventory.open(player));
+        }
 
         open(player);
     }

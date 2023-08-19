@@ -2,7 +2,7 @@ package br.com.aspenmc.backend.data.redis;
 
 import br.com.aspenmc.CommonConst;
 import br.com.aspenmc.CommonPlugin;
-import br.com.aspenmc.backend.data.SkinData;
+import br.com.aspenmc.backend.data.SkinService;
 import br.com.aspenmc.entity.member.Skin;
 import br.com.aspenmc.utils.json.JsonUtils;
 import com.google.gson.JsonArray;
@@ -21,7 +21,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-public class RedisSkinData implements SkinData {
+public class RedisSkinService implements SkinService {
 
     private static final String BASE_PATH = "skin-data:";
     private static final int TIME_TO_EXPIRE = 60 * 60 * 24 * 3;

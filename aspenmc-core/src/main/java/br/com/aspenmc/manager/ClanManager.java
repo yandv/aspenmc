@@ -3,19 +3,17 @@ package br.com.aspenmc.manager;
 import br.com.aspenmc.clan.Clan;
 import br.com.aspenmc.entity.Member;
 import br.com.aspenmc.entity.Sender;
+import br.com.aspenmc.utils.IndexableMap;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 public class ClanManager {
 
-    private Map<UUID, Clan> clanMap;
+    private IndexableMap<UUID, Clan> clanMap;
     private Map<UUID, Map<UUID, ClanInvite>> clanInviteMap;
 
     public ClanManager() {
-        this.clanMap = new HashMap<>();
+        this.clanMap = new IndexableMap<>();
         this.clanInviteMap = new HashMap<>();
     }
 
@@ -63,6 +61,10 @@ public class ClanManager {
 
     public void unloadClan(UUID clanId) {
         clanMap.remove(clanId);
+    }
+
+    public int indexOf(Clan clan) {
+        return clanMap.indexOf(clan.getClanId());
     }
 
     public interface ClanInvite {

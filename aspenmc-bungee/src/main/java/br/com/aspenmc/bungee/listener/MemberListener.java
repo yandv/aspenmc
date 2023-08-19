@@ -109,10 +109,10 @@ public class MemberListener implements Listener {
         String playerName = loginEvent.getConnection().getName();
 
         long start = System.currentTimeMillis();
-        CompletableFuture<BungeeMember> byIdFuture = CommonPlugin.getInstance().getMemberData()
+        CompletableFuture<BungeeMember> byIdFuture = CommonPlugin.getInstance().getMemberService()
                                                                  .getMemberById(uniqueId, BungeeMember.class);
 
-        CompletableFuture<BungeeMember> byNameFuture = CommonPlugin.getInstance().getMemberData()
+        CompletableFuture<BungeeMember> byNameFuture = CommonPlugin.getInstance().getMemberService()
                                                                    .getMemberByName(playerName, BungeeMember.class,
                                                                            true);
 
@@ -129,7 +129,7 @@ public class MemberListener implements Listener {
                 member = new BungeeMember(uniqueId, playerName,
                         loginEvent.getConnection().isOnlineMode() ? LoginConfiguration.AccountType.PREMIUM :
                                 LoginConfiguration.AccountType.CRACKED);
-                CommonPlugin.getInstance().getMemberData().createMember(member);
+                CommonPlugin.getInstance().getMemberService().createMember(member);
                 CommonPlugin.getInstance().debug("The player " + member.getConstraintName() + " has been created.");
             } else {
                 if (!byName.getName().equals(playerName)) {
@@ -155,11 +155,11 @@ public class MemberListener implements Listener {
         if (member.isUsingDefaultSkin()) {
             skin = CommonPlugin.getInstance().getDefaultSkin();
         } else if (member.isUsingCustomSkin()) {
-            skin = CommonPlugin.getInstance().getSkinData().loadData(member.getPlayerSkin())
+            skin = CommonPlugin.getInstance().getSkinService().loadData(member.getPlayerSkin())
                                .orElse(CommonPlugin.getInstance().getDefaultSkin());
         } else {
             skin = PlayerAPI.getPlayerSkin(loginEvent.getConnection(), CommonPlugin.getInstance().getDefaultSkin());
-            CommonPlugin.getInstance().getSkinData().save(skin);
+            CommonPlugin.getInstance().getSkinService().save(skin);
         }
 
         try {
@@ -177,13 +177,18 @@ public class MemberListener implements Listener {
             Clan clan = CommonPlugin.getInstance().getClanManager().getClanById(finalMember.getUniqueId()).orElse(null);
 
             if (clan == null) {
-                CommonPlugin.getInstance().getClanData().getClanById(member.getClanId(), Clan.class)
+                CommonPlugin.getInstance().getClanService().getClanById(member.getClanId(), Clan.class)
                             .whenComplete((c, throwable) -> {
                                 if (throwable != null) {
                                     throwable.printStackTrace();
                                     finalMember.sendMessage(
                                             "§cO servidor não conseguiu carregar o seu clan, tentaremos novamente " +
                                                     "mais tarde.");
+                                    return;
+                                }
+
+                                if (c == null) {
+                                    finalMember.setClan(null);
                                     return;
                                 }
 

@@ -6,6 +6,7 @@ import br.com.aspenmc.bukkit.utils.menu.MenuInventory;
 import br.com.aspenmc.bukkit.utils.menu.MenuItem;
 import br.com.aspenmc.bukkit.utils.menu.click.MenuClickHandler;
 import br.com.aspenmc.entity.Member;
+import br.com.aspenmc.language.Language;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
@@ -15,19 +16,19 @@ import java.util.function.Supplier;
 public class YourPreferencesInventory extends MenuInventory {
 
     public YourPreferencesInventory(Player player) {
-        super("§7Suas preferências", 4);
+        super(Language.getLanguage(player.getUniqueId()).t("menu.staff-your-preferences.title"), 4);
 
         Member member = CommonPlugin.getInstance().getMemberManager().getMemberById(player.getUniqueId()).orElse(null);
 
         if (member == null) return;
 
-        createMenuItem("Entrar no admin", "§7Entrar no modo administrador ao logar em um servidor.", Material.PAPER,
-                10, member.getPreferencesConfiguration()::getAdminOnLogin, (short)2, v -> {
+        createMenuItem("Entrar no admin", "§7Entrar no modo administrador ao logar em um servidor.", Material.PAPER, 10,
+                member.getPreferencesConfiguration()::getAdminOnLogin, (short) 2, v -> {
 
-                    short nextValue = (short) (member.getPreferencesConfiguration().getAdminOnLogin() == 2 ? 0 : member.getPreferencesConfiguration().getAdminOnLogin() + 1);
+                    short nextValue = (short) (member.getPreferencesConfiguration().getAdminOnLogin() == 2 ? 0 :
+                            member.getPreferencesConfiguration().getAdminOnLogin() + 1);
 
-                    member.getPreferencesConfiguration()
-                          .setAdminOnLogin(nextValue);
+                    member.getPreferencesConfiguration().setAdminOnLogin(nextValue);
                 });
 
         createMenuItem("Remover itens no Admin", "§7Remover todos os itens do seu inventário ao entrar no modo admin.",
@@ -36,14 +37,14 @@ public class YourPreferencesInventory extends MenuInventory {
                           .setAdminRemoveItems(!member.getPreferencesConfiguration().isAdminRemoveItems());
                 });
 
-        createMenuItem("Falar no StaffChat", "§7Falar em um canal de voz somente para a equipe.",
-                Material.PAPER, 12, member.getPreferencesConfiguration()::isStaffChatEnabled, v -> {
+        createMenuItem("Falar no StaffChat", "§7Falar em um canal de voz somente para a equipe.", Material.PAPER, 12,
+                member.getPreferencesConfiguration()::isStaffChatEnabled, v -> {
                     member.getPreferencesConfiguration()
                           .setStaffChatEnabled(!member.getPreferencesConfiguration().isStaffChatEnabled());
                 });
 
-        createMenuItem("Ver no StaffChat", "§7Ver as mensagens que são trocadas no StaffChat.",
-                Material.PAPER, 13, member.getPreferencesConfiguration()::isSeeingStaffChatEnabled, v -> {
+        createMenuItem("Ver no StaffChat", "§7Ver as mensagens que são trocadas no StaffChat.", Material.PAPER, 13,
+                member.getPreferencesConfiguration()::isSeeingStaffChatEnabled, v -> {
                     member.getPreferencesConfiguration()
                           .setSeeingStaffChatEnabled(!member.getPreferencesConfiguration().isSeeingStaffChatEnabled());
                 });
@@ -71,8 +72,8 @@ public class YourPreferencesInventory extends MenuInventory {
                 clickHandler));
     }
 
-    public void createMenuItem(String name, String lore, Material material, int slot, Supplier<Short> supplier, short maxValue,
-            Consumer<Void> consumer) {
+    public void createMenuItem(String name, String lore, Material material, int slot, Supplier<Short> supplier,
+            short maxValue, Consumer<Void> consumer) {
         short preferenceEnabled = supplier.get();
 
         MenuClickHandler clickHandler = clickArgs -> {
@@ -82,13 +83,12 @@ public class YourPreferencesInventory extends MenuInventory {
 
         String text = (preferenceEnabled == 0 ? "§a" : preferenceEnabled == 1 ? "§e" : "§c") + name;
 
-        setItem(slot, new MenuItem(
-                new ItemBuilder().name(text).formatLore(lore).type(material),
-                clickHandler));
-        setItem(slot + 9, new MenuItem(new ItemBuilder().name(text)
-                                                        .formatLore(lore, "",
-                                                                (preferenceEnabled == maxValue - 1 ? "§cClique para ativar." : "§aClique para desativar.")).type(material)
-                                                        .type(Material.INK_SACK).durability(preferenceEnabled == 0 ? 10 : preferenceEnabled == 1 ? 14 : 8),
-                clickHandler));
+        setItem(slot, new MenuItem(new ItemBuilder().name(text).formatLore(lore).type(material), clickHandler));
+        setItem(slot + 9, new MenuItem(new ItemBuilder().name(text).formatLore(lore, "",
+                                                                (preferenceEnabled == maxValue - 1 ?
+                                                                        "§cClique para " + "ativar." : "§aClique " +
+                                                                        "para" + " desativar."))
+                                                        .type(material).type(Material.INK_SACK).durability(
+                        preferenceEnabled == 0 ? 10 : preferenceEnabled == 1 ? 14 : 8), clickHandler));
     }
 }

@@ -9,7 +9,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.IndexOptions;
 import br.com.aspenmc.CommonConst;
-import br.com.aspenmc.backend.data.PunishData;
+import br.com.aspenmc.backend.data.PunishService;
 import br.com.aspenmc.entity.Member;
 import br.com.aspenmc.entity.Sender;
 import br.com.aspenmc.utils.json.JsonUtils;
@@ -22,18 +22,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-public class MongoPunishData implements PunishData {
+public class MongoPunishService implements PunishService {
 
     private final MongoCollection<Document> punishCollection;
 
-    public MongoPunishData(MongoConnection mongoConnection) {
+    public MongoPunishService(MongoConnection mongoConnection) {
         this.punishCollection = mongoConnection.createCollection("punishs", collection -> {
             collection.createIndex(new Document("punishId", 1), new IndexOptions().unique(true));
         });
     }
 
     @Override
-    public CompletableFuture<Punish> createPunish(Member target, Sender sender, PunishType punishType, String reason, long expiresAt) {
+    public CompletableFuture<Punish> createPunish(Member target, Sender sender, PunishType punishType, String reason,
+            long expiresAt) {
         return CompletableFuture.supplyAsync(() -> {
             String punishId = "";
 
@@ -41,8 +42,8 @@ public class MongoPunishData implements PunishData {
                 punishId = CommonConst.RANDOM.nextLong() + "";
             } while (punishCollection.find(Filters.eq("punishId", punishId)).first() != null);
 
-            Punish punish = new Punish(punishId, target.getUniqueId(), sender.getUniqueId(), punishType, reason,
-                                       expiresAt);
+            Punish punish = new Punish(punishId, target.getUniqueId(), sender.getUniqueId(), sender.getName(),
+                    punishType, reason, expiresAt);
             punishCollection.insertOne(Document.parse(CommonConst.GSON.toJson(punish)));
             return punish;
         }, CommonConst.PRINCIPAL_EXECUTOR);
@@ -57,7 +58,8 @@ public class MongoPunishData implements PunishData {
     }
 
     @Override
-    public CompletableFuture<Map<PunishType, List<Punish>>> getPunish(int page, int limit, String[] filters, Object... values) {
+    public CompletableFuture<Map<PunishType, List<Punish>>> getPunish(int page, int limit, String[] filters,
+            Object... values) {
         return CompletableFuture.supplyAsync(() -> {
             Bson filter = null;
 
@@ -96,14 +98,10 @@ public class MongoPunishData implements PunishData {
             for (String fieldName : fields) {
                 if (tree.has(fieldName)) {
                     punishCollection.updateOne(Filters.eq("punishId", punish.getPunishId()), new Document("$set",
-                                                                                                          new Document(
-                                                                                                                  fieldName,
-                                                                                                                  JsonUtils.elementToBson(
-                                                                                                                          tree.get(
-                                                                                                                                  fieldName)))));
+                            new Document(fieldName, JsonUtils.elementToBson(tree.get(fieldName)))));
                 } else {
                     punishCollection.updateOne(Filters.eq("punishId", punish.getPunishId()),
-                                               new Document("$unset", new Document(fieldName, "")));
+                            new Document("$unset", new Document(fieldName, "")));
                 }
             }
         }, CommonConst.PRINCIPAL_EXECUTOR);
