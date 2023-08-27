@@ -3,6 +3,7 @@ package br.com.aspenmc;
 import br.com.aspenmc.backend.Credentials;
 import br.com.aspenmc.backend.data.*;
 import br.com.aspenmc.backend.data.mongo.*;
+import br.com.aspenmc.backend.data.redis.RedisGeoipService;
 import br.com.aspenmc.backend.data.redis.RedisServerService;
 import br.com.aspenmc.backend.data.redis.RedisSkinService;
 import br.com.aspenmc.backend.type.MongoConnection;
@@ -81,6 +82,9 @@ public class CommonPlugin {
     private GamerService gamerService;
 
     @Setter
+    private GeoipService geoipService;
+
+    @Setter
     private PermissionService permissionService;
 
     @Setter
@@ -104,6 +108,9 @@ public class CommonPlugin {
     private boolean serverLog = true;
 
     @Setter
+    private boolean serverLogPackets = false;
+
+    @Setter
     private boolean piratePlayersEnabled = true;
 
     @Setter
@@ -120,15 +127,18 @@ public class CommonPlugin {
         instance = this;
     }
 
-    public void startConnection() {
-        mongoConnection = new MongoConnection(new Credentials("127.0.0.1", "", "", "aspenmc", 27017));
-        redisConnection = new RedisConnection(new Credentials("localhost", "", "", "", 6379));
+    public void startConnection(Credentials mongoCredentials, Credentials redisCredentials) {
+//        new Credentials("127.0.0.1", "", "", "aspenmc", 27017)
+//        new Credentials("localhost", "", "", "", 6379)
+        mongoConnection = new MongoConnection(mongoCredentials);
+        redisConnection = new RedisConnection(redisCredentials);
 
         mongoConnection.createConnection();
         redisConnection.createConnection();
 
         setClanService(new MongoClanService(mongoConnection));
         setGamerService(new MongoGamerService());
+        setGeoipService(new RedisGeoipService());
         setMemberService(new MongoMemberService(mongoConnection));
         setPermissionService(new MongoPermissionService(mongoConnection));
         setPunishService(new MongoPunishService(mongoConnection));

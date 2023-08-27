@@ -33,6 +33,16 @@ import java.util.stream.Collectors;
 
 public class ModeratorCommand implements CommandHandler {
 
+    @CommandFramework.Command(name = "alerts", aliases = { "ac", "anticheat" },
+            permission = CommonConst.ADMIN_MODE_PERMISSION, console = false)
+    public void alertsCommand(CommandArgs cmdArgs) {
+        Member member = cmdArgs.getSenderAsMember();
+
+        member.getPreferencesConfiguration().setAlertsEnabled(!member.getPreferencesConfiguration().isAlertsEnabled());
+        member.sendMessage(member.t("command.alerts.alerts-" +
+                (member.getPreferencesConfiguration().isAlertsEnabled() ? "enabled" : "disabled")));
+    }
+
     @CommandFramework.Command(name = "punishinfo", aliases = { "pinfo" },
             permission = CommonConst.SERVER_FULL_PERMISSION)
     public void punishInfoCommand(CommandArgs cmdArgs) {

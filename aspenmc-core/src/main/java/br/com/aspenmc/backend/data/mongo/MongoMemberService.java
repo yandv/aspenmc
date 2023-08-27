@@ -121,13 +121,28 @@ public class MongoMemberService implements MemberService {
             for (int i = 0; i < fields.length; i++) {
                 String fieldName = fields[i];
 
-                if (tree.has(fieldName)) {
+                if (fieldName.contains(".")) {
+                    String field = fieldName.split("\\.")[0];
+                    String subField = fieldName.split("\\.")[1];
+
+                    if (tree.has(field) && tree.get(field).isJsonObject()) {
+                        JsonObject jsonObject = tree.getAsJsonObject(field);
+
+                        if (jsonObject.has(subField)) {
+                            updatePredicates.add(
+                                    Updates.set(fieldName, JsonUtils.elementToBson(jsonObject.get(subField))));
+                            values[i] = jsonObject.get(subField);
+                            continue;
+                        }
+                    }
+                } else if (tree.has(fieldName)) {
                     updatePredicates.add(Updates.set(fieldName, JsonUtils.elementToBson(tree.get(fieldName))));
                     values[i] = tree.get(fieldName);
-                } else {
-                    updatePredicates.add(Updates.unset(fieldName));
-                    values[i] = JsonNull.INSTANCE;
+                    continue;
                 }
+
+                updatePredicates.add(Updates.unset(fieldName));
+                values[i] = JsonNull.INSTANCE;
             }
 
             memberCollection.updateOne(Filters.eq("uniqueId", member.getUniqueId().toString()),

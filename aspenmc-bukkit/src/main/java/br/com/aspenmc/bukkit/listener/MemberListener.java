@@ -37,8 +37,9 @@ public class MemberListener implements Listener {
                                                                                                   .getGamerList()
                                                                                                   .toArray(
                                                                                                           new Map.Entry[0]));
-        CompletableFuture<List<Status>> loadStatus = CommonPlugin.getInstance().getStatusService().getStatusById(uniqueId,
-                BukkitCommon.getInstance().getPreloadedStatus());
+        CompletableFuture<List<Status>> loadStatus = CommonPlugin.getInstance().getStatusService()
+                                                                 .getStatusById(uniqueId, BukkitCommon.getInstance()
+                                                                                                      .getPreloadedStatus());
 
         CompletableFuture.allOf(byId, gamers, loadStatus);
 
@@ -93,8 +94,9 @@ public class MemberListener implements Listener {
         }
 
         member.setPlayer(player);
-        CommonPlugin.getInstance().getMemberManager().getGamers(player.getUniqueId(), Player.class)
-                    .forEach(gamer -> gamer.loadEntity(player));
+        CommonPlugin.getInstance().getMemberManager().getGamers(player.getUniqueId(), Player.class).forEach(gamer -> {
+            gamer.loadEntity(player);
+        });
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
@@ -139,5 +141,8 @@ public class MemberListener implements Listener {
                 }
             });
         });
+
+        BukkitCommon.getInstance().getHologramManager().getRankingHologramSet()
+                    .forEach(hologram -> hologram.getPlayerPageMap().remove(event.getPlayer().getUniqueId()));
     }
 }

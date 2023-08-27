@@ -1,22 +1,16 @@
 package br.com.aspenmc.entity.member.configuration;
 
 import br.com.aspenmc.clan.ClanTag;
+import br.com.aspenmc.entity.Member;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import br.com.aspenmc.entity.Member;
+
+import java.util.Arrays;
 
 @NoArgsConstructor
 @Getter
 public class PreferencesConfiguration {
-
-    private boolean staffChatEnabled = true;
-    private boolean seeingStaffChatEnabled = true;
-
-    private boolean adminRemoveItems = true;
-    private short adminOnLogin = 0;
-    private boolean adminModeEnabled = false;
-    private boolean spectatorsEnabled = true;
 
     private boolean tellEnabled = true;
     private boolean chatEnabled = true;
@@ -25,6 +19,22 @@ public class PreferencesConfiguration {
 
     private boolean clanDisplayTagEnabled;
     private ClanTag clanTag;
+
+    /*
+     * Staff
+     */
+
+    private boolean staffChatEnabled = true;
+    private boolean seeingStaffChatEnabled = true;
+    private boolean seeingReportsEnabled = true;
+    private boolean seeingStafflogsEnabled = true;
+
+    private boolean adminRemoveItems = true;
+    private short adminOnLogin = 0;
+    private boolean adminModeEnabled = false;
+    private boolean spectatorsEnabled = false;
+
+    private boolean alertsEnabled;
 
     @Getter(AccessLevel.NONE)
     private transient Member member;
@@ -37,90 +47,109 @@ public class PreferencesConfiguration {
         return clanTag;
     }
 
+    public void setSeeingReportsEnabled(boolean seeingReportsEnabled) {
+        if (this.seeingReportsEnabled == seeingReportsEnabled) return;
+
+        this.seeingReportsEnabled = seeingReportsEnabled;
+        save("seeingReportsEnabled");
+    }
+
+    public void setSeeingStafflogsEnabled(boolean seeingStafflogsEnabled) {
+        if (this.seeingStafflogsEnabled == seeingStafflogsEnabled) return;
+
+        this.seeingStafflogsEnabled = seeingStafflogsEnabled;
+        save("seeingStaffLogs");
+    }
+
     public void setClanDisplayTagEnabled(boolean clanDisplayTagEnabled) {
         if (this.clanDisplayTagEnabled == clanDisplayTagEnabled) return;
 
         this.clanDisplayTagEnabled = clanDisplayTagEnabled;
-        save();
+        save("clanDisplayTagEnabled");
     }
 
     public void setClanTag(ClanTag clanTag) {
         if (this.clanTag == clanTag) return;
 
         this.clanTag = clanTag;
-        save();
+        save("clanTag");
+    }
+
+    public void setAlertsEnabled(boolean alertsEnabled) {
+        this.alertsEnabled = alertsEnabled;
+        save("alertsEnabled");
     }
 
     public void setAdminOnLogin(short adminOnLogin) {
         if (this.adminOnLogin == adminOnLogin) return;
 
         this.adminOnLogin = adminOnLogin;
-        save();
+        save("adminOnLogin");
     }
 
     public void setAdminModeEnabled(boolean adminModeEnabled) {
         if (this.adminModeEnabled == adminModeEnabled) return;
 
         this.adminModeEnabled = adminModeEnabled;
-        save();
+        save("adminModeEnabled");
     }
 
     public void setAdminRemoveItems(boolean adminRemoveItems) {
         if (this.adminRemoveItems == adminRemoveItems) return;
 
         this.adminRemoveItems = adminRemoveItems;
-        save();
+        save("adminRemoveItems");
     }
 
     public void setSpectatorsEnabled(boolean spectatorsEnabled) {
         if (this.spectatorsEnabled == spectatorsEnabled) return;
 
         this.spectatorsEnabled = spectatorsEnabled;
-        save();
+        save("spectatorsEnabled");
     }
 
     public void setStaffChatEnabled(boolean staffChatEnabled) {
         if (this.staffChatEnabled == staffChatEnabled) return;
 
         this.staffChatEnabled = staffChatEnabled;
-        save();
+        save("staffChatEnabled");
     }
 
     public void setSeeingStaffChatEnabled(boolean seeingStaffChatEnabled) {
         if (this.seeingStaffChatEnabled == seeingStaffChatEnabled) return;
 
         this.seeingStaffChatEnabled = seeingStaffChatEnabled;
-        save();
+        save("seeingStaffChatEnabled");
     }
 
     public void setTellEnabled(boolean tellEnabled) {
         if (this.tellEnabled == tellEnabled) return;
 
         this.tellEnabled = tellEnabled;
-        save();
+        save("tellEnabled");
     }
 
     public void setChatEnabled(boolean chatEnabled) {
         if (this.chatEnabled == chatEnabled) return;
 
         this.chatEnabled = chatEnabled;
-        save();
+        save("chatEnabled");
     }
 
     public void setClanInvitesEnabled(boolean clanInvitesEnabled) {
         if (this.clanInvitesEnabled == clanInvitesEnabled) return;
 
         this.clanInvitesEnabled = clanInvitesEnabled;
-        save();
+        save("clanInvitesEnabled");
     }
 
     public boolean isAdminOnLogin() {
         return adminOnLogin == 0 || (adminOnLogin == 1 && adminModeEnabled);
     }
 
-    private void save() {
+    private void save(String... fields) {
         if (member != null) {
-            member.save("preferencesConfiguration");
+            member.save(Arrays.stream(fields).map(field -> "preferencesConfiguration." + field).toArray(String[]::new));
         }
     }
 

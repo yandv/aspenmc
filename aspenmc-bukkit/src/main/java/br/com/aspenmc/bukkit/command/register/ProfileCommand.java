@@ -28,6 +28,7 @@ import br.com.aspenmc.language.Language;
 import br.com.aspenmc.manager.PermissionManager;
 import br.com.aspenmc.packet.type.member.skin.SkinChangeRequest;
 import br.com.aspenmc.packet.type.member.skin.SkinChangeResponse;
+import br.com.aspenmc.permission.GroupInfo;
 import br.com.aspenmc.permission.Tag;
 import com.google.common.base.Joiner;
 import org.bukkit.Bukkit;
@@ -93,7 +94,7 @@ public class ProfileCommand implements CommandHandler {
             return;
         }
 
-        if (sender.hasPermission(CommonConst.SERVER_FULL_PERMISSION) && !sender.getName().equals(args[0])) {
+        if (!sender.hasPermission(CommonConst.SERVER_FULL_PERMISSION) && !sender.getName().equals(args[0])) {
             sender.sendMessage("§cVocê não tem permissão para executar esse comando.");
             return;
         }
@@ -118,13 +119,20 @@ public class ProfileCommand implements CommandHandler {
         sender.sendMessage("  §fRank: " + target.getServerGroup().getGroupTag().map(Tag::getColoredName)
                                                 .orElse(PermissionManager.NULL_TAG.getColoredName()));
         sender.sendMessage("    §7Adicionado em " + CommonConst.FULL_DATE_FORMAT.format(
-                target.getGroupInfo(target.getServerGroup()).orElse(null).getCreatedAt()));
+                target.getGroupInfo(target.getServerGroup()).map(GroupInfo::getCreatedAt).orElse(-1L)));
 
         if (hasSuperPermission) {
-            sender.sendMessage("  §fLocalização: ");
-            sender.sendMessage("    §7País: Brasil");
-            sender.sendMessage("    §7Estado: Rio de Janeiro");
-            sender.sendMessage("    §7Cidade: Rio de Janeiro");
+            if (target.getIpInfo() == null) {
+                sender.sendMessage("  §fLocalização: ");
+                sender.sendMessage("    §7País: Brazil");
+                sender.sendMessage("    §7Estado: Unknown");
+                sender.sendMessage("    §7Cidade: Unknown");
+            } else {
+                sender.sendMessage("  §fLocalização: ");
+                sender.sendMessage("    §7País: " + target.getIpInfo().getCountry());
+                sender.sendMessage("    §7Estado: " + target.getIpInfo().getRegion());
+                sender.sendMessage("    §7Cidade: " + target.getIpInfo().getCity());
+            }
         }
     }
 
@@ -431,7 +439,7 @@ public class ProfileCommand implements CommandHandler {
         BukkitMember member = cmdArgs.getSenderAsMember(BukkitMember.class);
 
         Skin newSkin = member.getLoginConfiguration().getAccountType() == LoginConfiguration.AccountType.PREMIUM ?
-                CommonPlugin.getInstance().getSkinService().loadData(member.getPlayerSkin())
+                CommonPlugin.getInstance().getSkinService().loadData(member.getName())
                             .orElse(CommonPlugin.getInstance().getDefaultSkin()) :
                 CommonPlugin.getInstance().getDefaultSkin();
 
@@ -459,13 +467,6 @@ public class ProfileCommand implements CommandHandler {
             runAsync = true, console = false)
     public void fakeResetCommand(CommandArgs cmdArgs) {
         BukkitMember member = cmdArgs.getSenderAsMember(BukkitMember.class);
-        String[] args = cmdArgs.getArgs();
-
-        if (args.length == 0) {
-            member.sendMessage(" §e» §fUse §a/" + cmdArgs.getLabel() + " <nick>§f para alterar seu nick.");
-            return;
-        }
-
         member.setFakeName(null);
         member.setTag(member.getDefaultTag());
         PlayerAPI.changePlayerName(member.getPlayer(), member.getName(), true);

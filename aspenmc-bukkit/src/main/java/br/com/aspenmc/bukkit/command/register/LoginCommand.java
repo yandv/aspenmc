@@ -44,15 +44,16 @@ public class LoginCommand implements CommandHandler {
         Member member = cmdArgs.getSenderAsMember();
         String[] args = cmdArgs.getArgs();
 
+        if (!member.getLoginConfiguration().isCaptch()) {
+            member.sendMessage("§cComplete o captcha para iniciar uma sessão.");
+            return;
+        }
+
         if (member.getLoginConfiguration().isLogged()) {
             member.sendMessage("§cSomente usuários sem uma sessão ativa podem executar este comando.");
             return;
         }
 
-        if (!member.getLoginConfiguration().isCaptch()) {
-            member.sendMessage("§cComplete o captcha para iniciar uma sessão.");
-            return;
-        }
 
         if (!member.getLoginConfiguration().isRegistered()) {
             member.sendMessage("§cSomente jogadores registrados podem executar este comando.");

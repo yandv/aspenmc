@@ -1,9 +1,9 @@
 package br.com.aspenmc.entity.member.configuration;
 
-import lombok.Getter;
 import br.com.aspenmc.entity.Member;
 import br.com.aspenmc.punish.Punish;
 import br.com.aspenmc.punish.PunishType;
+import lombok.Getter;
 
 import java.util.*;
 
@@ -29,7 +29,7 @@ public class PunishConfiguration {
 
     public void punish(Punish punish) {
         punishMap.computeIfAbsent(punish.getPunishType(), k -> new ArrayList<>()).add(punish);
-        save();
+        save("punishMap");
     }
 
     public void revoke(PunishType punishType, UUID uniqueId, String punisherName, String reason) {
@@ -37,7 +37,7 @@ public class PunishConfiguration {
 
         if (currentPunish != null) {
             currentPunish.revoke(uniqueId, punisherName, reason);
-            save();
+            save("punishMap");
         }
     }
 
@@ -53,9 +53,9 @@ public class PunishConfiguration {
         this.member = member;
     }
 
-    private void save() {
+    private void save(String... fields) {
         if (member != null) {
-            member.save("punishConfiguration");
+            member.save(Arrays.stream(fields).map(field -> "punishConfiguration." + field).toArray(String[]::new));
         }
     }
 }

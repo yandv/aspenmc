@@ -522,7 +522,7 @@ public class GroupCommand implements CommandHandler {
                     Tag tag = tagList.get(i);
 
                     messageBuilder.extra(new MessageBuilder(tag.getColoredName())
-                            .setHoverEvent(member.t("command.tag.example", "%tagPrefix%", tag.getTagPrefix()))
+                            .setHoverEvent(member.t("command.tag.example", "%tagPrefix%", tag.getTagPrefix(), "%player%", sender.getName()))
                             .setClickEvent("/tag " + tag.getTagName()));
 
                     if (i == tagList.size() - 1) {

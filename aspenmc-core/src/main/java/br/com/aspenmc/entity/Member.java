@@ -9,12 +9,13 @@ import br.com.aspenmc.entity.member.configuration.PreferencesConfiguration;
 import br.com.aspenmc.entity.member.configuration.PunishConfiguration;
 import br.com.aspenmc.entity.member.gamer.Gamer;
 import br.com.aspenmc.language.Language;
-import lombok.Getter;
-import lombok.Setter;
 import br.com.aspenmc.permission.Group;
 import br.com.aspenmc.permission.GroupInfo;
 import br.com.aspenmc.permission.Tag;
 import br.com.aspenmc.server.ServerType;
+import br.com.aspenmc.utils.geoip.IpInfo;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -55,6 +56,8 @@ public abstract class Member implements Sender {
 
     private String ipAddress;
     private String lastIpAddress;
+
+    private IpInfo ipInfo;
 
     /*
      * Server
@@ -101,6 +104,11 @@ public abstract class Member implements Sender {
         this.lastLoginAt = System.currentTimeMillis();
 
         handleDefaultGroup(true);
+    }
+
+    public void setIpInfo(IpInfo ipInfo) {
+        this.ipInfo = ipInfo;
+        save("ipInfo");
     }
 
     public void setClan(Clan clan) {
@@ -319,11 +327,32 @@ public abstract class Member implements Sender {
         setSkin(CommonPlugin.getInstance().getDefaultSkin());
 
         if (!isUsingDefaultSkin()) {
-            CommonPlugin.getInstance().getSkinService().loadUserData(getPlayerSkin()).whenComplete((skin, throwable) -> {
-                if (skin != null) {
-                    setSkin(skin);
-                }
-            });
+            CommonPlugin.getInstance().getSkinService().loadUserData(getPlayerSkin())
+                        .whenComplete((skin, throwable) -> {
+                            if (skin != null) {
+                                setSkin(skin);
+                            }
+                        });
+        }
+    }
+
+    public void addPermission(String permission) {
+        addPermission(permission, -1L);
+    }
+
+    public void addPermission(String permission, long expiresAt) {
+        permission = permission.toLowerCase();
+
+        if (!this.permissions.containsKey(permission)) {
+            this.permissions.put(permission, expiresAt);
+        }
+    }
+
+    public void removePermission(String permission) {
+        permission = permission.toLowerCase();
+
+        if (this.permissions.containsKey(permission)) {
+            this.permissions.remove(permission);
         }
     }
 

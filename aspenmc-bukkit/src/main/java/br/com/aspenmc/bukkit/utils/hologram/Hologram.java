@@ -22,6 +22,8 @@ public interface Hologram {
 
     Hologram setDisplayName(String displayName);
 
+    String getDisplayName();
+
     Hologram updateTitle(Player player);
 
     /**

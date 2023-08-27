@@ -12,6 +12,7 @@
         <module>aspenmc-core</module>
         <module>aspenmc-bukkit</module>
         <module>aspenmc-bungee</module>
+        <module>aspenmc-discord</module>
     </modules>
 
     <properties>

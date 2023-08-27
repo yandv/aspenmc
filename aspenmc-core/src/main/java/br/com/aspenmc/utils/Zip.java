@@ -130,21 +130,21 @@ public class Zip {
         return File.separatorChar == WINDOWS_SEPARATOR;
     }
 
-    private static String separatorsToUnix(final String path) {
+    public static String separatorsToUnix(final String path) {
         if (path == null || path.indexOf(WINDOWS_SEPARATOR) == -1) {
             return path;
         }
         return path.replace(WINDOWS_SEPARATOR, UNIX_SEPARATOR);
     }
 
-    private static String separatorsToWindows(final String path) {
+    public static String separatorsToWindows(final String path) {
         if (path == null || path.indexOf(UNIX_SEPARATOR) == -1) {
             return path;
         }
         return path.replace(UNIX_SEPARATOR, WINDOWS_SEPARATOR);
     }
 
-    private static String separatorsToSystem(final String path) {
+    public static String separatorsToSystem(final String path) {
         if (path == null) {
             return null;
         }

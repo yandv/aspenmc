@@ -43,11 +43,31 @@ public class YourPreferencesInventory extends MenuInventory {
                           .setStaffChatEnabled(!member.getPreferencesConfiguration().isStaffChatEnabled());
                 });
 
-        createMenuItem("Ver no StaffChat", "§7Ver as mensagens que são trocadas no StaffChat.", Material.PAPER, 13,
+        createMenuItem("Ver o StaffChat", "§7Ver as mensagens que são trocadas no StaffChat.", Material.PAPER, 13,
                 member.getPreferencesConfiguration()::isSeeingStaffChatEnabled, v -> {
                     member.getPreferencesConfiguration()
                           .setSeeingStaffChatEnabled(!member.getPreferencesConfiguration().isSeeingStaffChatEnabled());
                 });
+
+        createMenuItem("Ver espectadores",
+                "§7Ver todos os membros da equipe que estão no modo administrador ou espectadores de partidas.",
+                Material.PAPER, 14, member.getPreferencesConfiguration()::isSpectatorsEnabled, v -> {
+                    member.getPreferencesConfiguration()
+                          .setSpectatorsEnabled(!member.getPreferencesConfiguration().isSpectatorsEnabled());
+                });
+
+        createMenuItem("Ver reports", "§7Ver todos os reports que forem feitos no servidor.", Material.PAPER, 15,
+                member.getPreferencesConfiguration()::isSeeingReportsEnabled, v -> {
+                    member.getPreferencesConfiguration()
+                          .setSeeingReportsEnabled(!member.getPreferencesConfiguration().isSeeingReportsEnabled());
+                });
+
+        createMenuItem("Alertas do AntiCheat", "§7Ver todos os alertas do anticheat para supostos hacks no servidor.",
+                Material.PAPER, 16, member.getPreferencesConfiguration()::isAlertsEnabled, v -> {
+                    member.getPreferencesConfiguration()
+                          .setAlertsEnabled(!member.getPreferencesConfiguration().isAlertsEnabled());
+                });
+
 
         open(player);
     }
@@ -85,10 +105,8 @@ public class YourPreferencesInventory extends MenuInventory {
 
         setItem(slot, new MenuItem(new ItemBuilder().name(text).formatLore(lore).type(material), clickHandler));
         setItem(slot + 9, new MenuItem(new ItemBuilder().name(text).formatLore(lore, "",
-                                                                (preferenceEnabled == maxValue - 1 ?
-                                                                        "§cClique para " + "ativar." : "§aClique " +
-                                                                        "para" + " desativar."))
-                                                        .type(material).type(Material.INK_SACK).durability(
-                        preferenceEnabled == 0 ? 10 : preferenceEnabled == 1 ? 14 : 8), clickHandler));
+                (preferenceEnabled == maxValue - 1 ? "§cClique para " + "ativar." :
+                        "§aClique " + "para" + " desativar.")).type(material).type(Material.INK_SACK).durability(
+                preferenceEnabled == 0 ? 10 : preferenceEnabled == 1 ? 14 : 8), clickHandler));
     }
 }

@@ -1,2 +1,6 @@
 serverId: 'default.aspenmc.com.br'
 serverType: 'lobby'
+
+mongodb:
+  hostname: '127.0.0.1'
+  database: "aspenmc"

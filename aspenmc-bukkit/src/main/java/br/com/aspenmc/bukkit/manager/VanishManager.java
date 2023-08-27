@@ -6,7 +6,6 @@ import br.com.aspenmc.bukkit.event.player.vanish.PlayerHideToPlayerEvent;
 import br.com.aspenmc.bukkit.event.player.vanish.PlayerShowToPlayerEvent;
 import br.com.aspenmc.entity.Member;
 import br.com.aspenmc.permission.Group;
-import br.com.aspenmc.permission.Tag;
 import com.google.common.collect.ImmutableSet;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -69,27 +68,24 @@ public class VanishManager {
         }
 
         PlayerAdminEvent playerAdminEvent = new PlayerAdminEvent(player, PlayerAdminEvent.AdminMode.ADMIN,
-                                                                 GameMode.CREATIVE);
+                GameMode.CREATIVE);
         Bukkit.getPluginManager().callEvent(playerAdminEvent);
 
-        if (playerAdminEvent.isCancelled()) {
-            return false;
-        }
+        if (playerAdminEvent.isCancelled()) return false;
 
         if (member.getPreferencesConfiguration().isAdminRemoveItems()) {
             ItemStack[] contents = new ItemStack[player.getInventory().getContents().length + 4];
 
-            for (int i = 0; i < player.getInventory().getContents().length; i++) {
+            for (int i = 0; i < playerAdminEvent.getContents().length; i++) {
                 contents[i] = player.getInventory().getContents()[i];
             }
 
-            for (int i = 0; i < player.getInventory().getArmorContents().length; i++) {
+            for (int i = 0; i < playerAdminEvent.getArmorContents().length; i++) {
                 contents[player.getInventory().getContents().length + i] = player.getInventory().getArmorContents()[i];
             }
 
             playerStateMap.put(player.getUniqueId(),
-                               new PlayerState(contents, player.getGameMode(), player.getAllowFlight(),
-                                               player.isFlying()));
+                    new PlayerState(contents, player.getGameMode(), player.getAllowFlight(), player.isFlying()));
             player.getInventory().clear();
             player.getInventory().setArmorContents(new ItemStack[4]);
         }
@@ -98,7 +94,8 @@ public class VanishManager {
         member.getPreferencesConfiguration().setAdminModeEnabled(true);
 
         Group group = hidePlayer(player);
-        player.sendMessage("§dVocê entrou no modo admin.\n§dVocê está invísivel para " + group.getGroupName() + " e abaixo.");
+        player.sendMessage(
+                "§dVocê entrou no modo admin.\n§dVocê está invísivel para " + group.getGroupName() + " e abaixo.");
         player.setGameMode(playerAdminEvent.getGameMode());
 
         if (playerAdminEvent.getGameMode() == GameMode.CREATIVE) {
@@ -118,11 +115,14 @@ public class VanishManager {
         Member member = CommonPlugin.getInstance().getMemberManager().getMemberById(player.getUniqueId()).orElse(null);
 
         if (adminSet.contains(player.getUniqueId()) && member != null) {
+            PlayerState playerState = playerStateMap.remove(player.getUniqueId());
+            ItemStack[] storedContents = playerState == null ? new ItemStack[40] : playerState.getContents();
+
+            ItemStack[] contents = Arrays.copyOfRange(storedContents, 0, player.getInventory().getContents().length);
+            ItemStack[] armorContents = new ItemStack[4];
 
             PlayerAdminEvent playerAdminEvent = new PlayerAdminEvent(player, PlayerAdminEvent.AdminMode.PLAYER,
-                                                                     playerStateMap.containsKey(player.getUniqueId()) ?
-                                                                     playerStateMap.get(player.getUniqueId())
-                                                                                   .getGameMode() : GameMode.SURVIVAL);
+                    playerState == null ? GameMode.SURVIVAL : playerState.getGameMode(), contents, armorContents);
             Bukkit.getPluginManager().callEvent(playerAdminEvent);
 
             if (playerAdminEvent.isCancelled()) {
@@ -134,22 +134,12 @@ public class VanishManager {
 
             showPlayer(player);
             player.sendMessage("§dVocê entrou no modo jogador.\n§dVocê está visível para todos os jogadores.");
+
             player.setGameMode(playerAdminEvent.getGameMode());
-
-            if (playerStateMap.containsKey(player.getUniqueId())) {
-                ItemStack[] contents = playerStateMap.get(player.getUniqueId()).getContents();
-
-                player.getInventory()
-                      .setContents(Arrays.copyOfRange(contents, 0, player.getInventory().getContents().length));
-                player.getInventory().setArmorContents(
-                        Arrays.copyOfRange(contents, player.getInventory().getContents().length, contents.length));
-                player.setAllowFlight(playerStateMap.get(player.getUniqueId()).isAllowFlight());
-                player.setFlying(playerStateMap.get(player.getUniqueId()).isFlying() &&
-                                 playerStateMap.get(player.getUniqueId()).isAllowFlight());
-
-                playerStateMap.remove(player.getUniqueId());
-            }
-
+            player.getInventory().setContents(playerAdminEvent.getContents());
+            player.getInventory().setArmorContents(playerAdminEvent.getArmorContents());
+            player.setAllowFlight(playerState == null ? false : playerState.isAllowFlight());
+            player.setFlying(playerState == null ? player.getAllowFlight() : playerState.isFlying());
             return false;
         }
 
@@ -199,7 +189,7 @@ public class VanishManager {
             }
 
             if (group != null && (onlineP.getServerGroup().getId() <= group.getId() ||
-                                  !onlineP.getPreferencesConfiguration().isSpectatorsEnabled())) {
+                    !onlineP.getPreferencesConfiguration().isSpectatorsEnabled())) {
                 PlayerHideToPlayerEvent event = new PlayerHideToPlayerEvent(player, online);
 
                 Bukkit.getPluginManager().callEvent(event);
@@ -251,7 +241,7 @@ public class VanishManager {
 
             if (group != null) {
                 if (member.getServerGroup().getId() <= group.getId() ||
-                    !member.getPreferencesConfiguration().isSpectatorsEnabled()) {
+                        !member.getPreferencesConfiguration().isSpectatorsEnabled()) {
                     PlayerHideToPlayerEvent event = new PlayerHideToPlayerEvent(online, player);
                     Bukkit.getPluginManager().callEvent(event);
 
@@ -286,8 +276,8 @@ public class VanishManager {
 
         if (member == null) return null;
 
-        return setPlayerVanishToGroup(player, CommonPlugin.getInstance().getPermissionManager()
-                                                          .getFirstLowerGroup(member.getServerGroup()));
+        return setPlayerVanishToGroup(player,
+                CommonPlugin.getInstance().getPermissionManager().getFirstLowerGroup(member.getServerGroup()));
     }
 
     /**

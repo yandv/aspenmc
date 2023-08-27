@@ -40,6 +40,10 @@ public class MongoStatusService implements StatusService {
         System.out.println(status.get(StatusField.KILLSTREAK));
 
         mongoStatusData.saveStatus(status, StatusField.KILLSTREAK.toField());
+
+        mongoStatusData.ranking(StatusType.FPS, "xp", 1, 10).thenAccept(statuses -> {
+            System.out.println(CommonConst.GSON.toJson(statuses));
+        });
     }
 
     @Override
@@ -95,12 +99,14 @@ public class MongoStatusService implements StatusService {
 
     @Override
     public CompletableFuture<List<Status>> ranking(StatusType statusType, String fieldName, int page, int perPage) {
-        return CompletableFuture.supplyAsync(() -> {
-            return statusCollection.find(Filters.eq("statusType", statusType.name())).sort(new Document(fieldName, -1))
-                                   .skip((page - 1) * perPage).limit(perPage).into(new ArrayList<>()).stream()
-                                   .map(document -> CommonConst.GSON.fromJson(CommonConst.GSON.toJson(document),
-                                           Status.class)).collect(Collectors.toList());
-        }, CommonConst.PRINCIPAL_EXECUTOR);
+        return CompletableFuture.supplyAsync(() -> statusCollection.find(Filters.eq("statusType", statusType.name()))
+                                                                   .sort(new Document(fieldName, -1))
+                                                                   .skip((page - 1) * perPage).limit(perPage)
+                                                                   .into(new ArrayList<>()).stream()
+                                                                   .map(document -> CommonConst.GSON.fromJson(
+                                                                           CommonConst.GSON.toJson(document),
+                                                                           Status.class)).collect(Collectors.toList()),
+                CommonConst.PRINCIPAL_EXECUTOR);
     }
 
     @Override
@@ -117,8 +123,7 @@ public class MongoStatusService implements StatusService {
                     String field = fieldName.split("\\.")[1];
 
                     if (jsonObject.has(field)) {
-                        updatePredicates.add(Updates.set(fieldName,
-                                JsonUtils.elementToBson(jsonObject.get(field))));
+                        updatePredicates.add(Updates.set(fieldName, JsonUtils.elementToBson(jsonObject.get(field))));
                     } else {
                         updatePredicates.add(Updates.unset(fieldName));
                     }

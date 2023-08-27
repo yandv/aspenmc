@@ -3,8 +3,10 @@ package br.com.aspenmc.bukkit;
 import br.com.aspenmc.CommonConst;
 import br.com.aspenmc.CommonPlatform;
 import br.com.aspenmc.CommonPlugin;
+import br.com.aspenmc.backend.Credentials;
 import br.com.aspenmc.backend.type.RedisConnection;
 import br.com.aspenmc.bukkit.command.BukkitCommandFramework;
+import br.com.aspenmc.bukkit.entity.BukkitConsoleSender;
 import br.com.aspenmc.bukkit.entity.BukkitMember;
 import br.com.aspenmc.bukkit.event.player.PlayerChangeLeagueEvent;
 import br.com.aspenmc.bukkit.event.player.group.PlayerChangedGroupEvent;
@@ -14,7 +16,6 @@ import br.com.aspenmc.bukkit.listener.*;
 import br.com.aspenmc.bukkit.manager.*;
 import br.com.aspenmc.bukkit.networking.BukkitPubSub;
 import br.com.aspenmc.bukkit.permission.regex.RegexPermissions;
-import br.com.aspenmc.bukkit.entity.BukkitConsoleSender;
 import br.com.aspenmc.bukkit.protocol.impl.LimiterInjector;
 import br.com.aspenmc.bukkit.protocol.impl.MessageInjector;
 import br.com.aspenmc.bukkit.utils.hologram.impl.RankingHologram;
@@ -35,6 +36,7 @@ import lombok.Getter;
 import lombok.Setter;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -52,6 +54,7 @@ public abstract class BukkitCommon extends JavaPlugin implements CommonPlatform 
     protected RegexPermissions regexPerms;
 
     protected CharacterManager characterManager;
+    protected CheatManager cheatManager;
     protected CombatlogManager combatlogManager;
     protected CooldownManager cooldownManager;
     protected HologramManager hologramManager;
@@ -74,7 +77,7 @@ public abstract class BukkitCommon extends JavaPlugin implements CommonPlatform 
     private Set<StatusType> preloadedStatus;
 
     @Setter
-    private boolean saveGamers = true;
+    private boolean saveGamers = false;
 
     @Setter
     private boolean removePlayerDat = true;
@@ -99,7 +102,9 @@ public abstract class BukkitCommon extends JavaPlugin implements CommonPlatform 
             plugin.setServerType(Optional.ofNullable(ServerType.getByName(getConfig().getString("serverType")))
                                          .orElse(ServerType.LOBBY));
 
-            plugin.startConnection();
+            plugin.startConnection(new Credentials(getConfig().getString("mongodb.hostname", "127.0.0.1"), "", "",
+                            getConfig().getString("mongodb.database", "aspenmc"), 27017),
+                    new Credentials(getConfig().getString("redis.hostname", "localhost"), "", "", "", 6379));
             plugin.getServerService().startServer(Bukkit.getMaxPlayers());
 
             new LimiterInjector();
@@ -135,6 +140,7 @@ public abstract class BukkitCommon extends JavaPlugin implements CommonPlatform 
                     CommonConst.SERVER_PACKET_CHANNEL));
 
             characterManager = new CharacterManager();
+            cheatManager = new CheatManager();
             combatlogManager = new CombatlogManager();
             cooldownManager = new CooldownManager();
             hologramManager = new HologramManager();
@@ -247,8 +253,9 @@ public abstract class BukkitCommon extends JavaPlugin implements CommonPlatform 
                         state, time, mapName));
     }
 
-    public void register(RankingHologram.Loader loader, String... texts) {
-        getHologramManager().loadHologram(new RankingHologram(loader, texts));
+    public void registerRankingHologram(Location location, RankingHologram.Loader loader, String defaultText,
+            String... texts) {
+        getHologramManager().loadHologram(new RankingHologram(location, loader, defaultText, texts));
     }
 
     public void loadGamer(String gamerId, Class<? extends Gamer<Player>> gamerClass) {

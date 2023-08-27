@@ -31,7 +31,7 @@ public class SkinInventory extends MenuInventory {
                                              "§7Clique para ver as skins disponibilizadas gratuitamente pelo " +
                                                      "servidor.")
                                      .type(Material.BOOKSHELF).build(),
-                clickArgs -> new SkinLibraryInventory(clickArgs.getPlayer()));
+                clickArgs -> new SkinLibraryInventory(clickArgs.getPlayer(), this));
 
         if (member.isUsingCustomSkin()) {
             setItem(15, new ItemBuilder().name("§aRemover sua skin").lore("§7Clique para remover sua skin")

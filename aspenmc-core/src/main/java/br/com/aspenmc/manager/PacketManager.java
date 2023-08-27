@@ -1,12 +1,12 @@
 package br.com.aspenmc.manager;
 
-import com.google.gson.JsonObject;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import br.com.aspenmc.CommonConst;
 import br.com.aspenmc.CommonPlugin;
 import br.com.aspenmc.packet.Packet;
 import br.com.aspenmc.utils.ClassGetter;
+import com.google.gson.JsonObject;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 import java.lang.reflect.Modifier;
 import java.util.*;
@@ -25,6 +25,7 @@ public class PacketManager {
         waitingPacketMap = new ConcurrentHashMap<>();
         packetMap = new HashMap<>();
         packetHandlerMap = new HashMap<>();
+//        registerPacket(MemberFieldUpdate.class);
         registerPackets();
     }
 
@@ -81,9 +82,11 @@ public class PacketManager {
         if (!packet.isExclusiveServers() || packet.getServerList().contains(CommonPlugin.getInstance().getServerId()) ||
                 packet.getServerTypes().contains(CommonPlugin.getInstance().getServerType().getName())) {
 
-//            CommonPlugin.getInstance()
-//                        .debug("The server received a packet " + packet.getClass().getSimpleName() + " from " +
-//                               packet.getSource() + ".");
+            if (CommonPlugin.getInstance().isServerLogPackets()) {
+                CommonPlugin.getInstance()
+                            .debug("The server received a packet " + packet.getClass().getSimpleName() + " from " +
+                                    packet.getSource() + " with content: " + CommonConst.GSON.toJson(packet) + ".");
+            }
 
             if (preReceiveFunction.apply(packet)) {
                 packet.receive();

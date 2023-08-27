@@ -8,7 +8,6 @@ import br.com.aspenmc.entity.member.configuration.LoginConfiguration;
 import br.com.aspenmc.language.Language;
 import br.com.aspenmc.server.ProxiedServer;
 import br.com.aspenmc.server.ServerType;
-import net.md_5.bungee.api.Callback;
 import net.md_5.bungee.api.ServerPing;
 import net.md_5.bungee.api.connection.PendingConnection;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -32,16 +31,19 @@ public class ServerListener implements Listener {
                                                                  .getMemberById(player.getUniqueId())
                                                                  .map(Member::getLoginConfiguration)
                                                                  .map(LoginConfiguration::reloadSession)
-                                                                 .orElse(LoginConfiguration.LoginResult.NOT_LOGGED);
+                                                                 .orElse(player.getPendingConnection().isOnlineMode() ?
+                                                                         LoginConfiguration.LoginResult.PREMIUM :
+                                                                         LoginConfiguration.LoginResult.NOT_LOGGED);
         ServerType serverType;
 
         switch (loginResult) {
         case SESSION_EXPIRED:
+            player.sendMessage(language.t("session-expired"));
         case NOT_LOGGED:
             serverType = LOGIN_SERVER;
             break;
         case SESSION_RESTORED:
-            player.sendMessage(language.t("session-restored", "§aSua sessão foi restaurada."));
+            player.sendMessage(language.t("session-restored"));
         default:
             serverType = ServerType.LOBBY;
             break;
@@ -51,9 +53,7 @@ public class ServerListener implements Listener {
 
         if (server == null || server.getServerInfo() == null) {
             event.setCancelled(true);
-            event.setCancelMessage(language.t("no-server-available",
-                    "§c§lASPENMC\n§c\n§cNenhum servidor disponível no momento.\n§cTente novamente em alguns instantes" +
-                            "."));
+            event.setCancelMessage(language.t("no-server-available"));
             return;
         }
 

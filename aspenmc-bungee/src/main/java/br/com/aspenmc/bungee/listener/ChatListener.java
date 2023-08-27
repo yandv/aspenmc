@@ -41,7 +41,7 @@ public class ChatListener implements Listener {
 
         if (member.getPreferencesConfiguration().isStaffChatEnabled() && !event.isCommand()) {
             event.setCancelled(true);
-            BungeeMain.getInstance().sendStaffChatMessage(member, event.getMessage().replace('&', '§'));
+            BungeeMain.getInstance().sendStaffChatMessage(member, event.getMessage().replace('&', '§'), true);
             return;
         }
     }

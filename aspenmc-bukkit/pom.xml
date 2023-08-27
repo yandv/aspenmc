@@ -63,6 +63,15 @@
             <systemPath>C:/paperspigot.jar</systemPath>
         </dependency>
 
+        <dependency>
+            <groupId>me.liwk.karhu</groupId>
+            <artifactId>KarhuAPI</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>C:/Users/ALLAN/Desktop/allan/lib/KarhuAPI.jar</systemPath>
+        </dependency>
+
+
     </dependencies>
 
 </project>

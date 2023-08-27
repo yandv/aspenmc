@@ -1,6 +1,6 @@
 package br.com.aspenmc;
 
-import br.com.aspenmc.entity.member.Skin;
+import br.com.aspenmc.utils.Zip;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -9,7 +9,6 @@ import javax.management.Attribute;
 import javax.management.AttributeList;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
-import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Modifier;
 import java.text.DateFormat;
@@ -24,8 +23,8 @@ import java.util.regex.Pattern;
 
 public class CommonConst {
 
-    public static final ExecutorService PRINCIPAL_EXECUTOR = Executors.newSingleThreadExecutor(
-            new ThreadFactoryBuilder().setNameFormat("HighMC - Executor").build());
+    public static final ExecutorService PRINCIPAL_EXECUTOR = Executors.newFixedThreadPool(2,
+            new ThreadFactoryBuilder().setNameFormat("AspenMC - Executor").build());
 
     public static final Gson GSON = new GsonBuilder().excludeFieldsWithModifiers(Modifier.TRANSIENT, Modifier.STATIC)
                                                      .create();
@@ -55,7 +54,9 @@ public class CommonConst {
     public static final String WEBSITE = "www.aspenmc.com.br";
     public static final String DISCORD = "discord.gg/aspenmc";
 
-    public static final String PRINCIPAL_DIRECTORY = "C:/Users/Administrator/Desktop/AspenMC/";
+    public static final String PRINCIPAL_DIRECTORY =
+            System.getenv("PRINCIPAL_DIRECTORY") != null ? Zip.separatorsToUnix(System.getenv("PRINCIPAL_DIRECTORY")) :
+                    "C:/Users/Administrator/Desktop/AspenMC/";
     public static final String DEFAULT_SKIN_NAME = "Sem pele";
     public static final String DEFAULT_SKIN_VALUE =
             "ewogICJ0aW1lc3RhbXAiIDogMTY3NzI0NTI0OTE5MCwKICAicHJvZmlsZUlkIiA6ICI4NzQ3ODgyNjc2NzI0OTk1ODU1ODMwN2FiMWI3ZDRjZCIsCiAgInByb2ZpbGVOYW1lIiA6ICJUZXN0ZSIsCiAgInNpZ25hdHVyZVJlcXVpcmVkIiA6IHRydWUsCiAgInRleHR1cmVzIiA6IHsKICAgICJTS0lOIiA6IHsKICAgICAgInVybCIgOiAiaHR0cDovL3RleHR1cmVzLm1pbmVjcmFmdC5uZXQvdGV4dHVyZS8yYzFjYzE5YzYzZDM4MmI3ZTI5MzhkZWE4NGZmZmYzODYxMmJkM2IwNjM3NzY4NzkwZTZkNTJkNzEwNDZhNGIyIgogICAgfQogIH0KfQ==";

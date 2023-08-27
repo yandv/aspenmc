@@ -2,3 +2,4 @@ name: BukkitCommon
 version: 1.0
 author: yandv
 main: br.com.aspenmc.bukkit.BukkitMain
+depend: [KarhuAPI]

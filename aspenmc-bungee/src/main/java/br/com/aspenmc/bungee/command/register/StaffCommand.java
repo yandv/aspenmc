@@ -71,7 +71,7 @@ public class StaffCommand implements CommandHandler {
             member.sendMessage("§aAgora você não está vendo mais o chat da equipe.");
             break;
         default:
-            BungeeMain.getInstance().sendStaffChatMessage(member, message);
+            BungeeMain.getInstance().sendStaffChatMessage(member, message, true);
             break;
         }
     }

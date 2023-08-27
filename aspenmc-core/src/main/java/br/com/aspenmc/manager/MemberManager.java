@@ -2,6 +2,7 @@ package br.com.aspenmc.manager;
 
 import br.com.aspenmc.CommonPlugin;
 import br.com.aspenmc.entity.Member;
+import br.com.aspenmc.entity.member.MemberVoid;
 import br.com.aspenmc.entity.member.gamer.Gamer;
 
 import java.util.*;
@@ -114,6 +115,18 @@ public class MemberManager {
         return Optional.ofNullable(member);
     }
 
+    public Optional<? extends Member> getOrLoadById(UUID uniqueId) {
+        if (this.memberMap.containsKey(uniqueId)) {
+            return Optional.of(this.memberMap.get(uniqueId));
+        }
+
+        Member member = CommonPlugin.getInstance().getMemberService().getMemberById(uniqueId, MemberVoid.class).join();
+
+        if (member == null) return Optional.empty();
+        member.loadConfiguration();
+        return Optional.of(member);
+    }
+
     public <T extends Member> Optional<T> getOrLoadById(UUID uniqueId, Class<T> clazz) {
         if (this.memberMap.containsKey(uniqueId)) {
             return Optional.of(clazz.cast(this.memberMap.get(uniqueId)));
@@ -134,47 +147,62 @@ public class MemberManager {
         return this.memberMap.values().stream().filter(clazz::isInstance).map(clazz::cast).collect(Collectors.toList());
     }
 
-    public <K, T extends Gamer<K>> Collection<T> getGamers(Class<T> clazz) {
-        return this.gamerMap.values().stream().reduce(new HashSet<>(), (gamers, uuidGamerMap) -> {
-            uuidGamerMap.values().stream().filter(clazz::isInstance).map(clazz::cast).findFirst()
-                        .ifPresent(gamers::add);
 
-            return gamers;
-        }, (gamers, gamers2) -> {
-            gamers.addAll(gamers2);
-            return gamers;
-        });
+    public <K, T extends Gamer<K>> Collection<T> getGamers(String gamerId, Class<T> clazz) {
+        Set<T> set = new HashSet<>();
+
+        Map<UUID, Gamer<?>> uuidGamerMap = this.gamerMap.get(gamerId);
+
+        if (uuidGamerMap == null) {
+            return set;
+        }
+
+        for (Gamer<?> gamer : uuidGamerMap.values()) {
+            if (clazz.isInstance(gamer)) {
+                set.add(clazz.cast(gamer));
+            }
+        }
+
+        return set;
+    }
+
+    public <K, T extends Gamer<K>> Collection<T> getGamers(Class<T> clazz) {
+        Set<T> set = new HashSet<>();
+
+        for (Map<UUID, Gamer<?>> uuidGamerMap : this.gamerMap.values()) {
+            uuidGamerMap.values().stream().filter(clazz::isInstance).map(clazz::cast).findFirst().ifPresent(set::add);
+        }
+
+        return set;
     }
 
     public Collection<? extends Gamer<?>> getGamers(UUID uniqueId) {
-        return this.gamerMap.values().stream().reduce(new HashSet<>(), (gamers, uuidGamerMap) -> {
+        Set<Gamer<?>> gamerSet = new HashSet<>();
+
+        for (Map<UUID, Gamer<?>> uuidGamerMap : this.gamerMap.values()) {
             Gamer<?> gamer = uuidGamerMap.get(uniqueId);
 
             if (gamer != null) {
-                gamers.add(gamer);
+                gamerSet.add(gamer);
             }
+        }
 
-            return gamers;
-        }, (gamers, gamers2) -> {
-            gamers.addAll(gamers2);
-            return gamers;
-        });
+        return gamerSet;
     }
 
     @SuppressWarnings("unchecked")
     public <K> Collection<? extends Gamer<K>> getGamers(UUID uniqueId, Class<K> entity) {
-        return this.gamerMap.values().stream().reduce(new HashSet<>(), (gamers, uuidGamerMap) -> {
+        Set<Gamer<K>> gamerSet = new HashSet<>();
+
+        for (Map<UUID, Gamer<?>> uuidGamerMap : this.gamerMap.values()) {
             Gamer<?> gamer = uuidGamerMap.get(uniqueId);
 
-            if (gamer != null && gamer.getEntityClass() == entity) {
-                gamers.add((Gamer<K>) gamer);
+            if (gamer != null && gamer.getEntityClass().equals(entity)) {
+                gamerSet.add((Gamer<K>) gamer);
             }
+        }
 
-            return gamers;
-        }, (gamers, gamers2) -> {
-            gamers.addAll(gamers2);
-            return gamers;
-        });
+        return gamerSet;
     }
 
     public Collection<? extends Gamer<?>> getGamers(Collection<UUID> ids, String gamerId) {

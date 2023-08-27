@@ -515,6 +515,30 @@ public class ItemBuilder {
         return this;
     }
 
+    /*
+     * Factory
+     */
+
+    public static ItemBuilder newItemBuilder(Material material, int amount, short durability) {
+        return new ItemBuilder().type(material).amount(amount).durability(durability);
+    }
+
+    public static ItemBuilder newItemBuilder(Material material, int amount) {
+        return new ItemBuilder().type(material).amount(amount);
+    }
+
+    public static ItemBuilder newItemBuilder(Material material, short durability) {
+        return new ItemBuilder().type(material).durability(durability);
+    }
+
+    public static ItemBuilder newItemBuilder(Material material) {
+        return new ItemBuilder().type(material);
+    }
+
+    public static ItemBuilder newItemBuilder(ItemStack stack) {
+        return new ItemBuilder().type(stack.getType()).amount(stack.getAmount()).durability(stack.getDurability());
+    }
+
     public static ItemBuilder fromStack(ItemStack stack) {
         ItemBuilder builder = new ItemBuilder().type(stack.getType()).amount(stack.getAmount())
                                                .durability(stack.getDurability());

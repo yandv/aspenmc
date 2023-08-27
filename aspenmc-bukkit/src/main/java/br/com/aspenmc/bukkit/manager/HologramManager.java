@@ -1,5 +1,6 @@
 package br.com.aspenmc.bukkit.manager;
 
+import br.com.aspenmc.CommonPlugin;
 import br.com.aspenmc.bukkit.utils.hologram.Hologram;
 import br.com.aspenmc.bukkit.utils.hologram.impl.RankingHologram;
 import lombok.Getter;
@@ -15,6 +16,10 @@ public class HologramManager {
     public HologramManager() {
         this.hologramMap = new HashMap<>();
         this.rankingHologramSet = new HashSet<>();
+
+        CommonPlugin.getInstance().getPluginPlatform().runAsyncTimer(() -> {
+            this.rankingHologramSet.forEach(RankingHologram::update);
+        }, 20L * 60L * 5L, 20L * 60L * 5L);
     }
 
     public RankingHologram loadHologram(RankingHologram rankingHologram) {

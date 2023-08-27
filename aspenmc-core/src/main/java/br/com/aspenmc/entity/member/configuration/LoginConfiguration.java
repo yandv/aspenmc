@@ -7,6 +7,7 @@ import lombok.Getter;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Stream;
 
 
 public class LoginConfiguration {
@@ -43,7 +44,7 @@ public class LoginConfiguration {
 
         if (cryptograph.decode(this.passWord).equals(passWord)) {
             this.logged = true;
-            save();
+            save("logged");
             startSession();
             return true;
         }
@@ -76,13 +77,13 @@ public class LoginConfiguration {
         String ipAddress = this.member.getIpAddress();
 
         this.storageSessionMap.put(ipAddress, System.currentTimeMillis() + (1000L * 60L * 60L * 24L * 7L));
-        save();
+        save("logged", "passWord", "storageSessionMap");
     }
 
     public LoginResult reloadSession() {
         if (accountType == AccountType.PREMIUM) {
             this.logged = true;
-            save();
+            save("logged");
             return LoginResult.PREMIUM;
         }
 
@@ -90,15 +91,18 @@ public class LoginConfiguration {
             if (this.storageSessionMap.containsKey(this.member.getIpAddress())) {
                 if (this.storageSessionMap.get(this.member.getIpAddress()) > System.currentTimeMillis()) {
                     this.logged = true;
+                    save("logged");
                     return LoginResult.SESSION_RESTORED;
                 }
 
                 this.storageSessionMap.remove(this.member.getIpAddress());
+                save("storageSessionMap");
                 return LoginResult.SESSION_EXPIRED;
             }
         }
 
         this.logged = false;
+        save("logged");
         return LoginResult.NOT_LOGGED;
     }
 
@@ -114,26 +118,24 @@ public class LoginConfiguration {
         this.member = member;
     }
 
-    public void save() {
+    public void save(String... fields) {
         if (this.member != null) {
-            this.member.save("loginConfiguration");
+            this.member.save(
+                    Stream.of(fields).map(fieldName -> "loginConfiguration." + fieldName).toArray(String[]::new));
         }
     }
 
     public void changePassword(String passWord) {
         this.passWord = getCryptograph().encode(passWord);
         this.logged = false;
+        save("passWord", "logged");
     }
 
     public enum LoginResult {
-        PREMIUM,
-        SESSION_RESTORED,
-        SESSION_EXPIRED,
-        NOT_LOGGED;
+        PREMIUM, SESSION_RESTORED, SESSION_EXPIRED, NOT_LOGGED;
     }
 
     public enum AccountType {
-        CRACKED,
-        PREMIUM;
+        CRACKED, PREMIUM;
     }
 }

@@ -1,5 +1,6 @@
 package br.com.aspenmc.bungee.listener;
 
+import br.com.aspenmc.CommonConst;
 import br.com.aspenmc.CommonPlugin;
 import br.com.aspenmc.bungee.BungeeMain;
 import br.com.aspenmc.bungee.entity.BungeeMember;
@@ -133,7 +134,7 @@ public class MemberListener implements Listener {
                 CommonPlugin.getInstance().debug("The player " + member.getConstraintName() + " has been created.");
             } else {
                 if (!byName.getName().equals(playerName)) {
-                    loginEvent.setCancelReason("§akkkk");
+                    loginEvent.setCancelReason("§a");
                     loginEvent.setCancelled(true);
                     return;
                 }
@@ -202,6 +203,23 @@ public class MemberListener implements Listener {
         SocketAddress socket = loginEvent.getConnection().getSocketAddress();
         InetSocketAddress inetSocketAddress = (InetSocketAddress) socket;
         String ipAddress = inetSocketAddress.getHostString();
+
+        Member targetMember = member;
+
+        CommonPlugin.getInstance().getGeoipService().getIp(ipAddress).whenComplete((ipInfo, throwable) -> {
+            if (throwable != null) {
+                throwable.printStackTrace();
+                return;
+            }
+
+            if (ipInfo == null) {
+                targetMember.setIpInfo(null);
+                return;
+            }
+
+            targetMember.setIpInfo(ipInfo);
+            System.out.println(CommonConst.GSON.toJson(ipInfo));
+        });
 
         member.createSession(playerName, ipAddress);
 
