@@ -172,9 +172,11 @@ public class RedisServerService implements ServerService {
     public void sendPacket(Packet... packets) {
         try (Jedis jedis = CommonPlugin.getInstance().getRedisConnection().getPool().getResource()) {
             Pipeline pipe = jedis.pipelined();
+
             for (Packet packet : packets) {
                 pipe.publish(CommonConst.SERVER_PACKET_CHANNEL, CommonConst.GSON.toJson(packet));
             }
+
             pipe.sync();
         }
     }

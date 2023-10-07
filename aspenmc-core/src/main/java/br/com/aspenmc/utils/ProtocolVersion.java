@@ -1,9 +1,9 @@
 package br.com.aspenmc.utils;
 
-import java.util.stream.Stream;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+
+import java.util.stream.Stream;
 
 @AllArgsConstructor
 public enum ProtocolVersion {
