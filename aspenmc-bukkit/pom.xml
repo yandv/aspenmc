@@ -22,7 +22,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>2.3.2</version>
+                <version>3.3.0</version>
                 <configuration>
                     <finalName>BukkitCommon</finalName>
                 </configuration>
@@ -60,7 +60,7 @@
             <artifactId>paperspigot</artifactId>
             <version>1.8.8-R0.1-SNAPSHOT</version>
             <scope>system</scope>
-            <systemPath>C:/paperspigot.jar</systemPath>
+            <systemPath>C:/libs/paperspigot.jar</systemPath>
         </dependency>
 
         <dependency>
@@ -68,7 +68,7 @@
             <artifactId>KarhuAPI</artifactId>
             <version>1.0</version>
             <scope>system</scope>
-            <systemPath>C:/Users/ALLAN/Desktop/allan/lib/KarhuAPI.jar</systemPath>
+            <systemPath>C:/libs/KarhuAPI.jar</systemPath>
         </dependency>
 
 
