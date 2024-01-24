@@ -2,9 +2,13 @@ package br.com.aspenmc.bungee.command.register;
 
 import br.com.aspenmc.CommonConst;
 import br.com.aspenmc.CommonPlugin;
+import br.com.aspenmc.bungee.BungeeMain;
 import br.com.aspenmc.bungee.entity.BungeeMember;
+import br.com.aspenmc.command.CommandArgs;
+import br.com.aspenmc.command.CommandFramework;
+import br.com.aspenmc.command.CommandHandler;
+import br.com.aspenmc.entity.Member;
 import br.com.aspenmc.entity.Sender;
-import br.com.aspenmc.entity.member.MemberVoid;
 import br.com.aspenmc.server.ProxiedServer;
 import br.com.aspenmc.server.ServerType;
 import br.com.aspenmc.utils.ProtocolVersion;
@@ -12,13 +16,6 @@ import br.com.aspenmc.utils.string.MessageBuilder;
 import br.com.aspenmc.utils.string.StringFormat;
 import br.com.aspenmc.utils.string.TimeFormat;
 import com.google.common.base.Joiner;
-import br.com.aspenmc.bungee.BungeeMain;
-import br.com.aspenmc.command.CommandArgs;
-import br.com.aspenmc.command.CommandFramework;
-import br.com.aspenmc.command.CommandHandler;
-import br.com.aspenmc.entity.Member;
-import com.mongodb.client.model.Filters;
-import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -83,10 +80,7 @@ public class StaffCommand implements CommandHandler {
         String[] args = cmdArgs.getArgs();
 
         if (args.length == 0) {
-            sender.sendMessage(sender.t("command.maintenance.usage",
-                    " §a» §fUse §a/%label% <on:off>§f para ativar ou desativar a manutenção." + "\n" +
-                            " §a» §fUse §a/%label% <add:remove> <player>§f para adicionar ou removar alguém da " +
-                            "whitelist.", "%label%", cmdArgs.getLabel()));
+            sender.sendMessage(sender.t("command.maintenance.usage", "%label%", cmdArgs.getLabel()));
             return;
         }
 
@@ -94,13 +88,12 @@ public class StaffCommand implements CommandHandler {
         case "on":
         case "true":
             if (BungeeMain.getInstance().isMaintenance()) {
-                sender.sendMessage(
-                        sender.t("command.maintenance.already-enabled", "§cO servidor já está no modo manuntenção!"));
+                sender.sendMessage(sender.t("command.maintenance.already-enabled"));
                 break;
             }
 
             BungeeMain.getInstance().setMaintenance(true);
-            sender.sendMessage(sender.t("command.maintenance.enabled", "§aO servidor agora está no modo manunteção!"));
+            sender.sendMessage(sender.t("command.maintenance.enabled"));
             break;
         case "off":
         case "false":
@@ -148,8 +141,7 @@ public class StaffCommand implements CommandHandler {
                 long time = StringFormat.getTimeFromString(args[0], true);
 
                 BungeeMain.getInstance().setMaintenance(true, time);
-                sender.sendMessage(sender.t("command.maintenance.enabled-time",
-                        "§aO servidor agora está no modo manunteção por %time%.", "%time%",
+                sender.sendMessage(sender.t("command.maintenance.enabled-time", "%time%",
                         StringFormat.formatTime((time - System.currentTimeMillis()) / 1000)));
             } catch (IllegalArgumentException exception) {
                 sender.sendMessage(sender.t("time-format"));
@@ -438,8 +430,7 @@ public class StaffCommand implements CommandHandler {
         ProxiedServer server = CommonPlugin.getInstance().getServerManager().getServer(serverId);
 
         if (server == null) {
-            sender.sendMessage(
-                    sender.t("server-not-found", "§cO servidor %serverId% não existe.", "%serverId%", args[0]));
+            sender.sendMessage(sender.t("server-not-found", "%serverId%", args[0]));
             return;
         }
 

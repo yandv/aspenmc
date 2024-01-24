@@ -12,7 +12,7 @@ import org.bukkit.Bukkit;
 
 public class LoginCommand implements CommandHandler {
 
-    @CommandFramework.Command(name = "register", aliases = {"registrar"}, console = false)
+    @CommandFramework.Command(name = "register", aliases = { "registrar" }, console = false)
     public void registerCommand(CommandArgs cmdArgs) {
         Member member = cmdArgs.getSenderAsMember();
         String[] args = cmdArgs.getArgs();
@@ -39,7 +39,7 @@ public class LoginCommand implements CommandHandler {
         Bukkit.getPluginManager().callEvent(new MemberLoginEvent((BukkitMember) member));
     }
 
-    @CommandFramework.Command(name = "login", aliases = {"logar"}, console = false)
+    @CommandFramework.Command(name = "login", aliases = { "logar" }, console = false)
     public void loginCommand(CommandArgs cmdArgs) {
         Member member = cmdArgs.getSenderAsMember();
         String[] args = cmdArgs.getArgs();
@@ -76,7 +76,7 @@ public class LoginCommand implements CommandHandler {
         member.sendMessage("§aSua conta foi autenticada com sucesso.");
     }
 
-    @CommandFramework.Command(name = "changepassword", aliases = {"mudarsenha"})
+    @CommandFramework.Command(name = "changepassword", aliases = { "mudarsenha" })
     public void changepassword(CommandArgs cmdArgs) {
         Sender sender = cmdArgs.getSender();
         String[] args = cmdArgs.getArgs();

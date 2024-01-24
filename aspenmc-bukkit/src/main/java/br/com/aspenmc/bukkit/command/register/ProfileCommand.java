@@ -52,8 +52,7 @@ public class ProfileCommand implements CommandHandler {
                 CommonPlugin.getInstance().getPluginPlatform().runSync(
                         () -> new YourProfileInventory(cmdArgs.getSenderAsMember(BukkitMember.class).getPlayer()));
             } else {
-                sender.sendMessage(sender.t("command.account.usage",
-                        " §a» §fUse §a/%label% <player>§f para ver informações sobre um jogador.", "%label%",
+                sender.sendMessage(sender.t("command.account.usage", "%label%",
                         cmdArgs.getLabel()));
             }
             return;
@@ -145,7 +144,7 @@ public class ProfileCommand implements CommandHandler {
 
         StatusType statusType = BukkitCommon.getInstance().getPreloadedStatus().stream().findFirst().orElse(null);
 
-        if ((args.length == 0 && statusType == null) || args[0].equalsIgnoreCase("list")) {
+        if (statusType == null || (args.length > 0 && args[0].equalsIgnoreCase("list"))) {
             player.sendMessage("");
             player.sendMessage("§aLigas:");
             player.sendMessage("");
@@ -168,10 +167,8 @@ public class ProfileCommand implements CommandHandler {
         try {
             statusType = StatusType.valueOf(args[0].toUpperCase());
         } catch (Exception ex) {
-            if (statusType == null) {
-                player.sendMessage("§cUtilize: /rank (hg)");
-                return;
-            }
+            player.sendMessage("§cUtilize: /rank (hg)");
+            return;
         }
 
         Status status = CommonPlugin.getInstance().getStatusManager().getOrLoadById(player.getUniqueId(), statusType);

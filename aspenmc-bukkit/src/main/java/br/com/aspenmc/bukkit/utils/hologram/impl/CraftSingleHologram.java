@@ -1,5 +1,6 @@
 package br.com.aspenmc.bukkit.utils.hologram.impl;
 
+import br.com.aspenmc.bukkit.BukkitCommon;
 import br.com.aspenmc.bukkit.utils.PacketBuilder;
 import br.com.aspenmc.bukkit.utils.TouchHandler;
 import br.com.aspenmc.bukkit.utils.hologram.Hologram;
@@ -10,7 +11,6 @@ import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.wrappers.WrappedDataWatcher;
 import com.comphenix.protocol.wrappers.WrappedWatchableObject;
 import lombok.Getter;
-import lombok.Setter;
 import net.minecraft.server.v1_8_R3.EntityArmorStand;
 import net.minecraft.server.v1_8_R3.PacketPlayOutAttachEntity;
 import net.minecraft.server.v1_8_R3.PacketPlayOutSpawnEntityLiving;
@@ -20,6 +20,7 @@ import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -49,7 +50,13 @@ public class CraftSingleHologram implements Hologram {
         this.invisibleTo = new HashSet<>();
 
         createEntity();
-        Bukkit.getOnlinePlayers().forEach(this::show);
+        new BukkitRunnable() {
+
+            @Override
+            public void run() {
+                Bukkit.getOnlinePlayers().forEach(player -> show(player));
+            }
+        }.runTaskLater(BukkitCommon.getInstance(), 7L);
     }
 
     public CraftSingleHologram(String displayName, Location location) {

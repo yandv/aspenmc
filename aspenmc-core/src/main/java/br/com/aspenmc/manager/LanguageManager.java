@@ -3,7 +3,6 @@ package br.com.aspenmc.manager;
 import br.com.aspenmc.CommonConst;
 import br.com.aspenmc.CommonPlugin;
 import br.com.aspenmc.language.Language;
-import br.com.aspenmc.language.Translation;
 import br.com.aspenmc.packet.type.server.language.TranslationUpdate;
 import br.com.aspenmc.utils.FileUtils;
 import br.com.aspenmc.utils.json.JsonUtils;
@@ -32,8 +31,11 @@ public class LanguageManager {
 
             try {
                 JsonObject jsonObject = JsonUtils.fileToJson(
-                        FileUtils.createFile(language.name().toLowerCase() + ".json",
-                                CommonConst.PRINCIPAL_DIRECTORY + "translations", true)).getAsJsonObject();
+                                                         FileUtils.createFile(language.name().toLowerCase() + ".json"
+                                                                 , CommonConst.PRINCIPAL_DIRECTORY +
+                                                                 (CommonConst.PRINCIPAL_DIRECTORY.endsWith("/") ? ""
+                                                                         : "/") + "translations", true))
+                                                 .getAsJsonObject();
 
                 Map<String, String> map = new HashMap<>();
 
@@ -83,7 +85,9 @@ public class LanguageManager {
 
             try {
                 JsonUtils.saveJsonAsFile(CommonConst.GSON_PRETTY.toJson(translationMap.get(language)),
-                        language.name().toLowerCase() + ".json", CommonConst.PRINCIPAL_DIRECTORY + "translations");
+                        language.name().toLowerCase() + ".json",
+                        CommonConst.PRINCIPAL_DIRECTORY + (CommonConst.PRINCIPAL_DIRECTORY.endsWith("/") ? "" : "/") +
+                                "translations");
             } catch (Exception ex) {
                 ex.printStackTrace();
             }

@@ -14,15 +14,12 @@ import java.util.List;
 @Getter
 public class CraftHologram extends CraftSingleHologram {
 
-    private final List<Hologram> linesBelow;
-    private final List<Hologram> linesAbove;
+    private final List<Hologram> linesBelow = new ArrayList<>();
+    private final List<Hologram> linesAbove = new ArrayList<>();
 
     public CraftHologram(String displayName, Location location, TouchHandler<Hologram> touchHandler,
             ViewHandler viewHandler) {
         super(displayName, location, touchHandler, viewHandler);
-
-        this.linesBelow = new ArrayList<>();
-        this.linesAbove = new ArrayList<>();
     }
 
     public CraftHologram(String displayName, Location location) {

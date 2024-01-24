@@ -165,9 +165,8 @@ public class ServerCommand implements CommandHandler {
 
     @CommandFramework.Command(name = "ip", console = false)
     public void ipCommand(CommandArgs cmdArgs) {
-        cmdArgs.getSender().sendMessage(cmdArgs.getSender()
-                                               .t("command.ip.connected-server", "§aO seu servidor atual é %ip%.",
-                                                       "%ip%", cmdArgs.getSenderAsMember().getCurrentServer()));
+        cmdArgs.getSender().sendMessage(cmdArgs.getSender().t("command.ip.connected-server", "%ip%",
+                cmdArgs.getSenderAsMember().getCurrentServer()));
     }
 
     @CommandFramework.Completer(name = "report", aliases = { "reportar", "r", "find", "go" })

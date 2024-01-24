@@ -56,7 +56,7 @@ public class CommonConst {
 
     public static final String PRINCIPAL_DIRECTORY =
             System.getenv("PRINCIPAL_DIRECTORY") != null ? Zip.separatorsToUnix(System.getenv("PRINCIPAL_DIRECTORY")) :
-                    "C:/Users/Administrator/Desktop/AspenMC/";
+                    "C:/Users/User/Desktop/allan/Servidores/AspenMC/";
     public static final String DEFAULT_SKIN_NAME = "Sem pele";
     public static final String DEFAULT_SKIN_VALUE =
             "ewogICJ0aW1lc3RhbXAiIDogMTY3NzI0NTI0OTE5MCwKICAicHJvZmlsZUlkIiA6ICI4NzQ3ODgyNjc2NzI0OTk1ODU1ODMwN2FiMWI3ZDRjZCIsCiAgInByb2ZpbGVOYW1lIiA6ICJUZXN0ZSIsCiAgInNpZ25hdHVyZVJlcXVpcmVkIiA6IHRydWUsCiAgInRleHR1cmVzIiA6IHsKICAgICJTS0lOIiA6IHsKICAgICAgInVybCIgOiAiaHR0cDovL3RleHR1cmVzLm1pbmVjcmFmdC5uZXQvdGV4dHVyZS8yYzFjYzE5YzYzZDM4MmI3ZTI5MzhkZWE4NGZmZmYzODYxMmJkM2IwNjM3NzY4NzkwZTZkNTJkNzEwNDZhNGIyIgogICAgfQogIH0KfQ==";

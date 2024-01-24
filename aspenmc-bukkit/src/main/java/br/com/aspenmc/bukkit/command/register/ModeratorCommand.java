@@ -50,8 +50,7 @@ public class ModeratorCommand implements CommandHandler {
         String[] args = cmdArgs.getArgs();
 
         if (args.length == 0) {
-            sender.sendMessage(sender.t("command.punishinfo.usage",
-                    " §a» §fUse §a/%label% <player>§f para ver informações sobre um jogador.", "%label%",
+            sender.sendMessage(sender.t("command.punishinfo.usage", "%label%",
                     cmdArgs.getLabel()));
             return;
         }
@@ -167,7 +166,7 @@ public class ModeratorCommand implements CommandHandler {
 
             sender.sendMessage(
                     "§aO tempo do jogo foi alterado para " + StringFormat.formatTime(seconds, TimeFormat.NORMAL) + ".");
-            BukkitCommon.getInstance().updateTime(seconds);
+            BukkitCommon.getInstance().updateState(seconds);
             break;
         }
         }

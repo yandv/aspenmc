@@ -192,21 +192,6 @@ public abstract class BukkitCommon extends JavaPlugin implements CommonPlatform 
         }
     }
 
-    public void updateState(ProxiedServer.GameState state, int time) {
-        ProxiedServer.GameState oldState = this.state;
-        this.state = state;
-        this.time = time;
-        CommonPlugin.getInstance().getPacketManager().sendPacketAsync(
-                new ServerUpdate(CommonPlugin.getInstance().getServerId(), CommonPlugin.getInstance().getServerType(),
-                        state, time, mapName));
-
-        if (oldState != state) {
-            Bukkit.getPluginManager().callEvent(new GameStateChangeEvent(oldState, state));
-            CommonPlugin.getInstance()
-                        .debug("The game state changed from " + oldState.name() + " to " + state.name() + ".");
-        }
-    }
-
     public void updateState(ProxiedServer.GameState state, int time, String mapName) {
         ProxiedServer.GameState oldState = this.state;
 
@@ -225,25 +210,16 @@ public abstract class BukkitCommon extends JavaPlugin implements CommonPlatform 
         }
     }
 
-    public void updateState(ProxiedServer.GameState state) {
-        ProxiedServer.GameState oldState = this.state;
-
-        if (oldState != state) {
-            this.state = state;
-            CommonPlugin.getInstance().getPacketManager().sendPacketAsync(
-                    new ServerUpdate(CommonPlugin.getInstance().getServerId(),
-                            CommonPlugin.getInstance().getServerType(), state, time, mapName));
-            Bukkit.getPluginManager().callEvent(new GameStateChangeEvent(oldState, state));
-            CommonPlugin.getInstance()
-                        .debug("The game state changed from " + oldState.name() + " to " + state.name() + ".");
-        }
+    public void updateState(ProxiedServer.GameState state, int time) {
+        updateState(state, time, this.mapName);
     }
 
-    public void updateTime(int time) {
-        this.time = time;
-        CommonPlugin.getInstance().getPacketManager().sendPacketAsync(
-                new ServerUpdate(CommonPlugin.getInstance().getServerId(), CommonPlugin.getInstance().getServerType(),
-                        state, time, mapName));
+    public void updateState(ProxiedServer.GameState state) {
+        updateState(state, this.time, this.mapName);
+    }
+
+    public void updateState(int time) {
+        updateState(this.state, time, this.mapName);
     }
 
     public void updateMapName(String mapName) {
@@ -347,8 +323,9 @@ public abstract class BukkitCommon extends JavaPlugin implements CommonPlatform 
     public void registerListeners() {
         Bukkit.getPluginManager().registerEvents(new ActionItemListener(), this);
         Bukkit.getPluginManager().registerEvents(new CharacterListener(), this);
-        Bukkit.getPluginManager().registerEvents(new HologramListener(), this);
         Bukkit.getPluginManager().registerEvents(new ChatListener(), this);
+        Bukkit.getPluginManager().registerEvents(new DamageListener(), this);
+        Bukkit.getPluginManager().registerEvents(new HologramListener(), this);
         Bukkit.getPluginManager().registerEvents(new MemberListener(), this);
         Bukkit.getPluginManager().registerEvents(new MenuListener(), this);
         Bukkit.getPluginManager().registerEvents(new MoveListener(), this);

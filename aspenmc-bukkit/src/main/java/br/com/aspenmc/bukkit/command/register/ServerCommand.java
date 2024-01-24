@@ -32,25 +32,19 @@ public class ServerCommand implements CommandHandler {
         String[] args = cmdArgs.getArgs();
 
         if (args.length == 0) {
-            sender.sendMessage(sender.t("command.setdefaultskin.usage",
-                    " §a» §fUse §a/" + cmdArgs.getLabel() + " <skin> §fpara alterar o skin.", "%label%",
-                    cmdArgs.getLabel()));
+            sender.sendMessage(sender.t("command.setdefaultskin.usage", "%label%", cmdArgs.getLabel()));
             return;
         }
 
         Skin skin = CommonPlugin.getInstance().getSkinService().loadData(args[0]).orElse(null);
 
         if (skin == null) {
-            sender.sendMessage(
-                    sender.t("command.setdefaultskin.no-skin", "§cO jogador " + args[0] + " não possui skin.",
-                            "%player%", args[0]));
+            sender.sendMessage(sender.t("command.setdefaultskin.no-skin", "%player%", args[0]));
             return;
         }
 
         CommonPlugin.getInstance().setDefaultSkin(skin);
-        sender.sendMessage(
-                sender.t("command.setdefaultskin.changed-success", "§aSkin default alterada para " + args[0] + ".",
-                        "%player%", args[0]));
+        sender.sendMessage(sender.t("command.setdefaultskin.changed-success", "%player%", args[0]));
     }
 
     @CommandFramework.Command(name = "servermanager", permission = "command.server")
