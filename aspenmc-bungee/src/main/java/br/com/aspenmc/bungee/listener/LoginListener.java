@@ -3,6 +3,7 @@ package br.com.aspenmc.bungee.listener;
 import br.com.aspenmc.CommonConst;
 import br.com.aspenmc.CommonPlugin;
 import br.com.aspenmc.bungee.BungeeMain;
+import net.md_5.bungee.api.event.PlayerDisconnectEvent;
 import net.md_5.bungee.api.event.PreLoginEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
@@ -40,8 +41,8 @@ public class LoginListener implements Listener {
                                                                      connection.getPlayerId() + " and is " +
                                                                      (connection.isPremium() ? "premium" : "cracked") +
                                                                      (connection.isCached() ? " (cached)" :
-                                                                             "(not cached)"));
-                            CommonPlugin.getInstance().getConnectionData().cacheConnection(connection);
+                                                                             " (not cached)"));
+                            CommonPlugin.getInstance().getConnectionData().persistConnection(connection);
 
                             event.getConnection().setOnlineMode(connection.isPremium());
                             event.completeIntent(BungeeMain.getInstance());
@@ -49,5 +50,10 @@ public class LoginListener implements Listener {
         } else {
             event.getConnection().setOnlineMode(true);
         }
+    }
+
+    @EventHandler
+    public void onPlayerDisconnect(PlayerDisconnectEvent event) {
+        CommonPlugin.getInstance().getConnectionData().cacheConnection(event.getPlayer().getName());
     }
 }

@@ -14,7 +14,6 @@ import java.util.concurrent.CompletableFuture;
 public class RedisConnectionService implements ConnectionData {
 
     private static final String BASE_PATH = "connection:";
-    private static final int TIME_TO_EXPIRE = 60 * 15;
 
     @Override
     public CompletableFuture<MemberConnection> retrieveConnection(String playerName) {
@@ -41,12 +40,18 @@ public class RedisConnectionService implements ConnectionData {
     }
 
     @Override
-    public void cacheConnection(MemberConnection memberConnection) {
+    public void persistConnection(MemberConnection memberConnection) {
         try (Jedis jedis = CommonPlugin.getInstance().getRedisConnection().getPool().getResource()) {
-            jedis.hmset(BASE_PATH + memberConnection.getPlayerName().toLowerCase(),
-                        JsonUtils.objectToMap(memberConnection));
-            jedis.expire(BASE_PATH + memberConnection.getPlayerName().toLowerCase(), TIME_TO_EXPIRE);
-            jedis.save();
+            String id = BASE_PATH + memberConnection.getPlayerName().toLowerCase();
+            jedis.hmset(id, JsonUtils.objectToMap(memberConnection));
+            jedis.persist(id);
+        }
+    }
+
+    @Override
+    public void cacheConnection(String playerName) {
+        try (Jedis jedis = CommonPlugin.getInstance().getRedisConnection().getPool().getResource()) {
+            jedis.expire(BASE_PATH + playerName.toLowerCase(), 60 * 10);
         }
     }
 }

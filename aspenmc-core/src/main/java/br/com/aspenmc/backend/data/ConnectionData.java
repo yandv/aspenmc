@@ -8,5 +8,7 @@ public interface ConnectionData {
 
     CompletableFuture<MemberConnection> retrieveConnection(String playerName);
 
-    void cacheConnection(MemberConnection memberConnection);
+    void persistConnection(MemberConnection memberConnection);
+
+    void cacheConnection(String playerName);
 }
