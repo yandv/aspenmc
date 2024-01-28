@@ -1,12 +1,13 @@
 package br.com.aspenmc.utils.mojang;
 
+import br.com.aspenmc.CommonPlugin;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import br.com.aspenmc.CommonPlugin;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -20,99 +21,98 @@ import java.util.concurrent.TimeUnit;
 
 public class UUIDFetcher {
 
-	private List<String> apis = new ArrayList<>();
+    private List<String> apis = new ArrayList<>();
 
-	private LoadingCache<String, UUID> cache = CacheBuilder.newBuilder().expireAfterWrite(1L, TimeUnit.DAYS)
-			.expireAfterAccess(1L, TimeUnit.DAYS)
-			.build(new CacheLoader<String, UUID>() {
-				@Override
-				public UUID load(String name) throws Exception {
-					UUID uuid = CommonPlugin.getInstance().getPluginPlatform().getUniqueId(name);
-					return request(name);
-				}
-			});
+    private LoadingCache<String, UUID> cache = CacheBuilder.newBuilder().expireAfterWrite(1L, TimeUnit.DAYS)
+                                                           .expireAfterAccess(1L, TimeUnit.DAYS)
+                                                           .build(new CacheLoader<String, UUID>() {
 
-	public UUIDFetcher() {
-		apis.add("https://api.mojang.com/users/profiles/minecraft/%s");
-	}
+                                                               @Override
+                                                               public UUID load(@NotNull String name) throws Exception {
+                                                                   return request(name);
+                                                               }
+                                                           });
 
-	public UUID request(String name) {
-		return request(0, apis.get(0), name);
-	}
+    public UUIDFetcher() {
+        apis.add("https://api.mojang.com/users/profiles/minecraft/%s");
+    }
 
-	public UUID request(int idx, String api, String name) {
-		try {
-			URLConnection con = new URL(String.format(api, name)).openConnection();
+    public UUID request(String name) {
+        return request(0, apis.get(0), name);
+    }
 
-			JsonElement element = JsonParser.parseReader(
-					new BufferedReader(new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8)));
+    public UUID request(int idx, String api, String name) {
+        try {
+            URLConnection con = new URL(String.format(api, name)).openConnection();
 
-			if (element instanceof JsonObject) {
-				JsonObject object = (JsonObject) element;
-				if (object.has("error") && object.has("errorMessage")) {
-					throw new Exception(object.get("errorMessage").getAsString());
-				} else if (object.has("id")) {
-					return UUIDParser.parse(object.get("id"));
-				} else if (object.has("uuid")) {
-					JsonObject uuid = object.getAsJsonObject("uuid");
-					if (uuid.has("formatted")) {
-						return UUIDParser.parse(object.get("formatted"));
-					}
-				}
-			}
-		} catch (Exception e) {
-			idx++;
+            JsonElement element = JsonParser.parseReader(
+                    new BufferedReader(new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8)));
 
-			if (idx < apis.size()) {
-				api = apis.get(idx);
-				return request(idx, api, name);
-			}
-		}
+            if (element instanceof JsonObject) {
+                JsonObject object = (JsonObject) element;
+                if (object.has("error") && object.has("errorMessage")) {
+                    throw new Exception(object.get("errorMessage").getAsString());
+                } else if (object.has("id")) {
+                    return UUIDParser.parse(object.get("id"));
+                } else if (object.has("uuid")) {
+                    JsonObject uuid = object.getAsJsonObject("uuid");
+                    if (uuid.has("formatted")) {
+                        return UUIDParser.parse(object.get("formatted"));
+                    }
+                }
+            }
+        } catch (Exception e) {
+            idx++;
 
-		return null;
-	}
+            if (idx < apis.size()) {
+                api = apis.get(idx);
+                return request(idx, api, name);
+            }
+        }
 
-	/**
-	 * Retrieve the UUID of a player
-	 * If useServer is true, it will first try to get the UUID from the current server
-	 *
-	 * @param name The name of the player
-	 * @param useServer Whether to use the server's UUID cache
-	 * @return The UUID of the player
-	 */
+        return null;
+    }
 
-	public UUID getUniqueId(String name, boolean useServer) {
-		if (useServer) {
-			UUID uuid = CommonPlugin.getInstance().getPluginPlatform().getUniqueId(name);
+    /**
+     * Retrieve the UUID of a player
+     * If useServer is true, it will first try to get the UUID from the current server
+     *
+     * @param name      The name of the player
+     * @param useServer Whether to use the server's UUID cache
+     * @return The UUID of the player
+     */
 
-			if (uuid != null) {
-				return uuid;
-			}
-		}
+    public UUID getUniqueId(String name, boolean useServer) {
+        if (useServer) {
+            UUID uuid = CommonPlugin.getInstance().getPluginPlatform().getUniqueId(name);
 
-		if (name != null && !name.isEmpty()) {
-			if (name.matches("[a-zA-Z0-9_]{3,16}")) {
-				try {
-					return cache.get(name);
-				} catch (Exception ignored) {
-				}
-			} else {
-				return UUIDParser.parse(name);
-			}
-		}
-		return null;
-	}
+            if (uuid != null) {
+                return uuid;
+            }
+        }
 
-	/**
-	 * Retrieve the UUID of a player
-	 * This will not use the server's UUID cache
-	 *
-	 * @param name The name of the player
-	 * @return The UUID of the player
-	 */
+        if (name != null && !name.isEmpty()) {
+            if (name.matches("[a-zA-Z0-9_]{3,16}")) {
+                try {
+                    return cache.get(name);
+                } catch (Exception ignored) {
+                }
+            } else {
+                return UUIDParser.parse(name);
+            }
+        }
+        return null;
+    }
 
-	public UUID getUniqueId(String name) {
-		return getUniqueId(name, false);
-	}
+    /**
+     * Retrieve the UUID of a player
+     * This will not use the server's UUID cache
+     *
+     * @param name The name of the player
+     * @return The UUID of the player
+     */
 
+    public UUID getUniqueId(String name) {
+        return getUniqueId(name, false);
+    }
 }
