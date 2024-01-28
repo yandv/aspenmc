@@ -142,8 +142,8 @@ public class ServerCommand implements CommandHandler {
             serverType = serverType.getParent();
         }
 
-        ProxiedServer server = CommonPlugin.getInstance().getServerManager().getBalancer(serverType, ServerType.LOBBY)
-                                           .next();
+        ProxiedServer server = CommonPlugin.getInstance().getServerManager()
+                                           .getActiveServer(serverType, ServerType.LOBBY);
 
         if (server == null) {
             member.sendMessage("§cNenhum lobby encontrado no momento.");
