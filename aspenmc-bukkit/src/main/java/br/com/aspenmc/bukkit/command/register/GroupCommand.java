@@ -6,8 +6,8 @@ import br.com.aspenmc.bukkit.entity.BukkitMember;
 import br.com.aspenmc.command.CommandArgs;
 import br.com.aspenmc.command.CommandFramework;
 import br.com.aspenmc.command.CommandHandler;
-import br.com.aspenmc.entity.Member;
-import br.com.aspenmc.entity.Sender;
+import br.com.aspenmc.entity.sender.Sender;
+import br.com.aspenmc.entity.sender.member.Member;
 import br.com.aspenmc.packet.type.member.MemberGroupChange;
 import br.com.aspenmc.permission.Group;
 import br.com.aspenmc.permission.GroupInfo;
@@ -24,7 +24,83 @@ import java.util.stream.Collectors;
 
 public class GroupCommand implements CommandHandler {
 
-    @CommandFramework.Command(name = "group", permission = "command.group")
+    @CommandFramework.Command(name = "permission", aliases = { "perm" }, permission = "command.permission")
+    public void permissionCommand(CommandArgs cmdArgs) {
+        Sender sender = cmdArgs.getSender();
+        String[] args = cmdArgs.getArgs();
+
+        if (args.length == 0) {
+            sender.sendMessage(
+                    " §a» §fUse §a/" + cmdArgs.getLabel() + " <player> §fpara ver as permissões de um jogador.");
+            sender.sendMessage(" §a» §fUse §a/" + cmdArgs.getLabel() +
+                                       " <player> clear §fpara limpar as permissões de um jogador.");
+            sender.sendMessage(
+                    " §a» §fUse §a/" + cmdArgs.getLabel() + " <player> <add:remove> <permission> §fpara adicionar ou " +
+                            "remover uma permissão de um jogador.");
+            return;
+        }
+
+        Member member = CommonPlugin.getInstance().getMemberManager().getOrLoadByName(args[0]).orElse(null);
+
+        if (member == null) {
+            sender.sendMessage("§cO jogador \"" + args[0] + "\" não existe.");
+            return;
+        }
+
+        if (args.length == 1) {
+            sender.sendMessage("§aPermissões do jogador " + member.getName());
+            sender.sendMessage("  §fPermissões: §a" + Joiner.on(", ").join(member.getPermissions().keySet()));
+            return;
+        }
+
+        if (args[1].equalsIgnoreCase("clear")) {
+            if (!sender.hasPermission("command.permission.clear")) {
+                sender.sendMessage("§cVocê não tem permissão para limpar as permissões de um jogador.");
+                return;
+            }
+
+            member.clearPermissions();
+            sender.sendMessage("§aAs permissões do jogador " + member.getName() + " foram limpas.");
+            return;
+        }
+
+        if (!sender.hasPermission("command.permission.add") && !sender.hasPermission("command.permission.remove")) {
+            sender.sendMessage("§cVocê não tem permissão para adicionar ou remover permissões de um jogador.");
+            return;
+        }
+
+        if (args.length == 2) {
+            sender.sendMessage(" §a» §fUse §a/" + cmdArgs.getLabel() +
+                                       " <player> <add:remove> <permission> §fpara adicionar ou remover uma " +
+                                       "permissão de um jogador.");
+            return;
+        }
+
+        if (!Arrays.asList("add", "remove").contains(args[1].toLowerCase())) {
+            sender.sendMessage(" §a» §fUse §a/" + cmdArgs.getLabel() +
+                                       " <player> <add:remove> <permission> §fpara adicionar ou remover uma " +
+                                       "permissão de um jogador.");
+            return;
+        }
+
+        boolean add = args[1].equalsIgnoreCase("add");
+
+        if (add) {
+            if (member.addPermission(args[2])) {
+                sender.sendMessage("§aA permissão " + args[2] + " foi adicionada ao jogador " + member.getName() + ".");
+            } else {
+                sender.sendMessage("§cO jogador " + member.getName() + " já possui a permissão " + args[2] + ".");
+            }
+        } else {
+            if (member.removePermission(args[2])) {
+                sender.sendMessage("§aA permissão " + args[2] + " foi removida do jogador " + member.getName() + ".");
+            } else {
+                sender.sendMessage("§cO jogador " + member.getName() + " não possui a permissão " + args[2] + ".");
+            }
+        }
+    }
+
+    @CommandFramework.Command(name = "group", aliases = { "groups", "grupo", "grupos" }, permission = "command.group")
     public void groupCommand(CommandArgs cmdArgs) {
         Sender sender = cmdArgs.getSender();
         String[] args = cmdArgs.getArgs();
@@ -34,25 +110,25 @@ public class GroupCommand implements CommandHandler {
                     " §a» §fUse §a/" + cmdArgs.getLabel() + " criar <id> <groupName> §fpara criar um grupo.");
             sender.sendMessage(" §a» §fUse §a/" + cmdArgs.getLabel() + " delete <groupName> §fpara deletar um grupo.");
             sender.sendMessage(" §a» §fUse §a/" + cmdArgs.getLabel() +
-                    " settag <groupName> <tag> §fpara definir uma tag para um grupo.");
+                                       " settag <groupName> <tag> §fpara definir uma tag para um grupo.");
             sender.sendMessage(" §a» §fUse §a/" + cmdArgs.getLabel() +
-                    " permission <groupName> <add:remove> <permission> §fpara adicionar ou remover uma permissão de " +
-                    "um grupo.");
+                                       " permission <groupName:player> <add:remove> <permission> §fpara adicionar ou " +
+                                       "remover uma permissão de " + "um grupo.");
             sender.sendMessage(" §a» §fUse §a/" + cmdArgs.getLabel() +
-                    " setdefault <groupName> <true:false> §fpara definir um grupo como padrão.");
+                                       " setdefault <groupName> <true:false> §fpara definir um grupo como padrão.");
             sender.sendMessage(" §a» §fUse §a/" + cmdArgs.getLabel() +
-                    " setpaid <groupName> <true:false> §fpara definir um grupo como vip.");
+                                       " setpaid <groupName> <true:false> §fpara definir um grupo como vip.");
             sender.sendMessage(" §a» §fUse §a/" + cmdArgs.getLabel() +
-                    " setstaff <nome> <true:false> §fpara definir se um grupo é da equipe ou não.");
+                                       " setstaff <nome> <true:false> §fpara definir se um grupo é da equipe ou não.");
 
             sender.sendMessage("");
             sender.sendMessage(" §a» §fUse §a/" + cmdArgs.getLabel() + " <player>§f para ver o grupo de um jogador.");
             sender.sendMessage(" §a» §fUse §a/" + cmdArgs.getLabel() +
-                    " <player> set <group>§f para definir o grupo de um jogador.");
+                                       " <player> set <group>§f para definir o grupo de um jogador.");
             sender.sendMessage(" §a» §fUse §a/" + cmdArgs.getLabel() +
-                    " <player> add <group>§f para adicionar um grupo a um jogador.");
+                                       " <player> add <group>§f para adicionar um grupo a um jogador.");
             sender.sendMessage(" §a» §fUse §a/" + cmdArgs.getLabel() +
-                    " <player> remove <group>§f para remover um grupo de um jogador.");
+                                       " <player> remove <group>§f para remover um grupo de um jogador.");
             return;
         }
 
@@ -60,8 +136,8 @@ public class GroupCommand implements CommandHandler {
         case "permission": {
             if (args.length == 1) {
                 sender.sendMessage(" §a» §fUse §a/" + cmdArgs.getLabel() +
-                        " permission <groupName> <add:remove> <permission> §fpara adicionar ou remover uma permissão " +
-                        "de um grupo.");
+                                           " permission <groupName> <add:remove> <permission> §fpara adicionar ou " +
+                                           "remover uma permissão " + "de um grupo.");
                 break;
             }
 
@@ -76,7 +152,8 @@ public class GroupCommand implements CommandHandler {
 
             if (args.length <= 3) {
                 sender.sendMessage(" §a» §fUse §a/" + cmdArgs.getLabel() + " permission " + group.getGroupName() +
-                        " <add:remove> <permission> §fpara adicionar ou remover uma permissão de um grupo.");
+                                           " <add:remove> <permission> §fpara adicionar ou remover uma permissão de " +
+                                           "um grupo.");
                 break;
             }
 
@@ -107,7 +184,8 @@ public class GroupCommand implements CommandHandler {
             }
             default: {
                 sender.sendMessage(" §a» §fUse §a/" + cmdArgs.getLabel() + " permission " + group.getGroupName() +
-                        " <add:remove> <permission> §fpara adicionar ou remover uma permissão de um grupo.");
+                                           " <add:remove> <permission> §fpara adicionar ou remover uma permissão de " +
+                                           "um grupo.");
                 break;
             }
             }
@@ -187,7 +265,7 @@ public class GroupCommand implements CommandHandler {
             }
 
             Group group = new Group(groupId, StringFormat.formatString(groupName), new HashSet<>(), null, false, false,
-                    false);
+                                    false);
 
             sender.sendMessage("§aO grupo \"" + groupName + "\" foi criado com sucesso.");
             CommonPlugin.getInstance().getPermissionManager().loadGroup(group);
@@ -197,7 +275,7 @@ public class GroupCommand implements CommandHandler {
         case "settag": {
             if (args.length == 1) {
                 sender.sendMessage(" §a» §fUse §a/" + cmdArgs.getLabel() +
-                        " settag <nome> <tag> §fpara definir uma tag para um grupo.");
+                                           " settag <nome> <tag> §fpara definir uma tag para um grupo.");
                 break;
             }
 
@@ -212,7 +290,7 @@ public class GroupCommand implements CommandHandler {
 
             if (args.length == 2) {
                 sender.sendMessage(" §a» §fUse §a/" + cmdArgs.getLabel() + " settag " + group.getGroupName() +
-                        " <tag> §fpara definir uma tag para um grupo.");
+                                           " <tag> §fpara definir uma tag para um grupo.");
                 return;
             }
 
@@ -259,7 +337,8 @@ public class GroupCommand implements CommandHandler {
         case "setdefault": {
             if (args.length == 1) {
                 sender.sendMessage(" §a» §fUse §a/" + cmdArgs.getLabel() +
-                        " setdefault <nome> <true:false> §fpara definir se um grupo é o grupo padrão.");
+                                           " setdefault <nome> <true:false> §fpara definir se um grupo é o grupo " +
+                                           "padrão.");
                 break;
             }
 
@@ -274,7 +353,7 @@ public class GroupCommand implements CommandHandler {
 
             if (args.length == 2) {
                 sender.sendMessage(" §a» §fUse §a/" + cmdArgs.getLabel() + " setdefault " + group.getGroupName() +
-                        " <true:false> §fpara definir se um grupo é o grupo padrão.");
+                                           " <true:false> §fpara definir se um grupo é o grupo padrão.");
                 return;
             }
 
@@ -282,13 +361,13 @@ public class GroupCommand implements CommandHandler {
 
             group.setDefaultGroup(defaultGroup);
             sender.sendMessage("§aO grupo \"" + group.getGroupName() + "\" " + (defaultGroup ? "agora é" : "não é") +
-                    " o grupo padrão.");
+                                       " o grupo padrão.");
             break;
         }
         case "setpaid": {
             if (args.length == 1) {
                 sender.sendMessage(" §a» §fUse §a/" + cmdArgs.getLabel() +
-                        " setpaid <nome> <true:false> §fpara definir se um grupo é vip ou não.");
+                                           " setpaid <nome> <true:false> §fpara definir se um grupo é vip ou não.");
                 break;
             }
 
@@ -303,7 +382,7 @@ public class GroupCommand implements CommandHandler {
 
             if (args.length == 2) {
                 sender.sendMessage(" §a» §fUse §a/" + cmdArgs.getLabel() + " setpaid " + group.getGroupName() +
-                        " <true:false> §fpara definir se um grupo é vip ou não.");
+                                           " <true:false> §fpara definir se um grupo é vip ou não.");
                 return;
             }
 
@@ -311,13 +390,14 @@ public class GroupCommand implements CommandHandler {
 
             group.setPaidGroup(paidGroup);
             sender.sendMessage("§aO grupo \"" + group.getGroupName() + "\" " + (paidGroup ? "agora é" : "agora não é") +
-                    " um grupo vip.");
+                                       " um grupo vip.");
             break;
         }
         case "setstaff": {
             if (args.length == 1) {
                 sender.sendMessage(" §a» §fUse §a/" + cmdArgs.getLabel() +
-                        " setstaff <nome> <true:false> §fpara definir se um grupo é da equipe ou não.");
+                                           " setstaff <nome> <true:false> §fpara definir se um grupo é da equipe ou " +
+                                           "não.");
                 break;
             }
 
@@ -332,7 +412,7 @@ public class GroupCommand implements CommandHandler {
 
             if (args.length == 2) {
                 sender.sendMessage(" §a» §fUse §a/" + cmdArgs.getLabel() + " setstaff " + group.getGroupName() +
-                        " <true:false> §fpara definir se um grupo é da equipe ou não.");
+                                           " <true:false> §fpara definir se um grupo é da equipe ou não.");
                 return;
             }
 
@@ -340,7 +420,7 @@ public class GroupCommand implements CommandHandler {
 
             group.setStaff(staff);
             sender.sendMessage("§aO grupo \"" + group.getGroupName() + "\" " + (staff ? "agora é" : "agora não é") +
-                    " um grupo da equipe.");
+                                       " um grupo da equipe.");
             break;
         }
         default: {
@@ -356,11 +436,11 @@ public class GroupCommand implements CommandHandler {
 
                 sender.sendMessage("§aGrupo do " + member.getName());
                 sender.sendMessage("  §fGrupo atual: §a" +
-                        (member.getServerGroup().getGroupTag().map(Tag::getColoredName)
-                               .orElse(member.getServerGroup().getGroupName())));
+                                           (member.getServerGroup().getGroupTag().map(Tag::getColoredName)
+                                                  .orElse(member.getServerGroup().getGroupName())));
                 if (!groupInfo.isPermanent()) {
-                    sender.sendMessage("  §fExpira em: §a" +
-                            StringFormat.formatTime((groupInfo.getExpiresAt() - System.currentTimeMillis()) / 1000));
+                    sender.sendMessage("  §fExpira em: §a" + StringFormat.formatTime(
+                            (groupInfo.getExpiresAt() - System.currentTimeMillis()) / 1000));
                 }
 
                 for (Map.Entry<String, GroupInfo> entry : member.getGroupMap().entrySet()) {
@@ -378,7 +458,7 @@ public class GroupCommand implements CommandHandler {
             case "set": {
                 if (args.length == 2) {
                     sender.sendMessage(" §a» §fUse §a/" + cmdArgs.getLabel() + " " + sender.getName() +
-                            " set <group>§f para setar um grupo ao jogador.");
+                                               " set <group>§f para setar um grupo ao jogador.");
                     return;
                 }
 
@@ -400,19 +480,16 @@ public class GroupCommand implements CommandHandler {
                         "§aO grupo do jogador " + member.getName() + " foi alterado para " + group.getGroupName() +
                                 ".");
                 member.sendMessage("§aVocê recebeu o grupo " + group.getGroupName() + ".");
-                CommonPlugin.getInstance().getPluginPlatform().runAsync(() -> CommonPlugin.getInstance().getServerService()
-                                                                                          .sendPacket(
-                                                                                                  new MemberGroupChange(
-                                                                                                          member.getUniqueId(),
-                                                                                                          group.getGroupName(),
-                                                                                                          -1L, -1L,
-                                                                                                          MemberGroupChange.GroupAction.SET)));
+                CommonPlugin.getInstance().getPluginPlatform().runAsync(
+                        () -> CommonPlugin.getInstance().getServerService().sendPacket(
+                                new MemberGroupChange(member.getUniqueId(), group.getGroupName(), -1L, -1L,
+                                                      MemberGroupChange.GroupAction.SET)));
                 break;
             }
             case "add": {
                 if (args.length == 2) {
                     sender.sendMessage(" §a» §fUse §a/" + cmdArgs.getLabel() + " " + sender.getName() +
-                            " add <group>§f para setar um grupo ao jogador.");
+                                               " add <group>§f para setar um grupo ao jogador.");
                     return;
                 }
 
@@ -435,25 +512,19 @@ public class GroupCommand implements CommandHandler {
                         "§aO grupo do jogador " + member.getName() + " foi alterado para " + group.getGroupName() +
                                 ".");
                 member.sendMessage("§aVocê recebeu o grupo " + group.getGroupName() + " com duração de " +
-                        StringFormat.formatTime((expiresAt - System.currentTimeMillis()) / 1000) + "");
-                CommonPlugin.getInstance().getPluginPlatform().runAsync(() -> CommonPlugin.getInstance().getServerService()
-                                                                                          .sendPacket(
-                                                                                                  new MemberGroupChange(
-                                                                                                          member.getUniqueId(),
-                                                                                                          group.getGroupName(),
-                                                                                                          expiresAt,
-                                                                                                          expiresAt ==
-                                                                                                                  -1L ?
-                                                                                                                  -1L :
-                                                                                                                  expiresAt -
-                                                                                                                          System.currentTimeMillis(),
-                                                                                                          MemberGroupChange.GroupAction.ADD)));
+                                           StringFormat.formatTime((expiresAt - System.currentTimeMillis()) / 1000) +
+                                           "");
+                CommonPlugin.getInstance().getPluginPlatform().runAsync(
+                        () -> CommonPlugin.getInstance().getServerService().sendPacket(
+                                new MemberGroupChange(member.getUniqueId(), group.getGroupName(), expiresAt,
+                                                      expiresAt == -1L ? -1L : expiresAt - System.currentTimeMillis(),
+                                                      MemberGroupChange.GroupAction.ADD)));
                 break;
             }
             case "remove": {
                 if (args.length == 2) {
                     sender.sendMessage(" §a» §fUse §a/" + cmdArgs.getLabel() + " " + sender.getName() +
-                            " remove <group>§f para setar um grupo ao jogador.");
+                                               " remove <group>§f para setar um grupo ao jogador.");
                     return;
                 }
 
@@ -481,13 +552,10 @@ public class GroupCommand implements CommandHandler {
                         "§aO grupo do jogador " + member.getName() + " foi alterado para " + group.getGroupName() +
                                 ".");
                 member.sendMessage("§cO seu grupo " + group.getGroupName() + " foi removido.");
-                CommonPlugin.getInstance().getPluginPlatform().runAsync(() -> CommonPlugin.getInstance().getServerService()
-                                                                                          .sendPacket(
-                                                                                                  new MemberGroupChange(
-                                                                                                          member.getUniqueId(),
-                                                                                                          group.getGroupName(),
-                                                                                                          -1, -1,
-                                                                                                          MemberGroupChange.GroupAction.REMOVE)));
+                CommonPlugin.getInstance().getPluginPlatform().runAsync(
+                        () -> CommonPlugin.getInstance().getServerService().sendPacket(
+                                new MemberGroupChange(member.getUniqueId(), group.getGroupName(), -1, -1,
+                                                      MemberGroupChange.GroupAction.REMOVE)));
                 break;
             }
             default: {
@@ -521,14 +589,14 @@ public class GroupCommand implements CommandHandler {
                 for (int i = 0; i < tagList.size(); i++) {
                     Tag tag = tagList.get(i);
 
-                    messageBuilder.extra(new MessageBuilder(tag.getColoredName())
-                            .setHoverEvent(member.t("command.tag.example", "%tagPrefix%", tag.getTagPrefix(), "%player%", sender.getName()))
-                            .setClickEvent("/tag " + tag.getTagName()));
+                    messageBuilder.append(new MessageBuilder(tag.getColoredName()).setHoverEvent(
+                            member.t("command.tag.example", "%tagPrefix%", tag.getTagPrefix(), "%player%",
+                                     sender.getName())).setClickEvent("/tag " + tag.getTagName()));
 
                     if (i == tagList.size() - 1) {
-                        messageBuilder.extra("§f.");
+                        messageBuilder.append("§f.");
                     } else {
-                        messageBuilder.extra("§f, ");
+                        messageBuilder.append("§f, ");
                     }
                 }
 
@@ -542,7 +610,7 @@ public class GroupCommand implements CommandHandler {
         case "ajuda": {
             if (sender.hasPermission("command.tag.create")) {
                 sender.sendMessage(" §a» §fUse §a/" + cmdArgs.getLabel() +
-                        " criar <tagName> <tagId> <tagPrefix> §fpara criar uma tag.");
+                                           " criar <tagName> <tagId> <tagPrefix> §fpara criar uma tag.");
             }
 
             if (sender.hasPermission("command.tag.delete")) {
@@ -552,7 +620,7 @@ public class GroupCommand implements CommandHandler {
 
             if (sender.hasPermission("command.tag.setprefix")) {
                 sender.sendMessage(" §a» §fUse §a/" + cmdArgs.getLabel() +
-                        " setprefix <tagName> <tagPrefix> §fpara definir o prefixo de uma tag.");
+                                           " setprefix <tagName> <tagPrefix> §fpara definir o prefixo de uma tag.");
             }
             break;
         }
@@ -569,8 +637,8 @@ public class GroupCommand implements CommandHandler {
             }
 
             sender.sendMessage("§aTags disponíveis: §f" +
-                    CommonPlugin.getInstance().getPermissionManager().getTags().stream().map(Tag::getTagName)
-                                .collect(Collectors.joining(", ")));
+                                       CommonPlugin.getInstance().getPermissionManager().getTags().stream()
+                                                   .map(Tag::getTagName).collect(Collectors.joining(", ")));
             break;
         }
         case "criar":
@@ -583,7 +651,7 @@ public class GroupCommand implements CommandHandler {
 
             if (args.length == 1) {
                 sender.sendMessage(" §a» §fUse §a/" + cmdArgs.getLabel() +
-                        " criar <tagName> <tagId> <tagPrefix> §fpara criar uma tag.");
+                                           " criar <tagName> <tagId> <tagPrefix> §fpara criar uma tag.");
                 return;
             }
 
@@ -596,7 +664,7 @@ public class GroupCommand implements CommandHandler {
 
             if (args.length == 2) {
                 sender.sendMessage(" §a» §fUse §a/" + cmdArgs.getLabel() + " criar " + tagName +
-                        " <tagId> <tagPrefix> §fpara criar uma tag.");
+                                           " <tagId> <tagPrefix> §fpara criar uma tag.");
                 return;
             }
 
@@ -611,7 +679,7 @@ public class GroupCommand implements CommandHandler {
 
             if (args.length == 3) {
                 sender.sendMessage(" §a» §fUse §a/" + cmdArgs.getLabel() + " criar " + tagName + " " + tagId +
-                        " <tagPrefix> §fpara criar uma tag.");
+                                           " <tagPrefix> §fpara criar uma tag.");
                 return;
             }
 
@@ -619,7 +687,7 @@ public class GroupCommand implements CommandHandler {
 
             Tag tag = new Tag(tagId, StringFormat.formatString(tagName), tagPrefix, new HashSet<>());
             sender.sendMessage("§aA tag §e\"" + tag.getTagName() + "\"§a com o prefixo §e\"" + tag.getTagPrefix() +
-                    "§e\" e id §e\"" + tag.getId() + "\"§a foi criada.");
+                                       "§e\" e id §e\"" + tag.getId() + "\"§a foi criada.");
             CommonPlugin.getInstance().getPermissionManager().loadTag(tag);
             CommonPlugin.getInstance().getPermissionService().createTag(tag);
             break;
@@ -655,7 +723,7 @@ public class GroupCommand implements CommandHandler {
 
             if (args.length == 1) {
                 sender.sendMessage(" §a» §fUse §a/" + cmdArgs.getLabel() +
-                        " setprefix <tagName> <tagPrefix> §fpara definir o prefixo de uma tag.");
+                                           " setprefix <tagName> <tagPrefix> §fpara definir o prefixo de uma tag.");
                 return;
             }
 
@@ -668,7 +736,7 @@ public class GroupCommand implements CommandHandler {
 
             if (args.length == 2) {
                 sender.sendMessage(" §a» §fUse §a/" + cmdArgs.getLabel() + " setprefix " + tag.getTagName() +
-                        " <tagPrefix> §fpara definir o prefixo de uma tag.");
+                                           " <tagPrefix> §fpara definir o prefixo de uma tag.");
                 return;
             }
 
@@ -774,6 +842,27 @@ public class GroupCommand implements CommandHandler {
                     completer.addAll(CommonPlugin.getInstance().getPermissionManager().getGroupByName(args[1])
                                                  .map(Group::getPermissions).orElse(new HashSet<>()));
                 }
+            }
+        }
+
+        return completer.stream().filter(complete -> complete.toLowerCase().startsWith(args[args.length - 1]))
+                        .collect(Collectors.toList());
+    }
+
+    @CommandFramework.Completer(name = "permission")
+    public List<String> permissionCompleter(CommandArgs cmdArgs) {
+        String[] args = cmdArgs.getArgs();
+        List<String> completer = new ArrayList<>();
+
+
+        if (args.length == 1) {
+            completer.addAll(Bukkit.getOnlinePlayers().stream().map(Player::getName).collect(Collectors.toList()));
+        } else if (args.length == 2) {
+            completer.addAll(Arrays.asList("clear", "add", "remove"));
+        } else if (args.length == 3) {
+            if (args[2].equalsIgnoreCase("add") || args[2].equalsIgnoreCase("remove")) {
+                completer.addAll(BukkitCommandFramework.INSTANCE.getCommands().stream().map(Command::getPermission)
+                                                                .collect(Collectors.toList()));
             }
         }
 

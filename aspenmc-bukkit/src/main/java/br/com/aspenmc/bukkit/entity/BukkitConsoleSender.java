@@ -2,12 +2,12 @@ package br.com.aspenmc.bukkit.entity;
 
 import br.com.aspenmc.CommonConst;
 import br.com.aspenmc.CommonPlugin;
-import br.com.aspenmc.entity.Sender;
+import br.com.aspenmc.entity.sender.Sender;
 import br.com.aspenmc.language.Language;
+import br.com.aspenmc.permission.Group;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
-import br.com.aspenmc.permission.Group;
 
 import java.util.UUID;
 

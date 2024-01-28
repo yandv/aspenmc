@@ -1,19 +1,19 @@
-package br.com.aspenmc.entity;
+package br.com.aspenmc.entity.sender.member;
 
 import br.com.aspenmc.CommonConst;
 import br.com.aspenmc.CommonPlugin;
 import br.com.aspenmc.clan.Clan;
-import br.com.aspenmc.entity.member.Skin;
-import br.com.aspenmc.entity.member.configuration.LoginConfiguration;
-import br.com.aspenmc.entity.member.configuration.PreferencesConfiguration;
-import br.com.aspenmc.entity.member.configuration.PunishConfiguration;
-import br.com.aspenmc.entity.member.gamer.Gamer;
+import br.com.aspenmc.entity.ip.IpInfo;
+import br.com.aspenmc.entity.sender.Sender;
+import br.com.aspenmc.entity.sender.member.configuration.LoginConfiguration;
+import br.com.aspenmc.entity.sender.member.configuration.PreferencesConfiguration;
+import br.com.aspenmc.entity.sender.member.configuration.PunishConfiguration;
+import br.com.aspenmc.entity.sender.member.gamer.Gamer;
 import br.com.aspenmc.language.Language;
 import br.com.aspenmc.permission.Group;
 import br.com.aspenmc.permission.GroupInfo;
 import br.com.aspenmc.permission.Tag;
 import br.com.aspenmc.server.ServerType;
-import br.com.aspenmc.utils.geoip.IpInfo;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -25,21 +25,16 @@ import java.util.stream.Stream;
 public abstract class Member implements Sender {
 
     private final UUID uniqueId;
-    private String name;
-
-    private String fakeName;
-    private String playerSkin;
-
-    private Map<String, GroupInfo> groupMap;
-    private Map<String, Long> permissions;
-    private String tag;
-
-    private UUID clanId;
-
     private final LoginConfiguration loginConfiguration;
     private final PreferencesConfiguration preferencesConfiguration;
     private final PunishConfiguration punishConfiguration;
-
+    private String name;
+    private String fakeName;
+    private String playerSkin;
+    private Map<String, GroupInfo> groupMap;
+    private Map<String, Long> permissions;
+    private String tag;
+    private UUID clanId;
     private String language;
 
     /*
@@ -111,17 +106,17 @@ public abstract class Member implements Sender {
         save("ipInfo");
     }
 
-    public void setClan(Clan clan) {
-        this.clanId = clan == null ? null : clan.getClanId();
-        save("clanId");
-    }
-
     public boolean hasClan() {
         return clanId != null;
     }
 
     public Optional<Clan> getClan() {
         return CommonPlugin.getInstance().getClanManager().getClanById(clanId);
+    }
+
+    public void setClan(Clan clan) {
+        this.clanId = clan == null ? null : clan.getClanId();
+        save("clanId");
     }
 
     public boolean isUsingCustomSkin() {
@@ -336,24 +331,37 @@ public abstract class Member implements Sender {
         }
     }
 
-    public void addPermission(String permission) {
-        addPermission(permission, -1L);
+    public boolean addPermission(String permission) {
+        return addPermission(permission, -1L);
     }
 
-    public void addPermission(String permission, long expiresAt) {
+    public boolean addPermission(String permission, long expiresAt) {
         permission = permission.toLowerCase();
 
         if (!this.permissions.containsKey(permission)) {
             this.permissions.put(permission, expiresAt);
+            save("permissions");
+            return true;
         }
+
+        return false;
     }
 
-    public void removePermission(String permission) {
+    public boolean removePermission(String permission) {
         permission = permission.toLowerCase();
 
         if (this.permissions.containsKey(permission)) {
             this.permissions.remove(permission);
+            save("permissions");
+            return true;
         }
+
+        return false;
+    }
+
+    public void clearPermissions() {
+        this.permissions.clear();
+        save("permissions");
     }
 
     public boolean hasSilentPermission(String permission) {

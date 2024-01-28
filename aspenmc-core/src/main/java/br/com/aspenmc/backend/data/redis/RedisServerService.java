@@ -41,7 +41,7 @@ public class RedisServerService implements ServerService {
             map.put("port", Integer.toString(server.getServerPort()));
             map.put("map", server.getMapName());
             map.put("time", "" + server.getTime());
-            map.put("state", "" + server.getState().name().toLowerCase());
+            map.put("state", server.getState().name().toLowerCase());
             map.put("starttime", Long.toString(System.currentTimeMillis()));
 
             pipe.hmset(REDIS_SERVER_PREFIX + server.getServerId(), map);
@@ -185,14 +185,18 @@ public class RedisServerService implements ServerService {
         Map<String, String> jedisMap = jedis.hgetAll(REDIS_SERVER_PREFIX + serverId);
 
         ServerType serverType = ServerType.getByName(jedisMap.get("type"));
-        int maxPlayers = Integer.parseInt(jedisMap.get("maxplayers"));
-        boolean joinEnabled = Boolean.parseBoolean(jedisMap.get("joinenabled"));
         String serverAddress = jedisMap.get("address");
         int serverPort = Integer.parseInt(jedisMap.get("port"));
+
+        long startTime = Long.parseLong(jedisMap.get("starttime"));
+
+        int maxPlayers = Integer.parseInt(jedisMap.get("maxplayers"));
+        boolean joinEnabled = Boolean.parseBoolean(jedisMap.get("joinenabled"));
+
         String serverMap = jedisMap.get("map");
         int time = Integer.parseInt(jedisMap.get("time"));
         ProxiedServer.GameState state = ProxiedServer.GameState.valueOf(jedisMap.get("state").toUpperCase());
-        long startTime = Long.parseLong(jedisMap.get("starttime"));
+
         Set<UUID> players = jedis.smembers(REDIS_SERVER_PREFIX + serverId + ":players").stream().map(UUID::fromString)
                                  .collect(Collectors.toSet());
 

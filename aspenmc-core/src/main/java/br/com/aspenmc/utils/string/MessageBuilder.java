@@ -17,100 +17,80 @@ import java.util.List;
 @Getter
 public class MessageBuilder {
 
-    private String message;
-
-    private boolean hoverable;
-    private HoverEvent hoverEvent;
-
-    private boolean clickable;
-    private ClickEvent clickEvent;
-
     private List<TextComponent> componentList;
 
     public MessageBuilder(String message) {
-        this.message = message;
         this.componentList = new ArrayList<>();
+        this.componentList.add(new TextComponent(message));
     }
 
     public MessageBuilder setMessage(String message) {
-        this.message = message;
+        this.componentList.set(0, new TextComponent(message));
         return this;
     }
 
-    public MessageBuilder setHoverable(boolean hoverable) {
-        this.hoverable = hoverable;
-        return this;
-    }
-
-    public MessageBuilder setHoverEvent(HoverEvent hoverEvent) {
-        this.hoverEvent = hoverEvent;
-        this.hoverable = true;
-        return this;
-    }
-
-    @SuppressWarnings("deprecation")
     public MessageBuilder setHoverEvent(HoverEvent.Action action, String text) {
-        this.hoverEvent = new HoverEvent(action, TextComponent.fromLegacyText(text));
-        this.hoverable = true;
+        TextComponent textComponent = this.componentList.get(0);
+        textComponent.setHoverEvent(new HoverEvent(action, TextComponent.fromLegacyText(text)));
         return this;
     }
 
-    @SuppressWarnings("deprecation")
     public MessageBuilder setHoverEvent(String text) {
-        this.hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.fromLegacyText(text));
-        this.hoverable = true;
-        return this;
-    }
-
-    public MessageBuilder setClickable(boolean clickable) {
-        this.clickable = clickable;
-        return this;
-    }
-
-    public MessageBuilder setClickEvent(ClickEvent clickEvent) {
-        this.clickEvent = clickEvent;
-        this.clickable = true;
-        return this;
-    }
-
-    public MessageBuilder setClickEvent(ClickEvent.Action action, String text) {
-        this.clickEvent = new ClickEvent(action, text);
-        this.clickable = true;
-        return this;
+        return setHoverEvent(HoverEvent.Action.SHOW_TEXT, text);
     }
 
     public MessageBuilder setClickEvent(String text) {
-        this.clickEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND, text);
-        this.clickable = true;
+        return setClickEvent(ClickEvent.Action.RUN_COMMAND, text);
+    }
+
+    public MessageBuilder setClickEvent(ClickEvent.Action action, String text) {
+        TextComponent textComponent = this.componentList.get(0);
+        textComponent.setClickEvent(new ClickEvent(action, text));
         return this;
     }
 
-    public MessageBuilder extra(String message) {
+    public MessageBuilder append(String message) {
         this.componentList.add(new TextComponent(message));
         return this;
     }
 
-    public MessageBuilder extra(MessageBuilder messageBuilder) {
-        this.componentList.add(messageBuilder.create());
-        return this;
-    }
+    public MessageBuilder append(String message, String clickableText, String hoverText) {
+        TextComponent textComponent = new TextComponent(message);
 
-    public MessageBuilder extra(TextComponent textComponent) {
+        if (!clickableText.isEmpty()) {
+            textComponent.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, clickableText));
+        }
+
+        if (!hoverText.isEmpty()) {
+            textComponent.setHoverEvent(
+                    new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.fromLegacyText(hoverText)));
+        }
+
         this.componentList.add(textComponent);
         return this;
     }
 
-    public MessageBuilder extra(List<TextComponent> extra) {
+    public MessageBuilder append(String message, String hoverText) {
+        return append(message, "", hoverText);
+    }
+
+    public MessageBuilder append(MessageBuilder messageBuilder) {
+        this.componentList.add(messageBuilder.create());
+        return this;
+    }
+
+    public MessageBuilder append(TextComponent textComponent) {
+        this.componentList.add(textComponent);
+        return this;
+    }
+
+    public MessageBuilder append(List<TextComponent> extra) {
         this.componentList.addAll(extra);
         return this;
     }
 
     public TextComponent create() {
-        TextComponent textComponent = new TextComponent(message);
-
-        if (hoverable) textComponent.setHoverEvent(hoverEvent);
-
-        if (clickable) textComponent.setClickEvent(clickEvent);
+        TextComponent textComponent = new TextComponent("");
 
         for (TextComponent text : componentList)
             textComponent.addExtra(text);

@@ -20,8 +20,8 @@ import br.com.aspenmc.bukkit.protocol.impl.LimiterInjector;
 import br.com.aspenmc.bukkit.protocol.impl.MessageInjector;
 import br.com.aspenmc.bukkit.utils.hologram.impl.RankingHologram;
 import br.com.aspenmc.bukkit.utils.scheduler.UpdateScheduler;
-import br.com.aspenmc.entity.member.gamer.Gamer;
-import br.com.aspenmc.entity.member.status.StatusType;
+import br.com.aspenmc.entity.sender.member.gamer.Gamer;
+import br.com.aspenmc.entity.sender.member.status.StatusType;
 import br.com.aspenmc.packet.type.member.MemberGroupChange;
 import br.com.aspenmc.packet.type.member.server.ServerConnectRequest;
 import br.com.aspenmc.packet.type.member.server.ServerConnectResponse;
@@ -81,6 +81,9 @@ public abstract class BukkitCommon extends JavaPlugin implements CommonPlatform 
 
     @Setter
     private boolean removePlayerDat = true;
+
+    @Setter
+    private boolean displayRank;
 
     private boolean pluginEnabled = true;
 

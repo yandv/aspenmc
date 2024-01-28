@@ -7,8 +7,8 @@ import br.com.aspenmc.bungee.entity.BungeeMember;
 import br.com.aspenmc.command.CommandArgs;
 import br.com.aspenmc.command.CommandFramework;
 import br.com.aspenmc.command.CommandHandler;
-import br.com.aspenmc.entity.Member;
-import br.com.aspenmc.entity.Sender;
+import br.com.aspenmc.entity.sender.Sender;
+import br.com.aspenmc.entity.sender.member.Member;
 import br.com.aspenmc.server.ProxiedServer;
 import br.com.aspenmc.server.ServerType;
 import br.com.aspenmc.utils.ProtocolVersion;
@@ -193,7 +193,7 @@ public class StaffCommand implements CommandHandler {
 
         for (int i = 0; i < array.size(); i++) {
             Member member = array.get(i);
-            messageBuilder.extra(new MessageBuilder("§7" + member.getDefaultTag().getRealPrefix() + member.getName() +
+            messageBuilder.append(new MessageBuilder("§7" + member.getDefaultTag().getRealPrefix() + member.getName() +
                     (i == array.size() - 1 ? "§7." : "§7, ")).setHoverEvent("§fTempo online: §7" +
                                                                      StringFormat.formatTime((int) (member.getSessionTime() / 1000), TimeFormat.NORMAL) +
                                                                      "\n§fPing: §7" +

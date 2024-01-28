@@ -1,11 +1,14 @@
 package br.com.aspenmc.manager;
 
 import br.com.aspenmc.clan.Clan;
-import br.com.aspenmc.entity.Member;
-import br.com.aspenmc.entity.Sender;
+import br.com.aspenmc.entity.sender.Sender;
+import br.com.aspenmc.entity.sender.member.Member;
 import br.com.aspenmc.utils.IndexableMap;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 
 public class ClanManager {
 

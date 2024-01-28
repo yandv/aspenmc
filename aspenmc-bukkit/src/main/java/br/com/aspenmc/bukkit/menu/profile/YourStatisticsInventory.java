@@ -3,9 +3,9 @@ package br.com.aspenmc.bukkit.menu.profile;
 import br.com.aspenmc.CommonPlugin;
 import br.com.aspenmc.bukkit.utils.item.ItemBuilder;
 import br.com.aspenmc.bukkit.utils.menu.MenuInventory;
-import br.com.aspenmc.entity.member.status.Status;
-import br.com.aspenmc.entity.member.status.StatusField;
-import br.com.aspenmc.entity.member.status.StatusType;
+import br.com.aspenmc.entity.sender.member.status.Status;
+import br.com.aspenmc.entity.sender.member.status.StatusField;
+import br.com.aspenmc.entity.sender.member.status.StatusType;
 import br.com.aspenmc.language.Language;
 import br.com.aspenmc.utils.string.StringFormat;
 import org.bukkit.Material;
@@ -22,9 +22,8 @@ public class YourStatisticsInventory extends MenuInventory {
             int currentSlot = slot++;
 
             if (CommonPlugin.getInstance().getStatusManager().hasLoadedStatus(player.getUniqueId(), statusType)) {
-                createItem(currentSlot,
-                        CommonPlugin.getInstance().getStatusManager().getStatusById(player.getUniqueId(), statusType),
-                        player);
+                createItem(currentSlot, CommonPlugin.getInstance().getStatusManager()
+                                                    .getStatusById(player.getUniqueId(), statusType), player);
             } else {
                 CommonPlugin.getInstance().getStatusService().getStatusById(player.getUniqueId(), statusType)
                             .whenComplete((status, throwable) -> {
@@ -58,8 +57,8 @@ public class YourStatisticsInventory extends MenuInventory {
             itemBuilder.type(Material.MUSHROOM_SOUP);
             itemBuilder.name("§aHG");
             itemBuilder.lore("§fVitórias: §7" + status.get(StatusField.WINS),
-                    "§fKills: §7" + status.get(StatusField.KILLS), "§fMortes: §7" + status.get(StatusField.DEATHS), "",
-                    "§fLiga: " + status.getLeague().getColoredSymbol());
+                             "§fKills: §7" + status.get(StatusField.KILLS),
+                             "§fMortes: §7" + status.get(StatusField.DEATHS), "", "§fLiga: " + status.getLeague());
             break;
         }
         case ARENA:
@@ -67,10 +66,10 @@ public class YourStatisticsInventory extends MenuInventory {
             itemBuilder.type(status.getStatusType() == StatusType.FPS ? Material.GLASS : Material.IRON_CHESTPLATE);
             itemBuilder.name("§a" + StringFormat.formatString(status.getStatusType().name()));
             itemBuilder.lore("§fKills: §7" + status.get(StatusField.KILLS),
-                    "§fMortes: §7" + status.get(StatusField.DEATHS),
-                    "§fKillstreak: §7" + status.get(StatusField.KILLSTREAK),
-                    "§fMáximo killstreak: §7" + status.get(StatusField.MAX_KILLSTREAK), "",
-                    "§fLiga: " + status.getLeague().getColoredSymbol());
+                             "§fMortes: §7" + status.get(StatusField.DEATHS),
+                             "§fKillstreak: §7" + status.get(StatusField.KILLSTREAK),
+                             "§fMáximo killstreak: §7" + status.get(StatusField.MAX_KILLSTREAK), "",
+                             "§fLiga: " + status.getLeague());
             break;
         case LAVA:
             itemBuilder.type(Material.LAVA_BUCKET);
@@ -79,7 +78,7 @@ public class YourStatisticsInventory extends MenuInventory {
             itemBuilder.lore("§cDíficil: ", "  §fCompleto: §70/0", "  §fMelhor tempo: §7999m", "");
             itemBuilder.lore("§6Médio: ", "  §fCompleto: §70/0", "  §fMelhor tempo: §7999m", "");
             itemBuilder.lore("§aFácil: ", "  §fCompleto: §70/0", "  §fMelhor tempo: §7999m", "",
-                    "§fLiga: " + status.getLeague().getColoredSymbol());
+                             "§fLiga: " + status.getLeague());
             break;
         }
 

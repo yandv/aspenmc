@@ -1,7 +1,11 @@
 package br.com.aspenmc.bukkit.listener;
 
 import br.com.aspenmc.CommonPlugin;
-import br.com.aspenmc.entity.Member;
+import br.com.aspenmc.bukkit.BukkitCommon;
+import br.com.aspenmc.entity.sender.member.Member;
+import br.com.aspenmc.entity.sender.member.status.League;
+import br.com.aspenmc.entity.sender.member.status.Status;
+import br.com.aspenmc.entity.sender.member.status.StatusType;
 import br.com.aspenmc.permission.Tag;
 import br.com.aspenmc.punish.Punish;
 import br.com.aspenmc.punish.PunishType;
@@ -46,11 +50,27 @@ public class ChatListener implements Listener {
                 member.hasPermission("chat.color") ? ChatColor.translateAlternateColorCodes('&', event.getMessage()) :
                         event.getMessage();
 
-        MessageBuilder messageBuilder = new MessageBuilder(
+        MessageBuilder messageBuilder = new MessageBuilder("");
+
+        if (BukkitCommon.getInstance().isDisplayRank()) {
+            StatusType statusType = StatusType.getByServer(CommonPlugin.getInstance().getServerType());
+
+            if (statusType != null) {
+                if (CommonPlugin.getInstance().getStatusManager().hasLoadedStatus(player.getUniqueId(), statusType)) {
+                    Status status = CommonPlugin.getInstance().getStatusManager()
+                                                .getOrLoadById(player.getUniqueId(), statusType);
+
+                    messageBuilder.append("§7[§f" + status.getLeague() + "§7] ", "", "");
+                } else {
+                    messageBuilder.append("§7[§f" + League.values()[0] + "§7] ", "", "");
+                }
+            }
+        }
+
+        messageBuilder.append(
                 member.getTag().map(Tag::getRealPrefix).orElse("§f") + player.getName() + " §8» §f" + message);
 
         event.getRecipients().forEach(recipient -> recipient.spigot().sendMessage(messageBuilder.create()));
-        CommonPlugin.getInstance().getConsoleSender().sendMessage(
-                member.getName() + (member.isUsingFake() ? "(" + player.getName() + ")" : "") + ": " + message);
+        CommonPlugin.getInstance().getConsoleSender().sendMessage(messageBuilder.create());
     }
 }

@@ -1,7 +1,7 @@
-package br.com.aspenmc.entity.member.configuration;
+package br.com.aspenmc.entity.sender.member.configuration;
 
 import br.com.aspenmc.CommonConst;
-import br.com.aspenmc.entity.Member;
+import br.com.aspenmc.entity.sender.member.Member;
 import br.com.aspenmc.utils.Cryptograph;
 import lombok.Getter;
 

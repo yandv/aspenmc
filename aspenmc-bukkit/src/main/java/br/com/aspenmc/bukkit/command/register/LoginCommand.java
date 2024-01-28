@@ -6,8 +6,8 @@ import br.com.aspenmc.bukkit.event.player.MemberLoginEvent;
 import br.com.aspenmc.command.CommandArgs;
 import br.com.aspenmc.command.CommandFramework;
 import br.com.aspenmc.command.CommandHandler;
-import br.com.aspenmc.entity.Member;
-import br.com.aspenmc.entity.Sender;
+import br.com.aspenmc.entity.sender.Sender;
+import br.com.aspenmc.entity.sender.member.Member;
 import org.bukkit.Bukkit;
 
 public class LoginCommand implements CommandHandler {

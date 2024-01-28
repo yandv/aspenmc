@@ -1,8 +1,7 @@
-package br.com.aspenmc.entity.member;
+package br.com.aspenmc.entity.sender.member;
 
+import br.com.aspenmc.entity.sender.member.configuration.LoginConfiguration;
 import com.google.common.base.Joiner;
-import br.com.aspenmc.entity.Member;
-import br.com.aspenmc.entity.member.configuration.LoginConfiguration;
 import net.md_5.bungee.api.chat.TextComponent;
 
 import java.util.UUID;

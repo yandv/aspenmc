@@ -4,7 +4,7 @@ import br.com.aspenmc.CommonConst;
 import br.com.aspenmc.CommonPlugin;
 import br.com.aspenmc.backend.data.MemberService;
 import br.com.aspenmc.backend.type.MongoConnection;
-import br.com.aspenmc.entity.Member;
+import br.com.aspenmc.entity.sender.member.Member;
 import br.com.aspenmc.packet.type.member.MemberFieldUpdate;
 import br.com.aspenmc.utils.json.JsonUtils;
 import com.google.gson.JsonElement;

@@ -6,7 +6,7 @@ import br.com.aspenmc.bukkit.BukkitCommon;
 import br.com.aspenmc.bukkit.event.player.PlayerChangeLeagueEvent;
 import br.com.aspenmc.bukkit.event.player.PlayerRealRespawnEvent;
 import br.com.aspenmc.bukkit.utils.scoreboard.ScoreHelper;
-import br.com.aspenmc.entity.member.status.League;
+import br.com.aspenmc.entity.sender.member.status.League;
 import org.bukkit.Achievement;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;

@@ -1,19 +1,20 @@
 package br.com.aspenmc.bungee.manager;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 import br.com.aspenmc.CommonConst;
 import br.com.aspenmc.CommonPlugin;
 import br.com.aspenmc.bungee.BungeeMain;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.config.Configuration;
 
 import java.util.*;
+import java.util.logging.Level;
 
 public class MotdManager {
 
-    private Map<String, List<Motd>> motdListMap;
+    private final Map<String, List<Motd>> motdListMap;
 
     public MotdManager() {
         this.motdListMap = new HashMap<>();
@@ -57,7 +58,7 @@ public class MotdManager {
     @AllArgsConstructor
     @NoArgsConstructor
     @Getter
-    public class Motd {
+    public static class Motd {
 
         private String name;
         private String header;
@@ -69,19 +70,21 @@ public class MotdManager {
             if (section == null) {
                 this.header = "";
                 this.footer = "";
-                CommonPlugin.getInstance().debug("Motd " + name + " is null");
+                CommonPlugin.getInstance().getLogger()
+                            .log(Level.WARNING, "The registered motd \"" + name + "\" has no configuration section.");
             } else {
-                if (section.contains("header")) {
-                    this.header = ChatColor.translateAlternateColorCodes('&', section.getString("header"));
-                } else {
+                boolean hasHeaderOrFooter = section.contains("header") || section.contains("footer");
+
+                if (!hasHeaderOrFooter) {
                     this.header = "";
+                    this.footer = "";
+                    CommonPlugin.getInstance().getLogger()
+                                .log(Level.WARNING, "The registered motd \"" + name + "\" has no header or footer.");
+                    return;
                 }
 
-                if (section.contains("footer")) {
-                    this.footer = ChatColor.translateAlternateColorCodes('&', section.getString("footer"));
-                } else {
-                    this.footer = "";
-                }
+                this.header = ChatColor.translateAlternateColorCodes('&', section.getString("header", ""));
+                this.footer = ChatColor.translateAlternateColorCodes('&', section.getString("footer", ""));
             }
         }
 

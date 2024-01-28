@@ -5,7 +5,7 @@ import br.com.aspenmc.bukkit.BukkitCommon;
 import br.com.aspenmc.bukkit.utils.TouchHandler;
 import br.com.aspenmc.bukkit.utils.character.Character;
 import br.com.aspenmc.bukkit.utils.hologram.Hologram;
-import br.com.aspenmc.entity.member.Skin;
+import br.com.aspenmc.entity.sender.member.Skin;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;

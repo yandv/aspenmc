@@ -1,4 +1,4 @@
-package br.com.aspenmc.entity;
+package br.com.aspenmc.entity.sender;
 
 import br.com.aspenmc.language.Language;
 import br.com.aspenmc.permission.Group;

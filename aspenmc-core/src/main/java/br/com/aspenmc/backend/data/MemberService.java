@@ -1,7 +1,7 @@
 package br.com.aspenmc.backend.data;
 
-import br.com.aspenmc.entity.Member;
-import br.com.aspenmc.entity.member.MemberVoid;
+import br.com.aspenmc.entity.sender.member.Member;
+import br.com.aspenmc.entity.sender.member.MemberVoid;
 import org.bson.conversions.Bson;
 
 import java.util.List;

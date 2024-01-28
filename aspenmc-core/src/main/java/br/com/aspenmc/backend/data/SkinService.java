@@ -1,6 +1,6 @@
 package br.com.aspenmc.backend.data;
 
-import br.com.aspenmc.entity.member.Skin;
+import br.com.aspenmc.entity.sender.member.Skin;
 
 import java.util.Optional;
 import java.util.UUID;

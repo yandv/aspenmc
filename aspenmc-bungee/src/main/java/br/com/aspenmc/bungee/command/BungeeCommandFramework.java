@@ -1,13 +1,13 @@
 package br.com.aspenmc.bungee.command;
 
-import lombok.Getter;
 import br.com.aspenmc.CommonPlugin;
 import br.com.aspenmc.bungee.BungeeMain;
 import br.com.aspenmc.command.CommandArgs;
 import br.com.aspenmc.command.CommandFramework;
 import br.com.aspenmc.command.CommandHandler;
-import br.com.aspenmc.entity.Member;
-import br.com.aspenmc.entity.Sender;
+import br.com.aspenmc.entity.sender.Sender;
+import br.com.aspenmc.entity.sender.member.Member;
+import lombok.Getter;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -15,7 +15,6 @@ import net.md_5.bungee.api.event.TabCompleteEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.event.EventHandler;
-import org.jline.reader.Completer;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

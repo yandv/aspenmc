@@ -1,11 +1,11 @@
 package br.com.aspenmc.bungee.entity;
 
+import br.com.aspenmc.CommonPlugin;
+import br.com.aspenmc.entity.sender.member.Member;
+import br.com.aspenmc.entity.sender.member.configuration.LoginConfiguration;
 import br.com.aspenmc.server.ProxiedServer;
 import lombok.Getter;
 import lombok.Setter;
-import br.com.aspenmc.CommonPlugin;
-import br.com.aspenmc.entity.Member;
-import br.com.aspenmc.entity.member.configuration.LoginConfiguration;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;

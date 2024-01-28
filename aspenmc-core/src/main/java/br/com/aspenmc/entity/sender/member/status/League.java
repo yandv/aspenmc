@@ -1,8 +1,6 @@
-package br.com.aspenmc.entity.member.status;
+package br.com.aspenmc.entity.sender.member.status;
 
-import com.google.common.base.Strings;
 import lombok.Getter;
-import net.md_5.bungee.api.ChatColor;
 
 @Getter
 public enum League {
@@ -41,14 +39,6 @@ public enum League {
         this.maxXp = maxXp;
     }
 
-    public String getColoredName() {
-        return color + name;
-    }
-
-    public String getColoredSymbol() {
-        return color + symbol;
-    }
-
     public String getColoredConstraint() {
         return color + name + " " + symbol;
     }
@@ -70,5 +60,14 @@ public enum League {
         }
 
         return totalLeagueXp;
+    }
+
+    public String toString(boolean complete) {
+        return getColor() + (complete ? getName() + " " : "") + getSymbol();
+    }
+
+    @Override
+    public String toString() {
+        return toString(false);
     }
 }

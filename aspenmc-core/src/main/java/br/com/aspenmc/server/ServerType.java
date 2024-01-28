@@ -3,9 +3,7 @@ package br.com.aspenmc.server;
 import br.com.aspenmc.utils.string.StringFormat;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
-import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,14 +15,11 @@ public enum ServerType {
 
     BUNGEECORD, DISCORD,
 
-    LOBBY(true), HG_LOBBY(true, "lobby"), PVP_LOBBY(true, "lobby"),
+    LOBBY(true), LOGIN(true), HG_LOBBY(true, "lobby"), PVP_LOBBY(true, "lobby"),
 
     HG("hg_lobby"),
 
-    ARENA("pvp_lobby"), FPS("pvp_lobby"), LAVA("pvp_lobby"),
-
-
-    LOGIN(true);
+    ARENA("pvp_lobby"), FPS("pvp_lobby"), LAVA("pvp_lobby");
 
     private final boolean lobby;
     private final String parent;

@@ -1,6 +1,6 @@
 package br.com.aspenmc.bukkit.utils.item;
 
-import br.com.aspenmc.entity.member.Skin;
+import br.com.aspenmc.entity.sender.member.Skin;
 import br.com.aspenmc.utils.string.StringFormat;
 import com.comphenix.protocol.utility.MinecraftReflection;
 import com.comphenix.protocol.wrappers.nbt.NbtCompound;

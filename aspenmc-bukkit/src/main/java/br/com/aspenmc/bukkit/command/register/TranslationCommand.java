@@ -6,7 +6,7 @@ import br.com.aspenmc.bukkit.event.player.language.PlayerLanguageChangedEvent;
 import br.com.aspenmc.command.CommandArgs;
 import br.com.aspenmc.command.CommandFramework;
 import br.com.aspenmc.command.CommandHandler;
-import br.com.aspenmc.entity.Sender;
+import br.com.aspenmc.entity.sender.Sender;
 import br.com.aspenmc.language.Language;
 import br.com.aspenmc.utils.string.MessageBuilder;
 import com.google.common.base.Joiner;
@@ -65,7 +65,7 @@ public class TranslationCommand implements CommandHandler {
                 for (Map.Entry<String, String> entry : CommonPlugin.getInstance().getLanguageManager()
                                                                    .getTranslations(language).entrySet()) {
                     if (entry.getValue().startsWith("{") && entry.getValue().endsWith("}")) {
-                        messageBuilder.extra(new MessageBuilder("§f" + entry.getKey() + "§7, ")
+                        messageBuilder.append(new MessageBuilder("§f" + entry.getKey() + "§7, ")
                                 .setClickEvent(ClickEvent.Action.SUGGEST_COMMAND,
                                         "/translate " + language.name() + " " + entry.getKey() + " ")
                                 .setHoverEvent("§eClique para editar."));

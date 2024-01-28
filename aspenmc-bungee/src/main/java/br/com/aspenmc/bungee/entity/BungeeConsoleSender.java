@@ -1,9 +1,9 @@
 package br.com.aspenmc.bungee.entity;
 
-import br.com.aspenmc.bungee.BungeeMain;
 import br.com.aspenmc.CommonConst;
 import br.com.aspenmc.CommonPlugin;
-import br.com.aspenmc.entity.Sender;
+import br.com.aspenmc.bungee.BungeeMain;
+import br.com.aspenmc.entity.sender.Sender;
 import br.com.aspenmc.language.Language;
 import br.com.aspenmc.permission.Group;
 import net.md_5.bungee.api.CommandSender;

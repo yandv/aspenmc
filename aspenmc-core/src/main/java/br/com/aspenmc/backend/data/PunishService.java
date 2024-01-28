@@ -1,7 +1,7 @@
 package br.com.aspenmc.backend.data;
 
-import br.com.aspenmc.entity.Member;
-import br.com.aspenmc.entity.Sender;
+import br.com.aspenmc.entity.sender.Sender;
+import br.com.aspenmc.entity.sender.member.Member;
 import br.com.aspenmc.punish.Punish;
 import br.com.aspenmc.punish.PunishType;
 

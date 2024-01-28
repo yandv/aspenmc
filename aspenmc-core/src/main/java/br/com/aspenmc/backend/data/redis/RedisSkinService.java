@@ -3,7 +3,7 @@ package br.com.aspenmc.backend.data.redis;
 import br.com.aspenmc.CommonConst;
 import br.com.aspenmc.CommonPlugin;
 import br.com.aspenmc.backend.data.SkinService;
-import br.com.aspenmc.entity.member.Skin;
+import br.com.aspenmc.entity.sender.member.Skin;
 import br.com.aspenmc.utils.json.JsonUtils;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -25,7 +25,6 @@ public class RedisSkinService implements SkinService {
 
     private static final String BASE_PATH = "skin-data:";
     private static final int TIME_TO_EXPIRE = 60 * 60 * 24 * 3;
-
 
     @Override
     public Optional<Skin> loadData(String playerName) {

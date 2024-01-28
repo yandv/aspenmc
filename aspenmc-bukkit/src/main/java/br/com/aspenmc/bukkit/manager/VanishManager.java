@@ -4,7 +4,7 @@ import br.com.aspenmc.CommonPlugin;
 import br.com.aspenmc.bukkit.event.player.vanish.PlayerAdminEvent;
 import br.com.aspenmc.bukkit.event.player.vanish.PlayerHideToPlayerEvent;
 import br.com.aspenmc.bukkit.event.player.vanish.PlayerShowToPlayerEvent;
-import br.com.aspenmc.entity.Member;
+import br.com.aspenmc.entity.sender.member.Member;
 import br.com.aspenmc.permission.Group;
 import com.google.common.collect.ImmutableSet;
 import lombok.AllArgsConstructor;

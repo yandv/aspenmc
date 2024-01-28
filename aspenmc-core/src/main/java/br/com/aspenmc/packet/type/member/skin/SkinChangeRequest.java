@@ -1,6 +1,6 @@
 package br.com.aspenmc.packet.type.member.skin;
 
-import br.com.aspenmc.entity.member.Skin;
+import br.com.aspenmc.entity.sender.member.Skin;
 import br.com.aspenmc.packet.Packet;
 import lombok.Getter;
 

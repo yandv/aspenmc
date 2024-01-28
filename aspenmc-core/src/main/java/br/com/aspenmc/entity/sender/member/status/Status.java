@@ -1,4 +1,4 @@
-package br.com.aspenmc.entity.member.status;
+package br.com.aspenmc.entity.sender.member.status;
 
 import br.com.aspenmc.CommonPlugin;
 import lombok.Getter;

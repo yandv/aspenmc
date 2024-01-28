@@ -2,7 +2,7 @@ package br.com.aspenmc.bungee.listener;
 
 import br.com.aspenmc.CommonPlugin;
 import br.com.aspenmc.bungee.BungeeMain;
-import br.com.aspenmc.entity.Member;
+import br.com.aspenmc.entity.sender.member.Member;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.ChatEvent;
 import net.md_5.bungee.api.plugin.Listener;

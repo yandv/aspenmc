@@ -8,7 +8,7 @@ import br.com.aspenmc.bukkit.event.player.tag.PlayerChangedTagEvent;
 import br.com.aspenmc.bukkit.utils.scoreboard.ScoreboardAPI;
 import br.com.aspenmc.clan.Clan;
 import br.com.aspenmc.clan.ClanTag;
-import br.com.aspenmc.entity.Member;
+import br.com.aspenmc.entity.sender.member.Member;
 import br.com.aspenmc.manager.PermissionManager;
 import br.com.aspenmc.permission.Tag;
 import org.bukkit.Bukkit;

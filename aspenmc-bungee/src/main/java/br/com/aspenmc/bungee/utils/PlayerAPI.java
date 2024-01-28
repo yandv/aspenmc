@@ -1,6 +1,6 @@
 package br.com.aspenmc.bungee.utils;
 
-import br.com.aspenmc.entity.member.Skin;
+import br.com.aspenmc.entity.sender.member.Skin;
 import lombok.NonNull;
 import net.md_5.bungee.api.connection.PendingConnection;
 import net.md_5.bungee.connection.InitialHandler;

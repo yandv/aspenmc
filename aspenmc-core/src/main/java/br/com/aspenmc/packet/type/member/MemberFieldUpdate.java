@@ -2,7 +2,7 @@ package br.com.aspenmc.packet.type.member;
 
 import br.com.aspenmc.CommonConst;
 import br.com.aspenmc.CommonPlugin;
-import br.com.aspenmc.entity.Member;
+import br.com.aspenmc.entity.sender.member.Member;
 import br.com.aspenmc.packet.Packet;
 import br.com.aspenmc.utils.Reflection;
 import com.google.gson.JsonElement;

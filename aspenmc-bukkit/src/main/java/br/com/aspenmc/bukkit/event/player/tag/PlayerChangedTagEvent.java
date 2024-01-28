@@ -1,7 +1,7 @@
 package br.com.aspenmc.bukkit.event.player.tag;
 
 import br.com.aspenmc.bukkit.event.PlayerCancellableEvent;
-import br.com.aspenmc.entity.Member;
+import br.com.aspenmc.entity.sender.member.Member;
 import br.com.aspenmc.permission.Tag;
 import lombok.Getter;
 import lombok.Setter;

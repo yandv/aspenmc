@@ -1,6 +1,6 @@
 package br.com.aspenmc.backend.data;
 
-import br.com.aspenmc.entity.member.gamer.Gamer;
+import br.com.aspenmc.entity.sender.member.gamer.Gamer;
 
 import java.util.List;
 import java.util.Map;

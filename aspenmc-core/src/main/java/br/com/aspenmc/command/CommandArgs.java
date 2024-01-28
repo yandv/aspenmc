@@ -5,8 +5,8 @@ package br.com.aspenmc.command;
  *
  */
 
-import br.com.aspenmc.entity.Member;
-import br.com.aspenmc.entity.Sender;
+import br.com.aspenmc.entity.sender.Sender;
+import br.com.aspenmc.entity.sender.member.Member;
 
 public class CommandArgs {
 

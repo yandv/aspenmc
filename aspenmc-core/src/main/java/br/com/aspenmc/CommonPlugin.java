@@ -3,13 +3,14 @@ package br.com.aspenmc;
 import br.com.aspenmc.backend.Credentials;
 import br.com.aspenmc.backend.data.*;
 import br.com.aspenmc.backend.data.mongo.*;
+import br.com.aspenmc.backend.data.redis.RedisConnectionService;
 import br.com.aspenmc.backend.data.redis.RedisGeoipService;
 import br.com.aspenmc.backend.data.redis.RedisServerService;
 import br.com.aspenmc.backend.data.redis.RedisSkinService;
 import br.com.aspenmc.backend.type.MongoConnection;
 import br.com.aspenmc.backend.type.RedisConnection;
-import br.com.aspenmc.entity.Sender;
-import br.com.aspenmc.entity.member.Skin;
+import br.com.aspenmc.entity.sender.Sender;
+import br.com.aspenmc.entity.sender.member.Skin;
 import br.com.aspenmc.language.Language;
 import br.com.aspenmc.manager.*;
 import br.com.aspenmc.packet.type.server.keepalive.KeepAliveRequest;
@@ -79,6 +80,9 @@ public class CommonPlugin {
     private ClanService clanService;
 
     @Setter
+    private ConnectionData connectionData;
+
+    @Setter
     private GamerService gamerService;
 
     @Setter
@@ -137,6 +141,7 @@ public class CommonPlugin {
         redisConnection.createConnection();
 
         setClanService(new MongoClanService(mongoConnection));
+        setConnectionData(new RedisConnectionService());
         setGamerService(new MongoGamerService());
         setGeoipService(new RedisGeoipService());
         setMemberService(new MongoMemberService(mongoConnection));

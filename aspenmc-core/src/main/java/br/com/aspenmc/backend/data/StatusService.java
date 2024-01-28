@@ -1,7 +1,7 @@
 package br.com.aspenmc.backend.data;
 
-import br.com.aspenmc.entity.member.status.Status;
-import br.com.aspenmc.entity.member.status.StatusType;
+import br.com.aspenmc.entity.sender.member.status.Status;
+import br.com.aspenmc.entity.sender.member.status.StatusType;
 
 import java.util.Collection;
 import java.util.List;

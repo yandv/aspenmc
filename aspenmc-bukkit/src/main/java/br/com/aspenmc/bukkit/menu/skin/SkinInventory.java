@@ -3,7 +3,7 @@ package br.com.aspenmc.bukkit.menu.skin;
 import br.com.aspenmc.CommonPlugin;
 import br.com.aspenmc.bukkit.utils.item.ItemBuilder;
 import br.com.aspenmc.bukkit.utils.menu.MenuInventory;
-import br.com.aspenmc.entity.Member;
+import br.com.aspenmc.entity.sender.member.Member;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 

@@ -1,4 +1,4 @@
-package br.com.aspenmc.entity.member.status;
+package br.com.aspenmc.entity.sender.member.status;
 
 public enum StatusField {
 

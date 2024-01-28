@@ -1,4 +1,4 @@
-package br.com.aspenmc.entity.member.gamer;
+package br.com.aspenmc.entity.sender.member.gamer;
 
 import br.com.aspenmc.CommonPlugin;
 

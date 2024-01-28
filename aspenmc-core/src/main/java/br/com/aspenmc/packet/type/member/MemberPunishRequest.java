@@ -1,6 +1,6 @@
 package br.com.aspenmc.packet.type.member;
 
-import br.com.aspenmc.entity.Sender;
+import br.com.aspenmc.entity.sender.Sender;
 import br.com.aspenmc.packet.Packet;
 import br.com.aspenmc.punish.PunishType;
 import lombok.Getter;

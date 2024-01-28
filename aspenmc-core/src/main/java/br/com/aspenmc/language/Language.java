@@ -1,7 +1,7 @@
 package br.com.aspenmc.language;
 
 import br.com.aspenmc.CommonPlugin;
-import br.com.aspenmc.entity.Member;
+import br.com.aspenmc.entity.sender.member.Member;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

@@ -2,7 +2,7 @@ package br.com.aspenmc.bukkit.menu.staff.account;
 
 import br.com.aspenmc.bukkit.utils.item.ItemBuilder;
 import br.com.aspenmc.bukkit.utils.menu.MenuInventory;
-import br.com.aspenmc.entity.Member;
+import br.com.aspenmc.entity.sender.member.Member;
 import br.com.aspenmc.punish.PunishType;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;

@@ -2,7 +2,7 @@ package br.com.aspenmc.bukkit.entity;
 
 import br.com.aspenmc.CommonPlugin;
 import br.com.aspenmc.bukkit.antihax.CheatType;
-import br.com.aspenmc.entity.Member;
+import br.com.aspenmc.entity.sender.member.Member;
 import br.com.aspenmc.packet.type.discord.MessageRequest;
 import br.com.aspenmc.utils.string.StringFormat;
 import lombok.Getter;

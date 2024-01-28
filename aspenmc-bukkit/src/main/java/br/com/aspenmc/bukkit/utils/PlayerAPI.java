@@ -1,31 +1,24 @@
 package br.com.aspenmc.bukkit.utils;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
 import br.com.aspenmc.CommonPlugin;
 import br.com.aspenmc.bukkit.BukkitCommon;
-import br.com.aspenmc.entity.member.Skin;
-import br.com.aspenmc.utils.ProtocolVersion;
-import com.comphenix.protocol.wrappers.*;
-import com.google.common.cache.CacheLoader;
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
-
+import br.com.aspenmc.entity.sender.member.Skin;
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.reflect.FieldAccessException;
 import com.comphenix.protocol.utility.MinecraftReflection;
+import com.comphenix.protocol.wrappers.*;
 import com.comphenix.protocol.wrappers.EnumWrappers.Difficulty;
 import com.comphenix.protocol.wrappers.EnumWrappers.NativeGameMode;
 import com.comphenix.protocol.wrappers.EnumWrappers.PlayerInfoAction;
+import com.google.common.cache.CacheLoader;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.util.*;
 
 public class PlayerAPI {
 

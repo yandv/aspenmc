@@ -2,7 +2,7 @@ package br.com.aspenmc.bukkit.event.player;
 
 import br.com.aspenmc.bukkit.entity.BukkitMember;
 import br.com.aspenmc.bukkit.event.NormalEvent;
-import br.com.aspenmc.entity.member.Skin;
+import br.com.aspenmc.entity.sender.member.Skin;
 import lombok.Getter;
 
 @Getter

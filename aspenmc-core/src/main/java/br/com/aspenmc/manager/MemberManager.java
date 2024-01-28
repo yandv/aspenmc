@@ -1,9 +1,9 @@
 package br.com.aspenmc.manager;
 
 import br.com.aspenmc.CommonPlugin;
-import br.com.aspenmc.entity.Member;
-import br.com.aspenmc.entity.member.MemberVoid;
-import br.com.aspenmc.entity.member.gamer.Gamer;
+import br.com.aspenmc.entity.sender.member.Member;
+import br.com.aspenmc.entity.sender.member.MemberVoid;
+import br.com.aspenmc.entity.sender.member.gamer.Gamer;
 
 import java.util.*;
 import java.util.concurrent.locks.Lock;

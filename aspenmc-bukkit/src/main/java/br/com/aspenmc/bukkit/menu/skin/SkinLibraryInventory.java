@@ -116,7 +116,7 @@ public class SkinLibraryInventory extends MenuInventory {
     public static class Skin {
 
         private String skinName;
-        private br.com.aspenmc.entity.member.Skin profieSkin;
+        private br.com.aspenmc.entity.sender.member.Skin profieSkin;
         private Gender gender;
     }
 

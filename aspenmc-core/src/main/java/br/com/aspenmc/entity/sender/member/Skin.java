@@ -1,4 +1,4 @@
-package br.com.aspenmc.entity.member;
+package br.com.aspenmc.entity.sender.member;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

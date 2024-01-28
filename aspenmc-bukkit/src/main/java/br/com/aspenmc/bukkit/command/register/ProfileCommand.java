@@ -2,7 +2,6 @@ package br.com.aspenmc.bukkit.command.register;
 
 import br.com.aspenmc.CommonConst;
 import br.com.aspenmc.CommonPlugin;
-import br.com.aspenmc.bukkit.BukkitCommon;
 import br.com.aspenmc.bukkit.entity.BukkitMember;
 import br.com.aspenmc.bukkit.event.player.PlayerChangedSkinEvent;
 import br.com.aspenmc.bukkit.event.player.PlayerClanTagUpdateEvent;
@@ -17,13 +16,13 @@ import br.com.aspenmc.clan.ClanTag;
 import br.com.aspenmc.command.CommandArgs;
 import br.com.aspenmc.command.CommandFramework;
 import br.com.aspenmc.command.CommandHandler;
-import br.com.aspenmc.entity.Member;
-import br.com.aspenmc.entity.Sender;
-import br.com.aspenmc.entity.member.Skin;
-import br.com.aspenmc.entity.member.configuration.LoginConfiguration;
-import br.com.aspenmc.entity.member.status.League;
-import br.com.aspenmc.entity.member.status.Status;
-import br.com.aspenmc.entity.member.status.StatusType;
+import br.com.aspenmc.entity.sender.Sender;
+import br.com.aspenmc.entity.sender.member.Member;
+import br.com.aspenmc.entity.sender.member.Skin;
+import br.com.aspenmc.entity.sender.member.configuration.LoginConfiguration;
+import br.com.aspenmc.entity.sender.member.status.League;
+import br.com.aspenmc.entity.sender.member.status.Status;
+import br.com.aspenmc.entity.sender.member.status.StatusType;
 import br.com.aspenmc.language.Language;
 import br.com.aspenmc.manager.PermissionManager;
 import br.com.aspenmc.packet.type.member.skin.SkinChangeRequest;
@@ -52,8 +51,7 @@ public class ProfileCommand implements CommandHandler {
                 CommonPlugin.getInstance().getPluginPlatform().runSync(
                         () -> new YourProfileInventory(cmdArgs.getSenderAsMember(BukkitMember.class).getPlayer()));
             } else {
-                sender.sendMessage(sender.t("command.account.usage", "%label%",
-                        cmdArgs.getLabel()));
+                sender.sendMessage(sender.t("command.account.usage", "%label%", cmdArgs.getLabel()));
             }
             return;
         }
@@ -142,7 +140,7 @@ public class ProfileCommand implements CommandHandler {
         Member player = cmdArgs.getSenderAsMember();
         String[] args = cmdArgs.getArgs();
 
-        StatusType statusType = BukkitCommon.getInstance().getPreloadedStatus().stream().findFirst().orElse(null);
+        StatusType statusType = StatusType.getByServer(CommonPlugin.getInstance().getServerType());
 
         if (statusType == null || (args.length > 0 && args[0].equalsIgnoreCase("list"))) {
             player.sendMessage("");

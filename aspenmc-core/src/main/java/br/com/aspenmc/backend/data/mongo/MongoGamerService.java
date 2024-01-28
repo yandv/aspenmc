@@ -1,14 +1,14 @@
 package br.com.aspenmc.backend.data.mongo;
 
-import com.google.gson.JsonObject;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.model.Filters;
 import br.com.aspenmc.CommonConst;
 import br.com.aspenmc.CommonPlugin;
 import br.com.aspenmc.backend.data.GamerService;
-import br.com.aspenmc.entity.Member;
-import br.com.aspenmc.entity.member.gamer.Gamer;
+import br.com.aspenmc.entity.sender.member.Member;
+import br.com.aspenmc.entity.sender.member.gamer.Gamer;
 import br.com.aspenmc.utils.json.JsonUtils;
+import com.google.gson.JsonObject;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.model.Filters;
 import org.bson.Document;
 
 import java.lang.reflect.Constructor;

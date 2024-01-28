@@ -3,8 +3,8 @@ package br.com.aspenmc.bungee.listener;
 import br.com.aspenmc.CommonConst;
 import br.com.aspenmc.CommonPlugin;
 import br.com.aspenmc.bungee.BungeeMain;
-import br.com.aspenmc.entity.Member;
-import br.com.aspenmc.entity.member.configuration.LoginConfiguration;
+import br.com.aspenmc.entity.sender.member.Member;
+import br.com.aspenmc.entity.sender.member.configuration.LoginConfiguration;
 import br.com.aspenmc.language.Language;
 import br.com.aspenmc.server.ProxiedServer;
 import br.com.aspenmc.server.ServerType;
@@ -21,7 +21,7 @@ import java.util.UUID;
 
 public class ServerListener implements Listener {
 
-    public static final ServerType LOGIN_SERVER = ServerType.LOBBY;
+    public static final ServerType LOGIN_SERVER = ServerType.LOGIN;
 
     @EventHandler
     public void onSearchServer(SearchServerEvent event) {
@@ -66,13 +66,11 @@ public class ServerListener implements Listener {
     @EventHandler
     public void onServerConnect(ServerConnectEvent event) {
         ProxiedPlayer player = event.getPlayer();
-        Member member = CommonPlugin.getInstance().getMemberManager().getMemberById(player.getUniqueId()).orElse(null);
+        boolean isLoggedIn = CommonPlugin.getInstance().getMemberManager().getMemberById(player.getUniqueId())
+                                         .map(Member::getLoginConfiguration).map(LoginConfiguration::isLogged)
+                                         .orElse(false);
 
-        if (member == null) return;
-
-        boolean logged = member.getLoginConfiguration().isLogged();
-
-        if (logged) return;
+        if (isLoggedIn) return;
 
         ProxiedServer toServer = CommonPlugin.getInstance().getServerManager().getServer(event.getTarget().getName());
 

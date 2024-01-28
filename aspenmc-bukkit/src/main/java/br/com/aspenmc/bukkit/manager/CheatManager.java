@@ -8,7 +8,7 @@ import br.com.aspenmc.bukkit.antihax.PlayerListener;
 import br.com.aspenmc.bukkit.antihax.test.AutosoupCheck;
 import br.com.aspenmc.bukkit.command.BukkitCommandFramework;
 import br.com.aspenmc.bukkit.entity.PlayerData;
-import br.com.aspenmc.entity.Member;
+import br.com.aspenmc.entity.sender.member.Member;
 import br.com.aspenmc.packet.type.member.MemberPunishRequest;
 import br.com.aspenmc.punish.PunishType;
 import me.liwk.karhu.api.KarhuAPI;
