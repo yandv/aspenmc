@@ -3,6 +3,7 @@ package br.com.aspenmc.bukkit.utils;
 import br.com.aspenmc.CommonPlugin;
 import br.com.aspenmc.bukkit.BukkitCommon;
 import br.com.aspenmc.entity.sender.member.Skin;
+import br.com.aspenmc.utils.ProtocolVersion;
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.events.PacketContainer;
@@ -19,6 +20,7 @@ import org.bukkit.entity.Player;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
+import java.util.logging.Level;
 
 public class PlayerAPI {
 
@@ -45,44 +47,13 @@ public class PlayerAPI {
             field.setAccessible(false);
             playersByName.put(name, MinecraftReflection.getCraftPlayerClass().getMethod("getHandle").invoke(player));
             f.setAccessible(false);
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception ex) {
+            CommonPlugin.getInstance().getLogger().log(Level.SEVERE, "Failed to change player name", ex);
+            return;
         }
 
         if (respawn) {
             respawnPlayer(player);
-        }
-    }
-
-    public void addToTab(Player player, Collection<? extends Player> players) {
-        PacketContainer packet = new PacketContainer(PacketType.Play.Server.PLAYER_INFO);
-        packet.getPlayerInfoAction().write(0, PlayerInfoAction.ADD_PLAYER);
-
-        if (player.getGameMode() != null) {
-            try {
-                Object entityPlayer = MinecraftReflection.getCraftPlayerClass().getMethod("getHandle").invoke(player);
-                Object getDisplayName = MinecraftReflection.getEntityPlayerClass().getMethod("getPlayerListName")
-                                                           .invoke(entityPlayer);
-                packet.getPlayerInfoDataLists().write(0, Arrays.asList(
-                        new PlayerInfoData(WrappedGameProfile.fromPlayer(player), 0,
-                                NativeGameMode.fromBukkit(player.getGameMode()),
-                                getDisplayName != null ? WrappedChatComponent.fromHandle(getDisplayName) : null)));
-            } catch (FieldAccessException | IllegalAccessException | IllegalArgumentException |
-                     InvocationTargetException | NoSuchMethodException | SecurityException e1) {
-                e1.printStackTrace();
-            }
-        }
-
-        for (Player online : players) {
-            if (!online.canSee(player)) {
-                continue;
-            }
-
-            try {
-                ProtocolLibrary.getProtocolManager().sendServerPacket(online, packet);
-            } catch (InvocationTargetException e) {
-                e.printStackTrace();
-            }
         }
     }
 
@@ -96,11 +67,13 @@ public class PlayerAPI {
                                                            .invoke(entityPlayer);
                 packet.getPlayerInfoDataLists().write(0, Arrays.asList(
                         new PlayerInfoData(WrappedGameProfile.fromPlayer(player), 0,
-                                NativeGameMode.fromBukkit(player.getGameMode()),
-                                getDisplayName != null ? WrappedChatComponent.fromHandle(getDisplayName) : null)));
+                                           NativeGameMode.fromBukkit(player.getGameMode()),
+                                           getDisplayName != null ? WrappedChatComponent.fromHandle(getDisplayName) :
+                                                   null)));
             } catch (FieldAccessException | IllegalAccessException | IllegalArgumentException |
-                     InvocationTargetException | NoSuchMethodException | SecurityException e1) {
-                e1.printStackTrace();
+                     InvocationTargetException | NoSuchMethodException | SecurityException ex) {
+                CommonPlugin.getInstance().getLogger().log(Level.SEVERE, "Failed to remove player from tab list", ex);
+                return;
             }
         }
 
@@ -111,8 +84,9 @@ public class PlayerAPI {
 
             try {
                 ProtocolLibrary.getProtocolManager().sendServerPacket(online, packet);
-            } catch (InvocationTargetException e) {
-                e.printStackTrace();
+            } catch (InvocationTargetException ex) {
+                CommonPlugin.getInstance().getLogger()
+                            .log(Level.SEVERE, "Failed to send packet to " + online.getName(), ex);
             }
         }
     }
@@ -140,11 +114,13 @@ public class PlayerAPI {
                                                            .invoke(entityPlayer);
                 int ping = (int) MinecraftReflection.getEntityPlayerClass().getField("ping").get(entityPlayer);
                 data.add(new PlayerInfoData(WrappedGameProfile.fromPlayer(player), ping,
-                        NativeGameMode.fromBukkit(player.getGameMode()),
-                        getDisplayName != null ? WrappedChatComponent.fromHandle(getDisplayName) : null));
+                                            NativeGameMode.fromBukkit(player.getGameMode()),
+                                            getDisplayName != null ? WrappedChatComponent.fromHandle(getDisplayName) :
+                                                    null));
             } catch (FieldAccessException | IllegalAccessException | IllegalArgumentException |
-                     InvocationTargetException | NoSuchMethodException | SecurityException | NoSuchFieldException e1) {
-                e1.printStackTrace();
+                     InvocationTargetException | NoSuchMethodException | SecurityException | NoSuchFieldException ex) {
+                CommonPlugin.getInstance().getLogger().log(Level.SEVERE, "Failed to respawn player", ex);
+                return;
             }
         }
 
@@ -181,8 +157,8 @@ public class PlayerAPI {
                 player.setExp(player.getExp());
                 player.setLevel(player.getLevel());
                 player.updateInventory();
-            } catch (InvocationTargetException e) {
-                e.printStackTrace();
+            } catch (InvocationTargetException ex) {
+                CommonPlugin.getInstance().getLogger().log(Level.SEVERE, "Failed to respawn player", ex);
             }
         });
     }
@@ -203,7 +179,7 @@ public class PlayerAPI {
         } catch (CacheLoader.InvalidCacheLoadException exception) {
             CommonPlugin.getInstance()
                         .debug("Failed to load skin for " + player.getUniqueId() + " (" + player.getName() + "): " +
-                                exception.getMessage());
+                                       exception.getMessage());
             gameProfile.getProperties().clear();
         }
 
@@ -244,16 +220,6 @@ public class PlayerAPI {
         removePlayerSkin(player, true);
     }
 
-    public static Skin getNaturalSkin(String playerName, UUID uniqueId) {
-//        try {
-//            WrappedSignedProperty property = TextureFetcher.loadTexture(new WrappedGameProfile(uniqueId, playerName));
-//
-//            return new Skin(playerName, uniqueId, property.getValue(), property.getSignature());
-//        } catch (CacheLoader.InvalidCacheLoadException exception) {
-        return CommonPlugin.getInstance().getDefaultSkin();
-//        }
-    }
-
     public static void removePlayerSkin(Player player, boolean respawn) {
         WrappedGameProfile gameProfile = WrappedGameProfile.fromPlayer(player);
         gameProfile.getProperties().clear();
@@ -276,14 +242,6 @@ public class PlayerAPI {
             setHeaderAndFooter(player, header, footer);
     }
 
-    public static void setHeader(Player p, String header) {
-        setHeaderAndFooter(p, header, null);
-    }
-
-    public static void setFooter(Player p, String footer) {
-        setHeaderAndFooter(p, null, footer);
-    }
-
     public static void setHeaderAndFooter(Player p, String rawHeader, String rawFooter) {
         PacketContainer packet = new PacketContainer(PacketType.Play.Server.PLAYER_LIST_HEADER_FOOTER);
         packet.getChatComponents().write(0, WrappedChatComponent.fromText(rawHeader));
@@ -291,25 +249,22 @@ public class PlayerAPI {
 
         try {
             ProtocolLibrary.getProtocolManager().sendServerPacket(p, packet);
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
+        } catch (InvocationTargetException ex) {
+            CommonPlugin.getInstance().getLogger().log(Level.SEVERE, "Failed to send packet to " + p.getName(), ex);
         }
     }
 
     public static void title(Player player, String title, String subTitle) {
         if (BukkitCommon.getInstance().getProtocolVersion(player).getId() >= 47) {
-            sendPacket(player,
-                    new PacketBuilder(PacketType.Play.Server.TITLE).writeTitleAction(0, EnumWrappers.TitleAction.TITLE)
-                                                                   .writeChatComponents(0,
-                                                                           WrappedChatComponent.fromText(title))
-                                                                   .build());
+            sendPacket(player, new PacketBuilder(PacketType.Play.Server.TITLE)
+                    .writeTitleAction(0, EnumWrappers.TitleAction.TITLE)
+                    .writeChatComponents(0, WrappedChatComponent.fromText(title)).build());
             sendPacket(player, new PacketBuilder(PacketType.Play.Server.TITLE)
                     .writeTitleAction(0, EnumWrappers.TitleAction.SUBTITLE)
                     .writeChatComponents(0, WrappedChatComponent.fromText(subTitle)).build());
-            sendPacket(player,
-                    new PacketBuilder(PacketType.Play.Server.TITLE).writeTitleAction(0, EnumWrappers.TitleAction.TIMES)
-                                                                   .writeInteger(0, 10).writeInteger(1, 20)
-                                                                   .writeInteger(2, 20).build());
+            sendPacket(player, new PacketBuilder(PacketType.Play.Server.TITLE)
+                    .writeTitleAction(0, EnumWrappers.TitleAction.TIMES).writeInteger(0, 10).writeInteger(1, 20)
+                    .writeInteger(2, 20).build());
         }
     }
 
@@ -323,18 +278,15 @@ public class PlayerAPI {
 
     public static void title(Player player, String title, String subTitle, int fadeIn, int stayIn, int fadeOut) {
         if (BukkitCommon.getInstance().getProtocolVersion(player).getId() >= 47) {
-            sendPacket(player,
-                    new PacketBuilder(PacketType.Play.Server.TITLE).writeTitleAction(0, EnumWrappers.TitleAction.TITLE)
-                                                                   .writeChatComponents(0,
-                                                                           WrappedChatComponent.fromText(title))
-                                                                   .build());
+            sendPacket(player, new PacketBuilder(PacketType.Play.Server.TITLE)
+                    .writeTitleAction(0, EnumWrappers.TitleAction.TITLE)
+                    .writeChatComponents(0, WrappedChatComponent.fromText(title)).build());
             sendPacket(player, new PacketBuilder(PacketType.Play.Server.TITLE)
                     .writeTitleAction(0, EnumWrappers.TitleAction.SUBTITLE)
                     .writeChatComponents(0, WrappedChatComponent.fromText(subTitle)).build());
-            sendPacket(player,
-                    new PacketBuilder(PacketType.Play.Server.TITLE).writeTitleAction(0, EnumWrappers.TitleAction.TIMES)
-                                                                   .writeInteger(0, fadeIn).writeInteger(1, stayIn)
-                                                                   .writeInteger(2, fadeOut).build());
+            sendPacket(player, new PacketBuilder(PacketType.Play.Server.TITLE)
+                    .writeTitleAction(0, EnumWrappers.TitleAction.TIMES).writeInteger(0, fadeIn).writeInteger(1, stayIn)
+                    .writeInteger(2, fadeOut).build());
         }
     }
 
@@ -354,6 +306,44 @@ public class PlayerAPI {
             ProtocolLibrary.getProtocolManager().sendServerPacket(player, packet);
         } catch (InvocationTargetException e) {
             e.printStackTrace();
+        }
+    }
+
+    public static ProtocolVersion getProtocolVersion(Player player) {
+        return ProtocolVersion.getById(ProtocolLibrary.getProtocolManager().getProtocolVersion(player));
+    }
+
+    public void addToTab(Player player, Collection<? extends Player> players) {
+        PacketContainer packet = new PacketContainer(PacketType.Play.Server.PLAYER_INFO);
+        packet.getPlayerInfoAction().write(0, PlayerInfoAction.ADD_PLAYER);
+
+        if (player.getGameMode() != null) {
+            try {
+                Object entityPlayer = MinecraftReflection.getCraftPlayerClass().getMethod("getHandle").invoke(player);
+                Object getDisplayName = MinecraftReflection.getEntityPlayerClass().getMethod("getPlayerListName")
+                                                           .invoke(entityPlayer);
+                packet.getPlayerInfoDataLists().write(0, Arrays.asList(
+                        new PlayerInfoData(WrappedGameProfile.fromPlayer(player), 0,
+                                           NativeGameMode.fromBukkit(player.getGameMode()),
+                                           getDisplayName != null ? WrappedChatComponent.fromHandle(getDisplayName) :
+                                                   null)));
+            } catch (FieldAccessException | IllegalAccessException | IllegalArgumentException |
+                     InvocationTargetException | NoSuchMethodException | SecurityException e1) {
+                e1.printStackTrace();
+            }
+        }
+
+        for (Player online : players) {
+            if (!online.canSee(player)) {
+                continue;
+            }
+
+            try {
+                ProtocolLibrary.getProtocolManager().sendServerPacket(online, packet);
+            } catch (InvocationTargetException e) {
+                CommonPlugin.getInstance().getLogger()
+                            .log(Level.SEVERE, "Failed to send packet to " + online.getName(), e);
+            }
         }
     }
 }

@@ -12,44 +12,6 @@ import java.util.stream.Collectors;
 
 public class MemberManager {
 
-    public static void main(String[] args) {
-        Gamer<String> gamer = new Gamer<String>() {
-
-            @Override
-            public UUID getUniqueId() {
-                return null;
-            }
-
-            @Override
-            public void loadEntity(String s) {
-
-            }
-
-            @Override
-            public String getEntity() {
-                return null;
-            }
-
-            @Override
-            public Class<String> getEntityClass() {
-                return String.class;
-            }
-
-            @Override
-            public String getId() {
-                return "viado";
-            }
-        };
-
-        MemberManager memberManager = new MemberManager();
-        UUID uuid = UUID.randomUUID();
-
-        memberManager.loadGamer(uuid, "viado", gamer);
-        memberManager.getGamers(uuid, String.class).forEach(g -> {
-            System.out.println("achou " + g.getId());
-        });
-    }
-
     private final Map<UUID, Member> memberMap;
     private final Map<String, Map<UUID, Gamer<?>>> gamerMap;
 

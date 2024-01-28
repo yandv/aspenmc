@@ -10,10 +10,10 @@ import org.bukkit.entity.Player;
 @Getter
 public class PlayerChangeLeagueEvent extends PlayerCancellableEvent {
 
-    private BukkitMember bukkitMember;
-    private Status status;
-    private League oldLeague;
-    private League newLeague;
+    private final BukkitMember bukkitMember;
+    private final Status status;
+    private final League oldLeague;
+    private final League newLeague;
 
     public PlayerChangeLeagueEvent(Player p, BukkitMember player, Status status, League oldLeague, League newLeague) {
         super(p);

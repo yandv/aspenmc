@@ -19,8 +19,6 @@ public class FileUtils {
                 return null;
             }
 
-            System.out.println(url);
-
             while (file.getParentFile() != null && !file.getParentFile().exists()) {
                 file.getParentFile().mkdirs();
             }

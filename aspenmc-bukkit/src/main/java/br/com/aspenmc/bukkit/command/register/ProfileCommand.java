@@ -186,8 +186,9 @@ public class ProfileCommand implements CommandHandler {
             double percent = (totalLeagueXp * 100.0D) / currentLeague.getMaxXp();
 
             player.sendMessage("§aXP para a próxima liga §7[" +
-                    ProgressBar.getProgressBar(totalLeagueXp, currentLeague.getMaxXp(), 20, '┃', ChatColor.GREEN,
-                            ChatColor.GRAY) + "§7] §7" + CommonConst.DECIMAL_FORMAT.format(percent) + "§7%");
+                                       ProgressBar.getProgressBar(totalLeagueXp, currentLeague.getMaxXp(), 20, '┃',
+                                                                  ChatColor.GREEN, ChatColor.GRAY) + "§7] §7" +
+                                       CommonConst.DECIMAL_FORMAT.format(percent) + "§7%");
         }
     }
 
@@ -198,7 +199,7 @@ public class ProfileCommand implements CommandHandler {
 
         if (args.length < 2) {
             sender.sendMessage(" §a» §fUse §a/" + cmdArgs.getLabel() +
-                    " <player> <statusType> <xp>§f para adicionar xp a um jogador.");
+                                       " <player> <statusType> <xp>§f para adicionar xp a um jogador.");
             return;
         }
 
@@ -243,7 +244,7 @@ public class ProfileCommand implements CommandHandler {
 
         if (args.length < 2) {
             sender.sendMessage(" §a» §fUse §a/" + cmdArgs.getLabel() +
-                    " <player> <statusType> <xp>§f para adicionar xp a um jogador.");
+                                       " <player> <statusType> <xp>§f para adicionar xp a um jogador.");
             return;
         }
 
@@ -308,8 +309,8 @@ public class ProfileCommand implements CommandHandler {
             if (member.hasClan()) {
                 Bukkit.getPluginManager().callEvent(
                         new PlayerClanTagUpdateEvent(member, member.getClan().orElse(null), false, true,
-                                member.getPreferencesConfiguration().getClanTag(),
-                                member.getPreferencesConfiguration().getClanTag()));
+                                                     member.getPreferencesConfiguration().getClanTag(),
+                                                     member.getPreferencesConfiguration().getClanTag()));
             }
         } else if (args[0].equalsIgnoreCase("desativar") || args[0].equalsIgnoreCase("disable")) {
             if (!member.getPreferencesConfiguration().isClanDisplayTagEnabled()) {
@@ -321,8 +322,8 @@ public class ProfileCommand implements CommandHandler {
             member.sendMessage(member.getLanguage().t("command.clantag.disabled"));
             Bukkit.getPluginManager().callEvent(
                     new PlayerClanTagUpdateEvent(member, member.getClan().orElse(null), true, false,
-                            member.getPreferencesConfiguration().getClanTag(),
-                            member.getPreferencesConfiguration().getClanTag()));
+                                                 member.getPreferencesConfiguration().getClanTag(),
+                                                 member.getPreferencesConfiguration().getClanTag()));
         } else {
             ClanTag clanTag = ClanTag.getByName(args[0]);
 
@@ -350,8 +351,11 @@ public class ProfileCommand implements CommandHandler {
 
             if (member.hasClan()) {
                 Bukkit.getPluginManager().callEvent(new PlayerClanTagUpdateEvent(member, member.getClan().orElse(null),
-                        member.getPreferencesConfiguration().isClanDisplayTagEnabled(),
-                        member.getPreferencesConfiguration().isClanDisplayTagEnabled(), oldClanTag, clanTag));
+                                                                                 member.getPreferencesConfiguration()
+                                                                                       .isClanDisplayTagEnabled(),
+                                                                                 member.getPreferencesConfiguration()
+                                                                                       .isClanDisplayTagEnabled(),
+                                                                                 oldClanTag, clanTag));
             }
         }
     }
@@ -375,7 +379,7 @@ public class ProfileCommand implements CommandHandler {
 
         if (language == member.getLanguage()) {
             member.sendMessage(member.getLanguage().t("command.language.language-already-set", "%language%",
-                    language.getLanguageName()));
+                                                      language.getLanguageName()));
             return;
         }
 
@@ -409,9 +413,12 @@ public class ProfileCommand implements CommandHandler {
         }
 
         CommonPlugin.getInstance().getPacketManager().waitPacket(SkinChangeResponse.class,
-                CommonPlugin.getInstance().getPacketManager().sendPacket(
-                        new SkinChangeRequest(member.getUniqueId(), CommonPlugin.getInstance().getDefaultSkin())), 500,
-                packet -> {
+                                                                 CommonPlugin.getInstance().getPacketManager()
+                                                                             .sendPacket(new SkinChangeRequest(
+                                                                                     member.getUniqueId(),
+                                                                                     CommonPlugin.getInstance()
+                                                                                                 .getDefaultSkin())),
+                                                                 500, packet -> {
                     if (packet == null) {
                         member.sendMessage(member.t("skin-change-error"));
                         return;
@@ -439,8 +446,10 @@ public class ProfileCommand implements CommandHandler {
                 CommonPlugin.getInstance().getDefaultSkin();
 
         CommonPlugin.getInstance().getPacketManager().waitPacket(SkinChangeResponse.class,
-                CommonPlugin.getInstance().getPacketManager()
-                            .sendPacket(new SkinChangeRequest(member.getUniqueId(), newSkin)), 500, packet -> {
+                                                                 CommonPlugin.getInstance().getPacketManager()
+                                                                             .sendPacket(new SkinChangeRequest(
+                                                                                     member.getUniqueId(), newSkin)),
+                                                                 500, packet -> {
                     if (packet == null) {
                         member.sendMessage(member.t("skin-change-error"));
                         return;
@@ -520,17 +529,33 @@ public class ProfileCommand implements CommandHandler {
         member.setTag(member.getDefaultTag());
         member.sendMessage("§aO seu nick foi alterado para o " + fakeName + ".");
 
+        Skin newSkin = member.getLoginConfiguration().getAccountType() == LoginConfiguration.AccountType.PREMIUM ?
+                CommonPlugin.getInstance().getSkinService().loadData(member.getName())
+                            .orElse(CommonPlugin.getInstance().getDefaultSkin()) :
+                CommonPlugin.getInstance().getDefaultSkin();
+
         CommonPlugin.getInstance().getPacketManager().waitPacket(SkinChangeResponse.class,
-                CommonPlugin.getInstance().getPacketManager().sendPacket(
-                        new SkinChangeRequest(member.getUniqueId(), CommonPlugin.getInstance().getDefaultSkin())), 500,
-                packet -> {
-                    PlayerAPI.changePlayerSkin(member.getPlayer(), CommonPlugin.getInstance().getDefaultSkin(), true);
+                                                                 CommonPlugin.getInstance().getPacketManager()
+                                                                             .sendPacket(new SkinChangeRequest(
+                                                                                     member.getUniqueId(), newSkin)),
+                                                                 500, packet -> {
+                    if (packet == null) {
+                        member.sendMessage(member.t("skin-change-error"));
+                        return;
+                    }
 
-                    member.setSkin(CommonPlugin.getInstance().getDefaultSkin());
-                    member.setPlayerSkin(CommonConst.DEFAULT_SKIN_NAME);
+                    if (packet.getSkinResult() == SkinChangeResponse.SkinResult.SUCCESS) {
+                        PlayerAPI.changePlayerSkin(member.getPlayer(), CommonPlugin.getInstance().getDefaultSkin(),
+                                                   true);
 
-                    Bukkit.getPluginManager()
-                          .callEvent(new PlayerChangedSkinEvent(member, CommonPlugin.getInstance().getDefaultSkin()));
+                        member.setSkin(newSkin);
+                        member.setPlayerSkin(newSkin.getPlayerName());
+
+                        Bukkit.getPluginManager().callEvent(
+                                new PlayerChangedSkinEvent(member, CommonPlugin.getInstance().getDefaultSkin()));
+                    } else {
+                        member.sendMessage("§c" + packet.getErrorMessage());
+                    }
                 });
     }
 

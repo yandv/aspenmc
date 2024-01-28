@@ -1,6 +1,5 @@
 package br.com.aspenmc.bungee.listener;
 
-import br.com.aspenmc.CommonConst;
 import br.com.aspenmc.CommonPlugin;
 import br.com.aspenmc.bungee.BungeeMain;
 import br.com.aspenmc.bungee.entity.BungeeMember;
@@ -218,7 +217,6 @@ public class MemberListener implements Listener {
             }
 
             targetMember.setIpInfo(ipInfo);
-            System.out.println(CommonConst.GSON.toJson(ipInfo));
         });
 
         member.createSession(playerName, ipAddress);
