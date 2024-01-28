@@ -55,26 +55,19 @@ public class CommonPlugin {
 
     private Skin defaultSkin;
 
+    private final UUIDFetcher uuidFetcher = new UUIDFetcher();
     @Setter
-    private ClanManager clanManager = new ClanManager();
-
+    private ClanManager clanManager;
     @Setter
-    private LanguageManager languageManager = new LanguageManager();
-
+    private LanguageManager languageManager;
     @Setter
-    private MemberManager memberManager = new MemberManager();
-
+    private MemberManager memberManager;
     @Setter
-    private PacketManager packetManager = new PacketManager();
-
+    private PacketManager packetManager;
     @Setter
-    private PermissionManager permissionManager = new PermissionManager();
-
+    private PermissionManager permissionManager;
     @Setter
-    private ServerManager serverManager = new ServerManager();
-
-    @Setter
-    private StatusManager statusManager = new StatusManager();
+    private ServerManager serverManager;
 
     @Setter
     private ClanService clanService;
@@ -105,8 +98,8 @@ public class CommonPlugin {
 
     @Setter
     private StatusService statusService;
-
-    private UUIDFetcher uuidFetcher = new UUIDFetcher();
+    @Setter
+    private StatusManager statusManager;
 
     @Setter
     private boolean serverLog = true;
@@ -128,7 +121,16 @@ public class CommonPlugin {
     public CommonPlugin(CommonPlatform pluginPlatform, Logger logger) {
         this.pluginPlatform = pluginPlatform;
         this.logger = logger;
+
         instance = this;
+
+        this.clanManager = new ClanManager();
+        this.languageManager = new LanguageManager();
+        this.memberManager = new MemberManager();
+        this.packetManager = new PacketManager();
+        this.permissionManager = new PermissionManager();
+        this.serverManager = new ServerManager();
+        this.statusManager = new StatusManager();
     }
 
     public void startConnection(Credentials mongoCredentials, Credentials redisCredentials) {
@@ -156,11 +158,11 @@ public class CommonPlugin {
 
         defaultSkin = skinService.loadData(CommonConst.DEFAULT_SKIN_NAME)
                                  .orElse(new Skin(CommonConst.DEFAULT_SKIN_NAME, CommonConst.CONSOLE_ID,
-                                         CommonConst.DEFAULT_SKIN_VALUE, CommonConst.SIGNATURE));
+                                                  CommonConst.DEFAULT_SKIN_VALUE, CommonConst.SIGNATURE));
     }
 
     public void debug(String message) {
-        System.out.println("[DEBUG] " + message);
+        logger.log(Level.INFO, "[DEBUG] " + message);
     }
 
     public void loadServers() {
@@ -172,25 +174,28 @@ public class CommonPlugin {
 
     private void tryAddServer(ProxiedServer server, int attemp) {
         packetManager.waitPacket(KeepAliveResponse.class,
-                packetManager.sendPacket(new KeepAliveRequest(server.getServerId())), 3000L, response -> {
-                    if (response != null) {
-                        serverManager.addActiveServer(server);
-                        debug("The server " + server.getServerId() + " (" + server.getServerType() + " - " +
-                                server.getOnlinePlayers() + "/" + server.getMaxPlayers() + ") has been loaded!");
-                        return;
-                    }
+                                 packetManager.sendPacket(new KeepAliveRequest(server.getServerId())), 3000L,
+                                 response -> {
+                                     if (response != null) {
+                                         serverManager.addActiveServer(server);
+                                         debug("The server " + server.getServerId() + " (" + server.getServerType() +
+                                                       " - " + server.getOnlinePlayers() + "/" +
+                                                       server.getMaxPlayers() + ") has been loaded!");
+                                         return;
+                                     }
 
-                    if (serverManager.hasServer(server.getServerId())) return;
+                                     if (serverManager.hasServer(server.getServerId())) return;
 
-                    if (attemp + 1 > 3) {
-                        logger.log(Level.WARNING, "The server " + server.getServerId() +
-                                " didn't respond to the keep alive request, stopping the connection...");
-                        serverService.stopServer(server.getServerId(), server.getServerType());
-                        return;
-                    }
+                                     if (attemp + 1 > 3) {
+                                         logger.log(Level.WARNING, "The server " + server.getServerId() +
+                                                 " didn't respond to the keep alive request, stopping the connection." +
+                                                 "..");
+                                         serverService.stopServer(server.getServerId(), server.getServerType());
+                                         return;
+                                     }
 
-                    tryAddServer(server, attemp + 1);
-                });
+                                     tryAddServer(server, attemp + 1);
+                                 });
     }
 
     public void stopConnection() {

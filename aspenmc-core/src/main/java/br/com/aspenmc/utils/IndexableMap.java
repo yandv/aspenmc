@@ -1,8 +1,6 @@
 package br.com.aspenmc.utils;
 
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 public class IndexableMap<K, V> extends HashMap<K, V> {
@@ -12,24 +10,6 @@ public class IndexableMap<K, V> extends HashMap<K, V> {
     public IndexableMap() {
         super();
         this.keyIndexMap = new HashMap<>();
-    }
-
-    public static void main(String[] args) {
-        IndexableMap<String, String> map = new IndexableMap<>();
-
-        map.put("1", "1");
-        map.put("2", "2");
-        map.put("3", "3");
-
-        System.out.println(map.indexOf("1"));
-        System.out.println(map.indexOf("2"));
-        System.out.println(map.indexOf("3"));
-        System.out.println(map.indexOf("4"));
-
-        map.remove("2");
-
-        System.out.println(map.indexOf("3"));
-        System.out.println(map.indexOf("1"));
     }
 
     @Override

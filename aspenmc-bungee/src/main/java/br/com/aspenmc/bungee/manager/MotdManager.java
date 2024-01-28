@@ -39,8 +39,6 @@ public class MotdManager {
                 }
             }
         }
-
-        System.out.println(CommonConst.GSON.toJson(this.motdListMap));
     }
 
     public Motd getServerNotFound() {

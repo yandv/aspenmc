@@ -84,8 +84,8 @@ public class BungeeMain extends Plugin implements CommonPlatform {
         plugin.setServerManager(new BungeeServerManager());
 
         plugin.startConnection(new Credentials(getConfig().getString("mongodb.hostname", "127.0.0.1"), "", "",
-                        getConfig().getString("mongodb.database", "aspenmc"), 6379),
-                new Credentials(getConfig().getString("redis.hostname", "localhost"), "", "", "", 6379));
+                                               getConfig().getString("mongodb.database", "aspenmc"), 6379),
+                               new Credentials(getConfig().getString("redis.hostname", "localhost"), "", "", "", 6379));
         super.onLoad();
     }
 
@@ -94,7 +94,7 @@ public class BungeeMain extends Plugin implements CommonPlatform {
         plugin.loadServers();
         plugin.getPluginPlatform().runAsync(
                 new RedisConnection.PubSubListener(plugin.getRedisConnection(), new BungeeCordPubSub(),
-                        CommonConst.SERVER_PACKET_CHANNEL));
+                                                   CommonConst.SERVER_PACKET_CHANNEL));
         motdManager = new MotdManager();
 
         registerListeners();
@@ -108,7 +108,7 @@ public class BungeeMain extends Plugin implements CommonPlatform {
                     CommandFramework.Command command = entry.getKey().getAnnotation(CommandFramework.Command.class);
 
                     return new BungeeCommandResponse.NormalCommand(command.name(), command.aliases(),
-                            command.permission());
+                                                                   command.permission());
                 }).toArray(BungeeCommandResponse.NormalCommand[]::new)));
         super.onEnable();
     }
@@ -163,14 +163,13 @@ public class BungeeMain extends Plugin implements CommonPlatform {
     public void registerPacketHandler() {
         plugin.getPacketManager().onEnable();
 
-        plugin.setServerLogPackets(true);
-
         plugin.getPacketManager().registerHandler(MemberGroupChange.class, packet -> {
             plugin.getMemberManager().getMemberById(packet.getPlayerId(), BungeeMember.class).ifPresent(
                     member -> ProxyServer.getInstance().getPluginManager().callEvent(
                             new PlayerChangedGroupEvent(member, packet.getGroupName(), packet.getExpiresAt(),
-                                    packet.getDuration(),
-                                    PlayerChangedGroupEvent.GroupAction.valueOf(packet.getGroupAction().name()))));
+                                                        packet.getDuration(),
+                                                        PlayerChangedGroupEvent.GroupAction.valueOf(
+                                                                packet.getGroupAction().name()))));
         });
 
         plugin.getPacketManager().registerHandler(BungeeCommandRequest.class, request -> {
@@ -179,7 +178,7 @@ public class BungeeMain extends Plugin implements CommonPlatform {
                         CommandFramework.Command command = entry.getKey().getAnnotation(CommandFramework.Command.class);
 
                         return new BungeeCommandResponse.NormalCommand(command.name(), command.aliases(),
-                                command.permission());
+                                                                       command.permission());
                     }).toArray(BungeeCommandResponse.NormalCommand[]::new)).id(request.getId())
                                                                            .server(request.getSource()));
         });
@@ -190,7 +189,7 @@ public class BungeeMain extends Plugin implements CommonPlatform {
             if (player == null) {
                 plugin.getPacketManager().sendPacket(
                         new SkinChangeResponse(request.getPlayerId(), SkinChangeResponse.SkinResult.PLAYER_NOT_FOUND,
-                                "player-not-found").id(request.getId()).server(request.getSource()));
+                                               "player-not-found").id(request.getId()).server(request.getSource()));
                 return;
             }
 
@@ -202,7 +201,7 @@ public class BungeeMain extends Plugin implements CommonPlatform {
             } catch (NoSuchFieldException | IllegalAccessException exception) {
                 plugin.getPacketManager().sendPacket(
                         new SkinChangeResponse(request.getPlayerId(), SkinChangeResponse.SkinResult.UNKNOWN_ERROR,
-                                exception.getMessage()).id(request.getId()).server(request.getSource()));
+                                               exception.getMessage()).id(request.getId()).server(request.getSource()));
                 throw new RuntimeException(exception);
             }
         });
@@ -228,7 +227,7 @@ public class BungeeMain extends Plugin implements CommonPlatform {
 
             Punish punish = CommonPlugin.getInstance().getPunishService()
                                         .createPunish(target, punisher, packet.getPunishType(), packet.getReason(),
-                                                packet.getExpiresAt()).join();
+                                                      packet.getExpiresAt()).join();
 
             target.loadConfiguration();
             target.getPunishConfiguration().punish(punish);
@@ -249,7 +248,8 @@ public class BungeeMain extends Plugin implements CommonPlatform {
         });
 
         plugin.getPacketManager().registerHandler(DiscordStaffMessage.class,
-                packet -> sendStaffChatMessage(packet.getDiscriminator(), packet.getMessage()));
+                                                  packet -> sendStaffChatMessage(packet.getDiscriminator(),
+                                                                                 packet.getMessage()));
     }
 
     public void registerListeners() {
@@ -313,14 +313,14 @@ public class BungeeMain extends Plugin implements CommonPlatform {
     public void runAsyncTimer(Runnable runnable, long delay, long period) {
         ProxyServer.getInstance().getScheduler()
                    .schedule(BungeeMain.getInstance(), runnable, (long) ((delay / 20.0D) * 1000),
-                           (long) ((period / 20.0D) * 1000), TimeUnit.MILLISECONDS);
+                             (long) ((period / 20.0D) * 1000), TimeUnit.MILLISECONDS);
     }
 
     @Override
     public void runAsyncLater(Runnable runnable, long delay) {
         ProxyServer.getInstance().getScheduler()
                    .schedule(BungeeMain.getInstance(), runnable, (long) ((delay / 20.0D) * 1000),
-                           TimeUnit.MILLISECONDS);
+                             TimeUnit.MILLISECONDS);
     }
 
     @Override
@@ -332,14 +332,14 @@ public class BungeeMain extends Plugin implements CommonPlatform {
     public void runLater(Runnable runnable, long delay) {
         ProxyServer.getInstance().getScheduler()
                    .schedule(BungeeMain.getInstance(), runnable, (long) ((delay / 20.0D) * 1000),
-                           TimeUnit.MILLISECONDS);
+                             TimeUnit.MILLISECONDS);
     }
 
     @Override
     public void runTimer(Runnable runnable, long delay, long period) {
         ProxyServer.getInstance().getScheduler()
                    .schedule(BungeeMain.getInstance(), runnable, (long) ((delay / 20.0D) * 1000),
-                           (long) ((period / 20.0D) * 1000), TimeUnit.MILLISECONDS);
+                             (long) ((period / 20.0D) * 1000), TimeUnit.MILLISECONDS);
     }
 
     public void sendStaffChatMessage(String discriminator, String message) {
@@ -357,7 +357,7 @@ public class BungeeMain extends Plugin implements CommonPlatform {
                               ChatColor.translateAlternateColorCodes('&', message)));
         plugin.getPacketManager().sendPacket(
                 new ServerStaffMessage(sender.getUniqueId(), sender.getName(), sender.getServerGroup().getGroupName(),
-                        message));
+                                       message));
     }
 
     public long getAveragePing() {

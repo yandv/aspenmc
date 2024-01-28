@@ -1,8 +1,7 @@
-
 package br.com.aspenmc.utils.string;
 
-import com.google.common.base.Preconditions;
 import br.com.aspenmc.CommonConst;
+import com.google.common.base.Preconditions;
 import net.md_5.bungee.api.ChatColor;
 
 import java.util.*;
@@ -25,7 +24,7 @@ public class StringFormat {
 
         for (int i = 0; i < split.length; i++) {
             if (ChatColor.stripColor(text).length() >= max || ChatColor.stripColor(text).endsWith(".") ||
-                ChatColor.stripColor(text).endsWith("!")) {
+                    ChatColor.stripColor(text).endsWith("!")) {
                 lore.add(text);
 
                 if (text.endsWith(".") || text.endsWith("!")) {
@@ -58,7 +57,8 @@ public class StringFormat {
         return "***.***.***" + ip.substring(ip.lastIndexOf("."));
     }
 
-    public static String createProgressBar(char character, char has, char need, int amount, double current, double max) {
+    public static String createProgressBar(char character, char has, char need, int amount, double current,
+            double max) {
         StringBuilder bar = new StringBuilder();
         double percentage = (current / max);
         double count = amount * percentage;
@@ -90,7 +90,7 @@ public class StringFormat {
 
     public static boolean isColor(ChatColor color) {
         return !(color == ChatColor.BOLD || color == ChatColor.ITALIC || color == ChatColor.UNDERLINE ||
-                 color == ChatColor.STRIKETHROUGH || color == ChatColor.MAGIC || color == ChatColor.RESET);
+                color == ChatColor.STRIKETHROUGH || color == ChatColor.MAGIC || color == ChatColor.RESET);
     }
 
     public static String getLastColors(String input) {
@@ -119,7 +119,7 @@ public class StringFormat {
     }
 
     public static String formatToRoman(int number) {
-        String[] roman = {"I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"};
+        String[] roman = { "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X" };
         return roman[number - 1];
     }
 
@@ -228,7 +228,7 @@ public class StringFormat {
         if (time >= 3600) {
             int hours = (time / 3600), minutes = (time % 3600) / 60, seconds = (time % 3600) % 60;
             return (hours < 10 ? "0" : "") + hours + ":" + (minutes < 10 ? "0" : "") + minutes + ":" +
-                   (seconds < 10 ? "0" : "") + seconds;
+                    (seconds < 10 ? "0" : "") + seconds;
         } else {
             int minutes = (time / 60), seconds = (time % 60);
             return minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
@@ -266,21 +266,21 @@ public class StringFormat {
             }
         case SHORT:
             return (days > 0 ? days + "d" + (hours > 0 || minutes > 0 || seconds > 0 ? " " : "") : "") +
-                   (hours > 0 ? hours + "h" + (seconds > 0 || minutes > 0 ? " " : "") : "") +
-                   (minutes > 0 ? minutes + "m" + (seconds > 0 ? " " : "") : "") +
-                   (seconds == 0 && (days > 0 || hours > 0 || minutes > 0) ? "" : seconds + "s");
+                    (hours > 0 ? hours + "h" + (seconds > 0 || minutes > 0 ? " " : "") : "") +
+                    (minutes > 0 ? minutes + "m" + (seconds > 0 ? " " : "") : "") +
+                    (seconds == 0 && (days > 0 || hours > 0 || minutes > 0) ? "" : seconds + "s");
         case NORMAL:
             return (days > 0 ?
                     days + " dia" + (days == 1 ? "" : "s") + (hours > 0 || minutes > 0 || seconds > 0 ? " " : "") :
                     "") +
-                   (hours > 0 ? hours + " hora" + (days == 1 ? "" : "s") + (seconds > 0 || minutes > 0 ? " " : "") :
-                    "") +
-                   (minutes > 0 ? minutes + " minuto" + (minutes == 1 ? "" : "s") + (seconds > 0 ? " " : "") : "") +
-                   (seconds == 0 && (days > 0 || hours > 0 || minutes > 0) ? "" :
-                    seconds + " segundo" + (seconds == 1 ? "" : "s"));
+                    (hours > 0 ? hours + " hora" + (days == 1 ? "" : "s") + (seconds > 0 || minutes > 0 ? " " : "") :
+                            "") +
+                    (minutes > 0 ? minutes + " minuto" + (minutes == 1 ? "" : "s") + (seconds > 0 ? " " : "") : "") +
+                    (seconds == 0 && (days > 0 || hours > 0 || minutes > 0) ? "" :
+                            seconds + " segundo" + (seconds == 1 ? "" : "s"));
         case DOUBLE_DOT:
             return "" + (hours > 0 ? (hours >= 10 ? hours : "0" + hours) + ":" : "") +
-                   (minutes >= 10 ? minutes : "0" + minutes) + ":" + (seconds >= 10 ? seconds : "0" + seconds);
+                    (minutes >= 10 ? minutes : "0" + minutes) + ":" + (seconds >= 10 ? seconds : "0" + seconds);
         default:
             return "";
         }
@@ -413,6 +413,8 @@ public class StringFormat {
             return "";
         }
 
+        time += 2L;
+
         long day = TimeUnit.SECONDS.toDays(time);
         long hours = TimeUnit.SECONDS.toHours(time) - day * 24L;
         long minutes = TimeUnit.SECONDS.toMinutes(time) - TimeUnit.SECONDS.toHours(time) * 60L;
@@ -450,9 +452,11 @@ public class StringFormat {
 
     public static long getTimeFromString(String time, boolean future) {
         Pattern timePattern = Pattern.compile("(?:([0-9]+)\\s*y[a-z]*[,\\s]*)?" + "(?:([0-9]+)\\s*mo[a-z]*[,\\s]*)?" +
-                                              "(?:([0-9]+)\\s*w[a-z]*[,\\s]*)?" + "(?:([0-9]+)\\s*d[a-z]*[,\\s]*)?" +
-                                              "(?:([0-9]+)\\s*h[a-z]*[,\\s]*)?" + "(?:([0-9]+)\\s*m[a-z]*[,\\s]*)?" +
-                                              "(?:([0-9]+)\\s*(?:s[a-z]*)?)?", Pattern.CASE_INSENSITIVE);
+                                                      "(?:([0-9]+)\\s*w[a-z]*[,\\s]*)?" +
+                                                      "(?:([0-9]+)\\s*d[a-z]*[,\\s]*)?" +
+                                                      "(?:([0-9]+)\\s*h[a-z]*[,\\s]*)?" +
+                                                      "(?:([0-9]+)\\s*m[a-z]*[,\\s]*)?" +
+                                                      "(?:([0-9]+)\\s*(?:s[a-z]*)?)?", Pattern.CASE_INSENSITIVE);
 
         Matcher m = timePattern.matcher(time);
 

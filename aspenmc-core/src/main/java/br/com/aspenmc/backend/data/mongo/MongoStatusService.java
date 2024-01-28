@@ -1,11 +1,9 @@
 package br.com.aspenmc.backend.data.mongo;
 
 import br.com.aspenmc.CommonConst;
-import br.com.aspenmc.backend.Credentials;
 import br.com.aspenmc.backend.data.StatusService;
 import br.com.aspenmc.backend.type.MongoConnection;
 import br.com.aspenmc.entity.sender.member.status.Status;
-import br.com.aspenmc.entity.sender.member.status.StatusField;
 import br.com.aspenmc.entity.sender.member.status.StatusType;
 import br.com.aspenmc.utils.json.JsonUtils;
 import com.google.gson.JsonObject;
@@ -25,25 +23,6 @@ public class MongoStatusService implements StatusService {
 
     public MongoStatusService(MongoConnection mongoConnection) {
         this.statusCollection = mongoConnection.createCollection("status");
-    }
-
-    public static void main(String[] args) {
-        MongoConnection mongoConnection = new MongoConnection(new Credentials("127.0.0.1", "", "", "aspenmc", 27017));
-        mongoConnection.createConnection();
-
-        UUID uniqueId = UUID.fromString("a0a0a0a0-a0a0-a0a0-a0a0-a0a0a0a0a0a0");
-        MongoStatusService mongoStatusData = new MongoStatusService(mongoConnection);
-
-        Status status = mongoStatusData.getStatusById(uniqueId, StatusType.FPS).join();
-
-        status.set(StatusField.KILLSTREAK, 1);
-        System.out.println(status.get(StatusField.KILLSTREAK));
-
-        mongoStatusData.saveStatus(status, StatusField.KILLSTREAK.toField());
-
-        mongoStatusData.ranking(StatusType.FPS, "xp", 1, 10).thenAccept(statuses -> {
-            System.out.println(CommonConst.GSON.toJson(statuses));
-        });
     }
 
     @Override

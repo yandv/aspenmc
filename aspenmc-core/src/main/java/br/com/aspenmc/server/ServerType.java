@@ -68,10 +68,4 @@ public enum ServerType {
         return SERVER_MAP.getOrDefault(name.toLowerCase(), orElse);
     }
 
-    public static void main(String[] args) {
-        ServerType serverType = FPS;
-
-        System.out.println(serverType.getParent().getName());
-        System.out.println(serverType.hasParent());
-    }
 }

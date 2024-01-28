@@ -62,11 +62,11 @@ public class DiscordMain {
         plugin.setServerLog(true);
 
         plugin.startConnection(new Credentials("127.0.0.1", "", "", "aspenmc", 6379),
-                new Credentials("localhost", "", "", "", 6379));
+                               new Credentials("localhost", "", "", "", 6379));
 
         plugin.getPluginPlatform().runAsync(
                 new RedisConnection.PubSubListener(plugin.getRedisConnection(), new BungeeCordPubSub(),
-                        CommonConst.SERVER_PACKET_CHANNEL));
+                                                   CommonConst.SERVER_PACKET_CHANNEL));
 
         try {
             setupDiscordServer();
@@ -112,12 +112,10 @@ public class DiscordMain {
         jda.addEventListener(new CommandListener());
         jda.addEventListener(new StaffchatListener());
 
-        plugin.setServerLogPackets(true);
-
         plugin.getPacketManager().registerHandler(ServerStaffMessage.class, packet -> {
             staffChatWebHook.send(new WebhookMessageBuilder()
-                    .setAvatarUrl("https://www.mc-heads.net/avatar/" + packet.getPlayerName())
-                    .setUsername(packet.getPlayerName()).setContent(packet.getMessage()).build());
+                                          .setAvatarUrl("https://www.mc-heads.net/avatar/" + packet.getPlayerName())
+                                          .setUsername(packet.getPlayerName()).setContent(packet.getMessage()).build());
         });
 
         plugin.getPacketManager().registerHandler(MessageRequest.class, packet -> {
@@ -128,12 +126,13 @@ public class DiscordMain {
                 if (textChannelById == null) return;
 
                 Punish punish = CommonConst.GSON.fromJson(CommonConst.GSON.toJson(packet.getData().get("punish")),
-                        Punish.class);
+                                                          Punish.class);
 
                 EmbedBuilder embedBuilder = new EmbedBuilder();
 
                 embedBuilder.setTitle(punish.getPunisherName() + " foi " +
-                        (punish.getPunishType() == PunishType.BAN ? "banido" : "silenciado") + ".");
+                                              (punish.getPunishType() == PunishType.BAN ? "banido" : "silenciado") +
+                                              ".");
                 embedBuilder.setThumbnail("https://mc-heads.net/avatar/" + punish.getPunisherName());
 
                 embedBuilder.addField("Banido por", punish.getPunisherName(), false);

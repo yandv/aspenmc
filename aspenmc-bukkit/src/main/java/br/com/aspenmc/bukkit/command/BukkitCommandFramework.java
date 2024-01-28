@@ -91,19 +91,22 @@ public class BukkitCommandFramework implements CommandFramework {
                         try {
                             entry.getKey().invoke(entry.getValue(), new CommandArgs(currentSender, label, args,
                                                                                     cmdLabel.split("\\.").length - 1));
-                        } catch (IllegalArgumentException | InvocationTargetException | IllegalAccessException e) {
-                            CommonPlugin.getInstance().getLogger()
-                                        .severe("Unable to execute command " + cmdLabel + " in " +
-                                                        entry.getValue().getClass().getName());
+                        } catch (IllegalArgumentException | InvocationTargetException | IllegalAccessException ex) {
+                            CommonPlugin.getInstance().getLogger().log(Level.SEVERE,
+                                                                       "Unable to execute command " + cmdLabel +
+                                                                               " in " +
+                                                                               entry.getValue().getClass().getName(),
+                                                                       ex);
                         }
                     });
                 } else {
                     try {
                         entry.getKey().invoke(entry.getValue(), new CommandArgs(currentSender, label, args,
                                                                                 cmdLabel.split("\\.").length - 1));
-                    } catch (IllegalArgumentException | InvocationTargetException | IllegalAccessException e) {
-                        CommonPlugin.getInstance().getLogger().severe("Unable to execute command " + cmdLabel + " in " +
-                                                                              entry.getValue().getClass().getName());
+                    } catch (IllegalArgumentException | InvocationTargetException | IllegalAccessException ex) {
+                        CommonPlugin.getInstance().getLogger().log(Level.SEVERE,
+                                                                   "Unable to execute command " + cmdLabel + " in " +
+                                                                           entry.getValue().getClass().getName(), ex);
                     }
                 }
                 return true;
@@ -121,7 +124,9 @@ public class BukkitCommandFramework implements CommandFramework {
                 Command command = m.getAnnotation(Command.class);
                 if (m.getParameterTypes().length != 1 ||
                         !CommandArgs.class.isAssignableFrom(m.getParameterTypes()[0])) {
-                    System.out.println("Unable to register command " + m.getName() + ". Unexpected method arguments");
+                    CommonPlugin.getInstance().getLogger().log(Level.SEVERE,
+                                                               "Unable to register command " + m.getName() +
+                                                                       ". Unexpected method arguments");
                     continue;
                 }
 
@@ -137,13 +142,16 @@ public class BukkitCommandFramework implements CommandFramework {
             if (m.getAnnotation(Completer.class) != null) {
                 Completer comp = m.getAnnotation(Completer.class);
                 if (m.getParameterTypes().length != 1 || m.getParameterTypes()[0] != CommandArgs.class) {
-                    System.out.println(
-                            "Unable to register tab completer " + m.getName() + ". Unexpected method arguments");
+                    CommonPlugin.getInstance().getLogger().log(Level.SEVERE,
+                                                               "Unable to register tab completer " + m.getName() +
+                                                                       ". Unexpected method arguments");
                     continue;
                 }
 
                 if (m.getReturnType() != List.class) {
-                    System.out.println("Unable to register tab completer " + m.getName() + ". Unexpected return type");
+                    CommonPlugin.getInstance().getLogger().log(Level.SEVERE,
+                                                               "Unable to register tab completer " + m.getName() +
+                                                                       ". Unexpected return type");
                     continue;
                 }
 
@@ -175,7 +183,7 @@ public class BukkitCommandFramework implements CommandFramework {
     private void registerCommand(Command command, String label, Method m, Object obj) {
         Entry<Method, Object> entry = new AbstractMap.SimpleEntry<Method, Object>(m, obj);
         commandMap.put(label.toLowerCase(), entry);
-        String cmdLabel = label.replace(".", ",").split(",")[0].toLowerCase();
+        String cmdLabel = label.replace("\\.", ",").split(",")[0].toLowerCase();
 
         if (map.getCommand(cmdLabel) == null) {
             org.bukkit.command.Command cmd = new BukkitCommand(command.name(), cmdLabel, plugin, command.permission());

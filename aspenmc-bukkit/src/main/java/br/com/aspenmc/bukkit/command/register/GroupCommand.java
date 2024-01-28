@@ -48,8 +48,22 @@ public class GroupCommand implements CommandHandler {
         }
 
         if (args.length == 1) {
-            sender.sendMessage("§aPermissões do jogador " + member.getName());
-            sender.sendMessage("  §fPermissões: §a" + Joiner.on(", ").join(member.getPermissions().keySet()));
+            boolean allPermissions = member.getPermissions().containsKey("*") ||
+                    member.getGroups().stream().anyMatch(group -> group.getPermissions().contains("*"));
+            sender.sendMessage(
+                    "§aPermissões do jogador " + member.getName() + (allPermissions ? " §e(todas as permissões)" : ""));
+
+            if (!member.getPermissions().isEmpty()) {
+                sender.sendMessage(
+                        "  §fPermissões individuais: §a" + Joiner.on(", ").join(member.getPermissions().keySet()));
+            }
+            if (!member.getGroups().isEmpty()) {
+                member.getGroups().stream().filter(group -> !group.getPermissions().isEmpty()).forEach(group -> {
+                    sender.sendMessage("  §fPermissões " + group.getGroupTag().map(Tag::getRealPrefix)
+                                                                .orElse(group.getGroupName()) + ": §a" +
+                                               Joiner.on(", ").join(group.getPermissions()));
+                });
+            }
             return;
         }
 
@@ -199,9 +213,36 @@ public class GroupCommand implements CommandHandler {
 
             sender.sendMessage("§eGrupos: §f" + CommonPlugin.getInstance().getPermissionManager().getGroups().size());
 
-            CommonPlugin.getInstance().getPermissionManager().getGroups().forEach(group -> {
-                sender.sendMessage(" §a» §f" + group.getGroupName());
-            });
+            CommonPlugin.getInstance().getPermissionManager().getGroups().stream()
+                        .sorted(Comparator.comparingInt(Group::getId)).forEach(group -> {
+                            StringBuilder hoverText = new StringBuilder();
+
+                            hoverText.append("§fGrupo: §7").append(group.getGroupName()).append("\n");
+                            hoverText.append("§fID: §7").append(group.getId()).append("\n\n");
+                            hoverText.append("§fTag: §7").append(group.getGroupTag().map(Tag::getRealPrefix).orElse(
+                                    "Sem tag"))
+                                     .append("\n\n");
+                            hoverText.append("§fPermissões: §7");
+
+                            if (group.getPermissions().isEmpty()) {
+                                hoverText.append("Sem permissões");
+                            } else {
+                                hoverText.append(Joiner.on(", ")
+                                                       .join(Arrays.copyOfRange(group.getPermissions().toArray(new String[0]), 0,
+                                                                                Math.min(5,
+                                                                                         group.getPermissions().size()))));
+
+                                if (group.getPermissions().size() > 5) {
+                                    hoverText.append(" e outras +").append(group.getPermissions().size() - 5).append(
+                                            " permissões");
+                                }
+                            }
+
+                            sender.sendMessage(
+                                    new MessageBuilder(" §a» §f").append("§f" + group.getGroupName(),
+                                                                         hoverText.toString())
+                                                                 .create());
+                        });
             break;
         }
         case "delete": {
@@ -512,8 +553,7 @@ public class GroupCommand implements CommandHandler {
                         "§aO grupo do jogador " + member.getName() + " foi alterado para " + group.getGroupName() +
                                 ".");
                 member.sendMessage("§aVocê recebeu o grupo " + group.getGroupName() + " com duração de " +
-                                           StringFormat.formatTime((expiresAt - System.currentTimeMillis()) / 1000) +
-                                           "");
+                                           StringFormat.formatTime((expiresAt - System.currentTimeMillis()) / 1000));
                 CommonPlugin.getInstance().getPluginPlatform().runAsync(
                         () -> CommonPlugin.getInstance().getServerService().sendPacket(
                                 new MemberGroupChange(member.getUniqueId(), group.getGroupName(), expiresAt,

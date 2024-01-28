@@ -1,9 +1,9 @@
 package br.com.aspenmc.manager;
 
-import com.google.common.collect.Sets;
-import lombok.Getter;
 import br.com.aspenmc.permission.Group;
 import br.com.aspenmc.permission.Tag;
+import com.google.common.collect.Sets;
+import lombok.Getter;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -11,7 +11,8 @@ import java.util.stream.Collectors;
 @Getter
 public class PermissionManager {
 
-    public static final Tag NULL_TAG = new Tag(0, "Membro", "§7", Sets.newHashSet("default", "padrão", "padrao", "normal"));
+    public static final Tag NULL_TAG = new Tag(0, "Membro", "§7",
+                                               Sets.newHashSet("default", "padrão", "padrao", "normal"));
 
     private final Map<String, Group> groupMap;
     private final Map<String, Tag> tagMap;
@@ -43,15 +44,15 @@ public class PermissionManager {
 
     public Group getFirstLowerGroup(int id) {
         return groupMap.values().stream().filter(group -> group.getId() < id).findFirst()
-                       .orElse(groupMap.values().stream().min((o1, o2) -> o1.getId() - o2.getId()).orElse(null));
+                       .orElse(groupMap.values().stream().min(Comparator.comparingInt(Group::getId)).orElse(null));
     }
 
     public Group getFirstLowerGroup(Group group) {
-        return getFirstLowerGroup(group == null ? 0 : group.getId());
+        return getFirstLowerGroup(group.getId());
     }
 
     public Group getHighGroup() {
-        return groupMap.values().stream().max((o1, o2) -> o1.getId() - o2.getId()).orElse(null);
+        return groupMap.values().stream().max(Comparator.comparingInt(Group::getId)).orElse(null);
     }
 
     public Optional<Group> getGroupById(int groupId) {

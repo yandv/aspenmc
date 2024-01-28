@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -40,12 +41,46 @@ public class BungeeCommandFramework implements CommandFramework {
         this.plugin.getProxy().getPluginManager().registerListener(plugin, new BungeeCompleter());
     }
 
+    public static void main(String[] args) {
+        test("/party ");
+        test("/party c");
+        test("/party c ");
+        test("/party c c");
+    }
+
+    public static void test(String string) {
+        Pattern pattern = Pattern.compile("\\s+");
+        Matcher matcher = pattern.matcher(string);
+
+        int count = 0;
+
+        while (matcher.find()) {
+            count++;
+        }
+
+        String[] split = string.replaceAll("\\s+", " ").split(" ");
+
+        if (split.length == 0) {
+            return;
+        }
+
+        String[] a = new String[count];
+
+        for (int i = 1; i < split.length; i++) {
+            a[i - 1] = split[i];
+        }
+
+        for (int i = a.length - 1; i >= 0; i--) {
+            if (a[i] == null) {
+                a[i] = "";
+            }
+        }
+    }
+
     public boolean handleCommand(CommandSender sender, String label, String[] args) {
-        Sender currentSender = sender instanceof ProxiedPlayer ? CommonPlugin.getInstance().getMemberManager()
-                                                                             .getMemberById(
-                                                                                     ((ProxiedPlayer) sender).getUniqueId())
-                                                                             .orElse(null) :
-                               CommonPlugin.getInstance().getConsoleSender();
+        Sender currentSender = sender instanceof ProxiedPlayer ?
+                CommonPlugin.getInstance().getMemberManager().getMemberById(((ProxiedPlayer) sender).getUniqueId())
+                            .orElse(null) : CommonPlugin.getInstance().getConsoleSender();
         for (int i = args.length; i >= 0; i--) {
             StringBuilder buffer = new StringBuilder();
             buffer.append(label.toLowerCase());
@@ -70,7 +105,8 @@ public class BungeeCommandFramework implements CommandFramework {
                         return true;
                     }
 
-                    if (!command.permission().isEmpty() && !member.hasSilentPermission(command.permission()) && !member.hasSilentPermission("*")) {
+                    if (!command.permission().isEmpty() && !member.hasSilentPermission(command.permission()) &&
+                            !member.hasSilentPermission("*")) {
                         member.sendMessage("§cVocê não tem permissão para executar esse comando.");
                         return true;
                     }
@@ -116,8 +152,10 @@ public class BungeeCommandFramework implements CommandFramework {
             if (m.getAnnotation(Command.class) != null) {
                 Command command = m.getAnnotation(Command.class);
                 if (m.getParameterTypes().length != 1 ||
-                    !CommandArgs.class.isAssignableFrom(m.getParameterTypes()[0])) {
-                    System.out.println("Unable to register command " + m.getName() + ". Unexpected method arguments");
+                        !CommandArgs.class.isAssignableFrom(m.getParameterTypes()[0])) {
+                    CommonPlugin.getInstance().getLogger().log(Level.SEVERE,
+                                                               "Unable to register command " + m.getName() +
+                                                                       ". Unexpected method arguments");
                     continue;
                 }
                 registerCommand(command, command.name(), m, cls);
@@ -127,13 +165,16 @@ public class BungeeCommandFramework implements CommandFramework {
             } else if (m.getAnnotation(Completer.class) != null) {
                 Completer comp = m.getAnnotation(Completer.class);
                 if (m.getParameterTypes().length != 1 ||
-                    !CommandArgs.class.isAssignableFrom(m.getParameterTypes()[0])) {
-                    System.out.println(
-                            "Unable to register tab completer " + m.getName() + ". Unexpected method arguments");
+                        !CommandArgs.class.isAssignableFrom(m.getParameterTypes()[0])) {
+                    CommonPlugin.getInstance().getLogger().log(Level.SEVERE,
+                                                               "Unable to register tab completer " + m.getName() +
+                                                                       ". Unexpected method arguments");
                     continue;
                 }
                 if (m.getReturnType() != List.class) {
-                    System.out.println("Unable to register tab completer " + m.getName() + ". Unexpected return type");
+                    CommonPlugin.getInstance().getLogger().log(Level.SEVERE,
+                                                               "Unable to register tab completer " + m.getName() +
+                                                                       ". Unexpected return type");
                     continue;
                 }
                 registerCompleter(comp.name(), m, cls);
@@ -164,6 +205,11 @@ public class BungeeCommandFramework implements CommandFramework {
         args.getSender().sendMessage("§cComando do bungeecord inacessível!");
     }
 
+    @Override
+    public Class<?> getJarClass() {
+        return plugin.getClass();
+    }
+
     class BungeeCommand extends net.md_5.bungee.api.plugin.Command {
 
         protected BungeeCommand(String label) {
@@ -177,42 +223,6 @@ public class BungeeCommandFramework implements CommandFramework {
         @Override
         public void execute(CommandSender sender, String[] args) {
             handleCommand(sender, getName(), args);
-        }
-    }
-
-    public static void main(String[] args) {
-        test("/party ");
-        test("/party c");
-        test("/party c ");
-        test("/party c c");
-    }
-
-    public static void test(String string) {
-        Pattern pattern = Pattern.compile("\\s+");
-        Matcher matcher = pattern.matcher(string);
-
-        int count = 0;
-
-        while (matcher.find()) {
-            count++;
-        }
-
-        String[] split = string.replaceAll("\\s+", " ").split(" ");
-
-        if (split.length == 0) {
-            return;
-        }
-
-        String[] a = new String[count];
-
-        for (int i = 1; i < split.length; i++) {
-            a[i - 1] = split[i];
-        }
-
-        for (int i = a.length - 1; i >= 0; i--) {
-            if (a[i] == null) {
-                a[i] = "";
-            }
         }
     }
 
@@ -288,10 +298,5 @@ public class BungeeCommandFramework implements CommandFramework {
                 }
             }
         }
-    }
-
-    @Override
-    public Class<?> getJarClass() {
-        return plugin.getClass();
     }
 }

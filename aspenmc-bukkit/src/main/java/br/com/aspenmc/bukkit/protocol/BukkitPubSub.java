@@ -1,4 +1,4 @@
-package br.com.aspenmc.bukkit.networking;
+package br.com.aspenmc.bukkit.protocol;
 
 import br.com.aspenmc.CommonConst;
 import br.com.aspenmc.CommonPlugin;

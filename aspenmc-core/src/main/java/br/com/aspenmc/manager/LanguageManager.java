@@ -13,13 +13,10 @@ import net.md_5.bungee.api.ChatColor;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
 
 @Getter
 public class LanguageManager {
-
-    public static void main(String[] args) {
-        LanguageManager languageManager = new LanguageManager();
-    }
 
     private final Map<Language, Map<String, String>> translationMap;
 
@@ -44,11 +41,17 @@ public class LanguageManager {
                 }
 
                 translationMap.put(language, map);
-                System.out.println("The language " + language.name() + " has been loaded.");
-            } catch (Exception e) {
-                e.printStackTrace();
+                CommonPlugin.getInstance().getLogger()
+                            .log(Level.INFO, "The language " + language.name() + " has been loaded.");
+            } catch (Exception ex) {
+                CommonPlugin.getInstance().getLogger()
+                            .log(Level.SEVERE, "Unable to load the language " + language.name() + ".", ex);
             }
         }
+    }
+
+    public static void main(String[] args) {
+        LanguageManager languageManager = new LanguageManager();
     }
 
     public String translate(Language language, String translationId, String... replaces) {
@@ -85,9 +88,9 @@ public class LanguageManager {
 
             try {
                 JsonUtils.saveJsonAsFile(CommonConst.GSON_PRETTY.toJson(translationMap.get(language)),
-                        language.name().toLowerCase() + ".json",
-                        CommonConst.PRINCIPAL_DIRECTORY + (CommonConst.PRINCIPAL_DIRECTORY.endsWith("/") ? "" : "/") +
-                                "translations");
+                                         language.name().toLowerCase() + ".json", CommonConst.PRINCIPAL_DIRECTORY +
+                                                 (CommonConst.PRINCIPAL_DIRECTORY.endsWith("/") ? "" : "/") +
+                                                 "translations");
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
