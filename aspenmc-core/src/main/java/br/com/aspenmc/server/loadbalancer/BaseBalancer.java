@@ -10,56 +10,54 @@ import java.util.stream.Collectors;
 
 public abstract class BaseBalancer<T extends ProxiedServer> implements LoadBalancer<ProxiedServer> {
 
-	private Map<String, T> objects;
-	protected List<T> nextObj;
+    protected List<T> nextObj;
+    private Map<String, T> objects;
 
-	public BaseBalancer() {
-		objects = new HashMap<>();
-		nextObj = new ArrayList<>();
-	}
+    public BaseBalancer() {
+        objects = new HashMap<>();
+        nextObj = new ArrayList<>();
+    }
 
-	public BaseBalancer(Map<String, T> map) {
-		addAll(map);
-	}
+    public BaseBalancer(Map<String, T> map) {
+        addAll(map);
+    }
 
-	public void add(String id, T obj) {
-		objects.put(id, obj);
-		update();
-	}
+    public void add(T obj) {
+        objects.put(obj.getServerId().toLowerCase(), obj);
+        update();
+    }
 
-	public T get(String id) {
-		return objects.get(id);
-	}
+    public T get(String id) {
+        return objects.get(id);
+    }
 
-	public void remove(String id) {
-		objects.remove(id);
-		update();
-	}
+    public void remove(String id) {
+        objects.remove(id);
+        update();
+    }
 
-	public void addAll(Map<String, T> map) {
-		if (objects != null)
-			objects.clear();
-		objects = map;
-		update();
-	}
+    public void addAll(Map<String, T> map) {
+        if (objects != null) objects.clear();
+        objects = map;
+        update();
+    }
 
-	public void clear() {
-		objects.clear();
-		nextObj.clear();
-	}
+    public void clear() {
+        objects.clear();
+        nextObj.clear();
+    }
 
-	public List<T> getList() {
-		return nextObj;
-	}
+    public List<T> getList() {
+        return nextObj;
+    }
 
-	public void update() {
-		if (nextObj != null)
-			nextObj.clear();
+    public void update() {
+        if (nextObj != null) nextObj.clear();
 
-		nextObj = new ArrayList<>();
-		nextObj.addAll(objects.values().stream().sorted((o1, o2) -> Long.compare(o1.getStartTime(), o2.getStartTime()))
-				.collect(Collectors.toList()));
-	}
+        nextObj = new ArrayList<>();
+        nextObj.addAll(objects.values().stream().sorted((o1, o2) -> Long.compare(o1.getStartTime(), o2.getStartTime()))
+                              .collect(Collectors.toList()));
+    }
 
-	public abstract int getTotalNumber();
+    public abstract int getTotalNumber();
 }
