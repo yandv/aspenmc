@@ -32,8 +32,8 @@ public class ServerListener implements Listener {
                                                                  .map(Member::getLoginConfiguration)
                                                                  .map(LoginConfiguration::reloadSession)
                                                                  .orElse(player.getPendingConnection().isOnlineMode() ?
-                                                                         LoginConfiguration.LoginResult.PREMIUM :
-                                                                         LoginConfiguration.LoginResult.NOT_LOGGED);
+                                                                                 LoginConfiguration.LoginResult.PREMIUM :
+                                                                                 LoginConfiguration.LoginResult.NOT_LOGGED);
         ServerType serverType;
 
         switch (loginResult) {
@@ -49,7 +49,7 @@ public class ServerListener implements Listener {
             break;
         }
 
-        ProxiedServer server = CommonPlugin.getInstance().getServerManager().getBalancer(serverType).next();
+        ProxiedServer server = CommonPlugin.getInstance().getServerManager().getActiveServer(serverType);
 
         if (server == null || server.getServerInfo() == null) {
             event.setCancelled(true);
@@ -59,7 +59,7 @@ public class ServerListener implements Listener {
 
         CommonPlugin.getInstance()
                     .debug("Sending the player " + player.getName() + " to the server " + server.getServerId() + " (" +
-                            server.getServerInfo().getName() + ")");
+                                   server.getServerInfo().getName() + ")");
         event.setServer(server.getServerInfo());
     }
 

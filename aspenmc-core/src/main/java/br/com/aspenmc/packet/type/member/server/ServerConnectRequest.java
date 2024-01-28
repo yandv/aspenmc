@@ -1,11 +1,11 @@
 package br.com.aspenmc.packet.type.member.server;
 
-import br.com.aspenmc.server.ProxiedServer;
-import lombok.Getter;
 import br.com.aspenmc.CommonConst;
 import br.com.aspenmc.CommonPlugin;
 import br.com.aspenmc.packet.Packet;
+import br.com.aspenmc.server.ProxiedServer;
 import br.com.aspenmc.server.ServerType;
+import lombok.Getter;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.ServerConnectEvent;
@@ -93,7 +93,7 @@ public class ServerConnectRequest extends Packet {
         if (serverType == ServerType.UNKNOWN) {
             return CommonPlugin.getInstance().getServerManager().getServer(server);
         } else {
-            return CommonPlugin.getInstance().getServerManager().getBalancer(serverType).next();
+            return CommonPlugin.getInstance().getServerManager().getActiveServer(serverType);
         }
     }
 
