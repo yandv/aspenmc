@@ -9,6 +9,7 @@ import lombok.Setter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 public class StatusManager {
 
@@ -27,6 +28,20 @@ public class StatusManager {
                      statusMap.get(status.getStatusType()).put(status.getUniqueId(), status);
                      return status;
                  });
+    }
+
+    public void apply(UUID uniqueId, StatusType statusType, Consumer<Status> statusConsumer) {
+        if (hasLoadedStatus(uniqueId, statusType)) {
+            statusConsumer.accept(getStatusById(uniqueId, statusType));
+        } else {
+            CommonPlugin.getInstance().getStatusService().getStatusById(uniqueId, statusType)
+                        .whenComplete((status, throwable) -> {
+                            if (status != null) {
+                                loadStatus(status);
+                                statusConsumer.accept(status);
+                            }
+                        });
+        }
     }
 
     public Status getStatusById(UUID uniqueId, StatusType statusType) {

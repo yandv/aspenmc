@@ -13,11 +13,9 @@ public class Status {
 
     private final UUID uniqueId;
     private final StatusType statusType;
-
+    private final Map<String, Long> statusMap;
     private League league;
     private int xp;
-
-    private final Map<String, Long> statusMap;
 
     public Status(UUID uniqueId, StatusType statusType) {
         this.uniqueId = uniqueId;
